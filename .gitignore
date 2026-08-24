@@ -1,0 +1,30 @@
+# Dependencias
+/backend/vendor
+/frontend/node_modules
+
+# Entorno
+.env
+.env.backup
+/backend/.env
+/frontend/.env
+/docker/.env
+
+# Compilados
+/frontend/dist
+/backend/public/build
+/backend/public/hot
+
+# Runtime de Laravel
+/backend/storage/*.key
+/backend/storage/logs/*.log
+/backend/storage/framework/cache/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/views/*
+/backend/database/database.sqlite
+/backend/.phpunit.result.cache
+
+# Editores / SO
+.idea
+.vscode
+.DS_Store
+Thumbs.db

@@ -1,0 +1,12 @@
+**/node_modules
+**/vendor
+**/.git
+**/dist
+**/.env
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/database/database.sqlite
+*.pdf
+spec_extract.txt
