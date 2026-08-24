@@ -1,0 +1,54 @@
+# Imagen de produccion para Render: nginx + php-fpm en un solo contenedor.
+# El Dockerfile de al lado (docker/backend/Dockerfile) es solo para desarrollo
+# local con docker-compose, donde el codigo llega por bind mount.
+#
+# Contexto de build: la raiz del repositorio.
+#   docker build -f docker/backend/Dockerfile.render .
+
+# ------------------------------------------------------------- Etapa: vendor
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+# Capa cacheable: las dependencias solo se reinstalan si cambia el lock.
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-dev --no-interaction --no-progress --prefer-dist \
+        --no-scripts --no-autoloader --ignore-platform-reqs
+
+COPY backend/ ./
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+
+# -------------------------------------------------------------- Imagen final
+FROM php:8.4-fpm-alpine
+
+# Librerias de runtime primero; las *-dev se instalan y se borran en la misma
+# capa para no arrastrarlas a la imagen final.
+RUN apk add --no-cache \
+        bash nginx icu-libs libzip libpng freetype libjpeg-turbo libpq oniguruma \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS icu-dev libzip-dev libpng-dev freetype-dev libjpeg-turbo-dev \
+        postgresql-dev oniguruma-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        pdo_pgsql pgsql gd zip intl bcmath opcache exif \
+    && apk del .build-deps \
+    && rm -rf /var/cache/apk/*
+
+COPY docker/backend/php.render.ini      /usr/local/etc/php/conf.d/99-app.ini
+COPY docker/backend/nginx.render.conf   /etc/nginx/nginx.conf.template
+COPY docker/backend/entrypoint.render.sh /usr/local/bin/entrypoint
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint && chmod +x /usr/local/bin/entrypoint
+
+WORKDIR /var/www/html
+
+COPY --from=vendor --chown=www-data:www-data /app ./
+
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
+             storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+# Render inyecta PORT en runtime; este valor es solo el fallback local.
+ENV PORT=10000
+EXPOSE 10000
+
+ENTRYPOINT ["entrypoint"]

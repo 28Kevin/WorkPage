@@ -1,0 +1,125 @@
+# Blueprint de Render: SPA estatica + API Laravel en Docker + PostgreSQL.
+#
+# IMPORTANTE: las URLs de mas abajo asumen que los nombres de servicio quedan
+# libres. Si Render les agrega un sufijo, corrige APP_URL, FRONTEND_URL,
+# CORS_ALLOWED_ORIGINS y VITE_API_BASE_URL con las URLs reales.
+
+databases:
+  - name: examenes-medicos-db
+    databaseName: examenes_medicos
+    user: examenes
+    plan: free
+    region: oregon
+
+services:
+  # --------------------------------------------------------- API Laravel (Docker)
+  - type: web
+    name: examenes-medicos-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./docker/backend/Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: Generador de Examenes Medicos Ocupacionales
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      # Generala en local con:  php artisan key:generate --show
+      # y pegala en el dashboard de Render (queda fuera del repo).
+      - key: APP_KEY
+        sync: false
+      - key: APP_LOCALE
+        value: es
+      - key: APP_FALLBACK_LOCALE
+        value: es
+      - key: APP_TIMEZONE
+        value: America/Bogota
+      - key: APP_URL
+        value: https://examenes-medicos-api.onrender.com
+
+      # URL del Static Site: va dentro del QR del PDF y en la cabecera CORS.
+      - key: FRONTEND_URL
+        value: https://examenes-medicos-web.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://examenes-medicos-web.onrender.com
+
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: examenes-medicos-db
+          property: connectionString
+
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # stderr manda los logs al panel de Render en vez de a storage/logs,
+      # que es efimero.
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: MAIL_MAILER
+        value: log
+
+      - key: RUN_MIGRATIONS
+        value: "true"
+      # Ponlo en "true" para el PRIMER despliegue (crea admin y catalogos) y
+      # devuelvelo a "false" despues, o re-sembrara en cada arranque.
+      - key: RUN_SEEDERS
+        value: "false"
+
+      - key: ADMIN_NAME
+        value: Administrador
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # Datos impresos en el PDF y en la verificacion publica.
+      - key: MEDICAL_CENTER_NAME
+        value: Centro Medico Ocupacional S.A.S.
+      - key: MEDICAL_CENTER_NIT
+        value: 900.123.456-7
+      - key: MEDICAL_CENTER_LICENSE
+        value: Licencia SST No. 0001-2026
+      - key: MEDICAL_CENTER_ADDRESS
+        value: "Calle 100 # 15-20, Bogota D.C."
+      - key: MEDICAL_CENTER_PHONE
+        value: "+57 601 000 0000"
+      - key: MEDICAL_CENTER_EMAIL
+        value: contacto@centromedico.test
+      - key: MEDICAL_CENTER_PHYSICIAN
+        value: Dra. Laura Gomez Restrepo
+      - key: MEDICAL_CENTER_PHYSICIAN_LICENSE
+        value: R.M. 12345 - Lic. SO 4567
+
+  # ------------------------------------------------------------- SPA Vue (estatica)
+  - type: web
+    name: examenes-medicos-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    envVars:
+      # Vite inyecta estas variables EN EL BUILD: si las cambias hay que
+      # redesplegar el Static Site, no basta con reiniciarlo.
+      - key: VITE_API_BASE_URL
+        value: https://examenes-medicos-api.onrender.com/api
+      - key: VITE_APP_NAME
+        value: Centro Medico Ocupacional
+    routes:
+      # vue-router usa createWebHistory: todo lo que no sea un archivo real
+      # tiene que servir index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html
