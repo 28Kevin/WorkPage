@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\MedicalExam;
 use App\Support\Branding;
 use App\Support\ExamForm;
+use App\Support\PdfAssets;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as PdfWrapper;
 
@@ -34,6 +35,10 @@ class ExamPdfGenerator
             'center' => $this->center($branding['center']),
             'palette' => $branding['theme']['palette'],
             'logo' => $branding['identity']['logo'],
+
+            // Marca de agua de todas las paginas y sello del medico.
+            'watermark' => PdfAssets::watermark(),
+            'signature' => PdfAssets::signature(),
         ])->setPaper('letter');
     }
 

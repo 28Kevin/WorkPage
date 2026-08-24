@@ -84,6 +84,10 @@ onMounted(async () => {
   if (isEditing.value) {
     await loadExam()
   } else {
+    // El borrador se pide de una: el medico corrige sobre valores ya puestos
+    // en vez de escribir los diez campos desde cero.
+    await loadDraft()
+
     try {
       const { data } = await api.get('/exams/next-order-number')
       nextOrder.value = data
@@ -205,14 +209,16 @@ watch(
 /** Trae del backend un juego de valores dentro de rangos normales. */
 async function loadDraft() {
   const height = Number(form.height_cm)
-
-  if (!height || height < 120 || height > 230) return
+  const hasHeight = height >= 120 && height <= 230
 
   loadingDraft.value = true
 
   try {
     const { data } = await api.get('/exams/draft', {
-      params: { height_cm: height, weight_kg: form.weight_kg || undefined },
+      params: {
+        height_cm: hasHeight ? height : undefined,
+        weight_kg: form.weight_kg || undefined,
+      },
     })
 
     Object.assign(form.vitals, data.medical_parameters.vitals)
@@ -295,7 +301,8 @@ async function submit() {
         </h1>
         <p class="mt-1 text-sm text-slate-600">
           Evaluación para <strong>trabajo en alturas y espacios confinados</strong>. El examen físico y los
-          paraclínicos vienen precargados con valores normales; revíselos antes de emitir.
+          paraclínicos vienen diligenciados con valores dentro de rangos normales; corrija lo que no
+          corresponda antes de emitir.
         </p>
       </div>
 
@@ -525,9 +532,9 @@ async function submit() {
         <header class="section-heading">
           <span class="section-badge">D</span>
           <h2 class="text-sm font-bold text-slate-900">Examen físico</h2>
-          <button type="button" class="btn-ghost ml-auto py-1 text-xs" :disabled="loadingDraft || !form.height_cm"
+          <button type="button" class="btn-ghost ml-auto py-1 text-xs" :disabled="loadingDraft"
                   @click="loadDraft">
-            {{ loadingDraft ? 'Precargando…' : 'Precargar valores normales' }}
+            {{ loadingDraft ? 'Generando…' : 'Generar otros valores normales' }}
           </button>
         </header>
 

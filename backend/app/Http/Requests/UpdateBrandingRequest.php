@@ -40,6 +40,7 @@ class UpdateBrandingRequest extends FormRequest
             'center.email' => ['required', 'email', 'max:120'],
             'center.physician_name' => ['required', 'string', 'max:120'],
             'center.physician_license' => ['required', 'string', 'max:120'],
+            'center.schedule' => ['nullable', 'string', 'max:300'],
         ];
     }
 
@@ -62,6 +63,7 @@ class UpdateBrandingRequest extends FormRequest
             'center.email' => 'correo electrónico',
             'center.physician_name' => 'médico responsable',
             'center.physician_license' => 'registro profesional',
+            'center.schedule' => 'horario de atención',
         ];
     }
 

@@ -20,7 +20,10 @@ class Branding
     public const FIELDS = [
         'identity' => ['app_name', 'tagline', 'logo'],
         'theme' => ['brand_color', 'accent_color', 'font_heading', 'font_body', 'radius'],
-        'center' => ['name', 'nit', 'license', 'address', 'phone', 'email', 'physician_name', 'physician_license'],
+        'center' => [
+            'name', 'nit', 'license', 'address', 'phone', 'email',
+            'physician_name', 'physician_license', 'schedule',
+        ],
     ];
 
     public static function defaults(): array
@@ -47,6 +50,7 @@ class Branding
                 'email' => config('medical_center.email'),
                 'physician_name' => config('medical_center.physician.name'),
                 'physician_license' => config('medical_center.physician.license'),
+                'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
             ],
         ];
     }

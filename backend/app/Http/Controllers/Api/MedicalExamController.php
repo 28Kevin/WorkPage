@@ -20,6 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MedicalExamController extends Controller
 {
+    /** Estatura de referencia del borrador inicial, antes de medir al trabajador. */
+    private const DEFAULT_HEIGHT_CM = 170;
+
     private const RELATIONS = ['eps', 'arl', 'afp', 'city', 'risks', 'creator'];
 
     public function index(Request $request): AnonymousResourceCollection
@@ -132,13 +135,15 @@ class MedicalExamController extends Controller
     public function draft(Request $request, MedicalParameterGenerator $parameters): JsonResponse
     {
         $validated = $request->validate([
-            'height_cm' => ['required', 'integer', 'min:120', 'max:230'],
+            // La estatura es opcional: el formulario pide el borrador al abrirse,
+            // antes de que el medico haya tomado las medidas.
+            'height_cm' => ['nullable', 'integer', 'min:120', 'max:230'],
             'weight_kg' => ['nullable', 'numeric', 'min:30', 'max:250'],
         ]);
 
         return response()->json([
             'medical_parameters' => $parameters->generate(
-                (int) $validated['height_cm'],
+                (int) ($validated['height_cm'] ?? self::DEFAULT_HEIGHT_CM),
                 isset($validated['weight_kg']) ? (float) $validated['weight_kg'] : null,
             ),
             'paraclinicals' => $parameters->paraclinicals(),

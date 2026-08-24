@@ -13,6 +13,7 @@ export const useBrandingStore = defineStore('branding', () => {
   const appName = computed(() => branding.value?.identity?.app_name || FALLBACK_NAME)
   const tagline = computed(() => branding.value?.identity?.tagline || 'Exámenes médicos ocupacionales')
   const logo = computed(() => branding.value?.identity?.logo || null)
+  const center = computed(() => branding.value?.center ?? {})
 
   /** Se llama una vez al arrancar la SPA, antes de montar. */
   async function load() {
@@ -55,5 +56,5 @@ export const useBrandingStore = defineStore('branding', () => {
     applyBranding(value)
   }
 
-  return { branding, loading, saving, appName, tagline, logo, load, save, restore }
+  return { branding, loading, saving, appName, tagline, logo, center, load, save, restore }
 })

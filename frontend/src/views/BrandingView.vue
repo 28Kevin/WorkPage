@@ -39,7 +39,7 @@ const form = reactive({
   },
   center: {
     name: '', nit: '', license: '', address: '',
-    phone: '', email: '', physician_name: '', physician_license: '',
+    phone: '', email: '', physician_name: '', physician_license: '', schedule: '',
   },
 })
 
@@ -464,6 +464,23 @@ function discard() {
         <FormField label="Médico responsable" :error="errors['center.physician_name']" required>
           <template #default="{ id }">
             <input :id="id" v-model="form.center.physician_name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField
+          class="md:col-span-2"
+          label="Horario de atención"
+          :error="errors['center.schedule']"
+          hint="Una línea por franja. Se muestra en Servicios y en Contáctenos."
+        >
+          <template #default="{ id }">
+            <textarea
+              :id="id"
+              v-model="form.center.schedule"
+              rows="2"
+              class="field-input"
+              @input="dirty = true"
+            ></textarea>
           </template>
         </FormField>
 

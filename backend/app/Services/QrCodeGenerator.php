@@ -12,7 +12,7 @@ class QrCodeGenerator
     public function dataUri(string $content, int $size = 220): string
     {
         $result = (new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: $content,
             errorCorrectionLevel: ErrorCorrectionLevel::High,
             size: $size,

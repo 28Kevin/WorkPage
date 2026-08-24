@@ -76,6 +76,39 @@ class OccupationalFormTest extends TestCase
         $this->assertCount(7, $response->json('paraclinicals'));
     }
 
+    public function test_draft_works_before_the_worker_is_measured(): void
+    {
+        // El formulario lo pide al abrirse, cuando aun no hay estatura.
+        $response = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/exams/draft')
+            ->assertOk();
+
+        $vitals = $response->json('medical_parameters.vitals');
+
+        $this->assertGreaterThanOrEqual(105, $vitals['systolic']);
+        $this->assertLessThanOrEqual(125, $vitals['systolic']);
+        $this->assertGreaterThanOrEqual(62, $vitals['heart_rate']);
+        $this->assertLessThanOrEqual(84, $vitals['heart_rate']);
+        $this->assertGreaterThanOrEqual(96, $vitals['spo2']);
+
+        $this->assertSame('20/20', $response->json('medical_parameters.vision.right_eye'));
+    }
+
+    public function test_each_draft_returns_different_values_within_normal_ranges(): void
+    {
+        $admin = $this->admin();
+
+        $draws = collect(range(1, 8))->map(
+            fn () => $this->actingAs($admin, 'sanctum')
+                ->getJson('/api/exams/draft')
+                ->json('medical_parameters.vitals.systolic'),
+        );
+
+        // Aleatorio pero siempre dentro del rango normal.
+        $this->assertGreaterThan(1, $draws->unique()->count());
+        $this->assertTrue($draws->every(fn (int $value) => $value >= 105 && $value <= 125));
+    }
+
     public function test_draft_rejects_an_out_of_range_height(): void
     {
         $this->actingAs($this->admin(), 'sanctum')

@@ -21,6 +21,18 @@ const routes = [
     component: () => import('@/views/VerificationView.vue'),
     meta: { public: true, title: 'Verificación de documento' },
   },
+  {
+    path: '/servicios',
+    name: 'public.services',
+    component: () => import('@/views/ServicesView.vue'),
+    meta: { public: true, title: 'Servicios' },
+  },
+  {
+    path: '/contacto',
+    name: 'public.contact',
+    component: () => import('@/views/ContactView.vue'),
+    meta: { public: true, title: 'Contáctenos' },
+  },
 
   // Modulo administrativo (acceso restringido)
   {
@@ -58,6 +70,12 @@ const routes = [
     name: 'admin.branding',
     component: () => import('@/views/BrandingView.vue'),
     meta: { requiresAuth: true, title: 'Configuración' },
+  },
+  {
+    path: '/admin/mensajes',
+    name: 'admin.messages',
+    component: () => import('@/views/MessagesView.vue'),
+    meta: { requiresAuth: true, title: 'Mensajes de contacto' },
   },
 
   {

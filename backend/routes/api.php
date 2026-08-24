@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,19 @@ Route::prefix('public')->name('api.public.')->middleware('throttle:30,1')->group
     Route::get('/exams/search', [PublicVerificationController::class, 'search'])->name('search');
     Route::get('/verify/{code}', [PublicVerificationController::class, 'verify'])->name('verify');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Formulario publico de contacto
+|--------------------------------------------------------------------------
+|
+| Fuera del grupo anterior a proposito: dos middlewares 'throttle' sobre la
+| misma peticion comparten contador y se sumarian entre si.
+|
+*/
+Route::post('/public/contact', [ContactMessageController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('api.public.contact');
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +59,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogs', [CatalogController::class, 'index'])->name('api.catalogs');
 
     Route::put('/branding', [BrandingController::class, 'update'])->name('api.branding.update');
+
+    Route::get('/contact-messages', [ContactMessageController::class, 'index'])->name('api.messages.index');
+    Route::patch('/contact-messages/{message}', [ContactMessageController::class, 'toggle'])->name('api.messages.toggle');
+    Route::delete('/contact-messages/{message}', [ContactMessageController::class, 'destroy'])->name('api.messages.destroy');
 
     Route::get('/tools/ideal-weight', [MedicalExamController::class, 'idealWeight'])->name('api.tools.ideal-weight');
     Route::get('/exams/next-order-number', [MedicalExamController::class, 'nextOrderNumber'])->name('api.exams.next-order');

@@ -111,6 +111,12 @@
         .verify .code { font-family: DejaVu Sans Mono, monospace; font-size: 7.6px;
                         color: {{ $palette[800] }}; word-break: break-all; }
 
+        /* Marca de agua: dompdf repite los elementos fixed en cada pagina. */
+        .watermark { position: fixed; top: 330px; left: 0; right: 0; text-align: center; }
+        .watermark img { width: 300px; }
+
+        .sign .stamp { display: block; max-height: 58px; max-width: 190px; margin: 2px 0 -8px; }
+
         /* Sello de anulacion: el documento sigue existiendo pero sin validez. */
         .annulled-stamp { position: fixed; top: 300px; left: 0; right: 0; text-align: center;
                           font-size: 74px; font-weight: bold; color: #dc2626; opacity: .18;
@@ -118,6 +124,10 @@
     </style>
 </head>
 <body>
+
+@if ($watermark)
+    <div class="watermark"><img src="{{ $watermark }}" alt=""></div>
+@endif
 
 @if ($exam->isAnnulled())
     <div class="annulled-stamp">ANULADO</div>
@@ -403,7 +413,12 @@
             <td>
                 Nombre: {{ $center['physician']['name'] }}<br>
                 Registro profesional: {{ $center['physician']['license'] }}<br>
-                Firma: {{ $blank }}
+                @if ($signature)
+                    Firma y sello:
+                    <img class="stamp" src="{{ $signature }}" alt="Sello y firma del médico ocupacional">
+                @else
+                    Firma: {{ $blank }}
+                @endif
             </td>
             <td>
                 Nombre: {{ $exam->full_name }}<br>
