@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import { setUnauthenticatedHandler } from './services/api'
 import { useAuthStore } from './stores/auth'
+import { useBrandingStore } from './stores/branding'
 import './style.css'
 
 const app = createApp(App)
@@ -20,4 +21,6 @@ setUnauthenticatedHandler(() => {
   }
 })
 
-app.mount('#app')
+// El tema se aplica antes de montar para no mostrar los colores por defecto y
+// repintarlos un instante despues.
+useBrandingStore().load().finally(() => app.mount('#app'))

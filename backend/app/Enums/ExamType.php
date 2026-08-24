@@ -9,15 +9,17 @@ enum ExamType: string
     case Seguimiento = 'seguimiento';
     case Retorno = 'retorno';
     case CambioOcupacion = 'cambio_ocupacion';
+    case Otra = 'otra';
 
     public function label(): string
     {
         return match ($this) {
-            self::Ingreso => 'Ingreso',
-            self::Periodico => 'Periódico',
-            self::Seguimiento => 'Seguimiento',
-            self::Retorno => 'Retorno',
+            self::Ingreso => 'Preingreso',
+            self::Periodico => 'Periódica',
+            self::Seguimiento => 'Seguimiento / control',
+            self::Retorno => 'Retorno / post-incapacidad',
             self::CambioOcupacion => 'Cambio de ocupación',
+            self::Otra => 'Otra',
         };
     }
 

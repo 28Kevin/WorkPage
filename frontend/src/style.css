@@ -1,16 +1,38 @@
 @import 'tailwindcss';
 
+/*
+ * Estos valores son solo el punto de partida: el modulo de configuracion
+ * sobreescribe las mismas variables en :root desde JavaScript, asi que el tema
+ * se puede cambiar sin recompilar. Ver services/theme.js
+ */
 @theme {
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  --color-brand-50: #f2f5fd;
+  --color-brand-100: #e5ecfb;
+  --color-brand-200: #c2d2f5;
+  --color-brand-300: #94b2f5;
+  --color-brand-400: #608df0;
+  --color-brand-500: #2d69ec;
+  --color-brand-600: #1453dc;
+  --color-brand-700: #1145b6;
+  --color-brand-800: #0e3895;
+  --color-brand-900: #0b2e79;
+
+  --color-accent-50: #f1f9fe;
+  --color-accent-100: #e3f4fc;
+  --color-accent-200: #bee5f9;
+  --color-accent-300: #8bd7fe;
+  --color-accent-400: #53c3fd;
+  --color-accent-500: #1cb0fd;
+  --color-accent-600: #029ded;
+  --color-accent-700: #0283c5;
+  --color-accent-800: #026ba2;
+  --color-accent-900: #015783;
+
+  --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 @layer base {
@@ -19,7 +41,11 @@
   }
 
   body {
-    @apply bg-slate-100 text-slate-800 antialiased;
+    @apply bg-slate-100 font-sans text-slate-800 antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
   }
 }
 

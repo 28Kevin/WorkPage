@@ -9,13 +9,18 @@ const route = useRoute()
 const loading = ref(true)
 const data = ref(null)
 const error = ref(null)
+// Un documento anulado responde 410: existe, pero perdio validez.
+const annulled = ref(false)
 
 onMounted(async () => {
   try {
     const response = await api.get(`/public/verify/${encodeURIComponent(route.params.code)}`)
     data.value = response.data
   } catch (err) {
-    error.value = err.response?.status === 404
+    const status = err.response?.status
+
+    annulled.value = status === 410
+    error.value = [404, 410].includes(status)
       ? err.response.data.message
       : parseApiError(err).message
   } finally {
@@ -28,7 +33,11 @@ onMounted(async () => {
   <div class="mx-auto max-w-2xl">
     <LoadingSpinner v-if="loading" label="Verificando documento…" />
 
-    <AlertMessage v-else-if="error" variant="error" title="Documento no verificado">
+    <AlertMessage
+      v-else-if="error"
+      variant="error"
+      :title="annulled ? 'Documento anulado' : 'Documento no verificado'"
+    >
       {{ error }}
     </AlertMessage>
 

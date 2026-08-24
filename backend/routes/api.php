@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
@@ -15,6 +16,13 @@ Route::prefix('public')->name('api.public.')->middleware('throttle:30,1')->group
     Route::get('/exams/search', [PublicVerificationController::class, 'search'])->name('search');
     Route::get('/verify/{code}', [PublicVerificationController::class, 'verify'])->name('verify');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Identidad visual: la SPA la pide antes de pintar, con o sin sesion abierta
+|--------------------------------------------------------------------------
+*/
+Route::get('/branding', [BrandingController::class, 'show'])->name('api.branding.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -36,11 +44,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/catalogs', [CatalogController::class, 'index'])->name('api.catalogs');
 
+    Route::put('/branding', [BrandingController::class, 'update'])->name('api.branding.update');
+
     Route::get('/tools/ideal-weight', [MedicalExamController::class, 'idealWeight'])->name('api.tools.ideal-weight');
     Route::get('/exams/next-order-number', [MedicalExamController::class, 'nextOrderNumber'])->name('api.exams.next-order');
+    Route::get('/exams/draft', [MedicalExamController::class, 'draft'])->name('api.exams.draft');
 
     Route::get('/exams', [MedicalExamController::class, 'index'])->name('api.exams.index');
     Route::post('/exams', [MedicalExamController::class, 'store'])->name('api.exams.store');
     Route::get('/exams/{exam}', [MedicalExamController::class, 'show'])->name('api.exams.show');
+    Route::put('/exams/{exam}', [MedicalExamController::class, 'update'])->name('api.exams.update');
+    Route::delete('/exams/{exam}', [MedicalExamController::class, 'destroy'])->name('api.exams.destroy');
     Route::get('/exams/{exam}/pdf', [MedicalExamController::class, 'pdf'])->name('api.exams.pdf');
 });

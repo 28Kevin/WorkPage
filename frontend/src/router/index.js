@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useBrandingStore } from '@/stores/branding'
 
 const routes = [
   {
@@ -46,6 +47,18 @@ const routes = [
     component: () => import('@/views/ExamDetailView.vue'),
     meta: { requiresAuth: true, title: 'Detalle del examen' },
   },
+  {
+    path: '/admin/examenes/:id/editar',
+    name: 'admin.exams.edit',
+    component: () => import('@/views/ExamFormView.vue'),
+    meta: { requiresAuth: true, title: 'Corregir evaluación' },
+  },
+  {
+    path: '/admin/configuracion',
+    name: 'admin.branding',
+    component: () => import('@/views/BrandingView.vue'),
+    meta: { requiresAuth: true, title: 'Configuración' },
+  },
 
   {
     path: '/:pathMatch(.*)*',
@@ -78,7 +91,8 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach((to) => {
-  const appName = import.meta.env.VITE_APP_NAME || 'Centro Médico Ocupacional'
+  const appName = useBrandingStore().appName
+
   document.title = to.meta.title ? `${to.meta.title} · ${appName}` : appName
 })
 

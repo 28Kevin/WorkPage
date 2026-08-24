@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MedicalExam;
+use App\Support\Branding;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class PublicVerificationController extends Controller
         ], [], ['document_number' => 'número de cédula']);
 
         $exams = MedicalExam::query()
+            ->active()
             ->where('document_number', $validated['document_number'])
             ->latest('exam_date')
             ->latest('order_number')
@@ -30,14 +32,14 @@ class PublicVerificationController extends Controller
         if ($exams->isEmpty()) {
             return response()->json([
                 'found' => false,
-                'message' => 'No se encontraron exámenes médicos ocupacionales asociados a la cédula consultada.',
+                'message' => 'No se encontraron exámenes médicos ocupacionales vigentes asociados a la cédula consultada.',
             ], 404);
         }
 
         return response()->json([
             'found' => true,
             'message' => 'Se confirma la realización exitosa del examen médico ocupacional.',
-            'issuer' => config('medical_center.name'),
+            'issuer' => $this->center()['name'],
             'total' => $exams->count(),
             'results' => $exams->map(fn (MedicalExam $exam) => [
                 'order_code' => $exam->order_code,
@@ -68,7 +70,21 @@ class PublicVerificationController extends Controller
             ], 404);
         }
 
-        $center = config('medical_center');
+        $center = $this->center();
+
+        // Un documento anulado sigue respondiendo: el QR ya esta impreso.
+        if ($exam->isAnnulled()) {
+            return response()->json([
+                'valid' => false,
+                'annulled' => true,
+                'message' => sprintf(
+                    'El documento No. %s fue anulado el %s por %s y no tiene validez.',
+                    $exam->order_code,
+                    $exam->annulled_at->translatedFormat('d \d\e F \d\e Y'),
+                    $center['name'],
+                ),
+            ], 410);
+        }
 
         return response()->json([
             'valid' => true,
@@ -99,6 +115,12 @@ class PublicVerificationController extends Controller
                 'arl' => $exam->arl->name,
             ],
         ]);
+    }
+
+    /** Datos del centro tal como quedaron en el modulo de configuracion. */
+    private function center(): array
+    {
+        return Branding::all()['center'];
     }
 
     /** Muestra solo iniciales y primer apellido para proteger datos personales. */

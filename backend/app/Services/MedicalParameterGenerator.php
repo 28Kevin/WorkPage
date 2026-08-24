@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Enums\ExamResult;
+use App\Support\ExamForm;
 
 /**
- * Diligencia automaticamente los campos medicos restantes con valores dentro de
- * rangos normales estandar, garantizando un resultado final de estado APTO.
+ * Precarga el examen con valores dentro de rangos normales. El medico puede
+ * corregir cualquiera de ellos desde el formulario antes de emitir.
  */
 class MedicalParameterGenerator
 {
@@ -23,71 +23,72 @@ class MedicalParameterGenerator
         $diastolic = random_int(68, 82);
 
         return [
-            'result' => ExamResult::Apto->value,
-            'signos_vitales' => [
-                'presion_arterial' => "{$systolic}/{$diastolic} mmHg",
-                'presion_sistolica' => $systolic,
-                'presion_diastolica' => $diastolic,
-                'frecuencia_cardiaca' => random_int(62, 84).' lpm',
-                'frecuencia_respiratoria' => random_int(14, 18).' rpm',
-                'temperatura' => $this->randomFloat(36.3, 37.0, 1).' °C',
-                'saturacion_oxigeno' => random_int(96, 99).' %',
+            'vitals' => [
+                'systolic' => $systolic,
+                'diastolic' => $diastolic,
+                'heart_rate' => random_int(62, 84),
+                'respiratory_rate' => random_int(14, 18),
+                'temperature' => $this->randomFloat(36.3, 37.0, 1),
+                'spo2' => random_int(96, 99),
             ],
-            'antropometria' => [
-                'estatura_cm' => $heightCm,
-                'peso_kg' => $weightKg,
-                'peso_ideal_kg' => $reference['ideal_weight_kg'],
-                'rango_peso_saludable_kg' => $reference['min_weight_kg'].' - '.$reference['max_weight_kg'],
-                'imc' => $bmi,
-                'clasificacion_imc' => 'Normal',
+            'anthropometry' => [
+                'height_cm' => $heightCm,
+                'weight_kg' => $weightKg,
+                'ideal_weight_kg' => $reference['ideal_weight_kg'],
+                'healthy_range_kg' => $reference['min_weight_kg'].' - '.$reference['max_weight_kg'],
+                'bmi' => $bmi,
+                'bmi_classification' => $this->classifyBmi($bmi),
             ],
-            'agudeza_visual' => [
-                'ojo_derecho' => '20/20',
-                'ojo_izquierdo' => '20/20',
-                'vision_binocular' => '20/20',
-                'vision_cromatica' => 'Normal (Ishihara sin alteraciones)',
-                'vision_profundidad' => 'Conservada',
+            'vision' => [
+                'right_eye' => '20/20',
+                'left_eye' => '20/20',
+                'optical_correction' => false,
             ],
-            'audiometria' => [
-                'oido_derecho' => 'Dentro de límites normales (0-25 dB)',
-                'oido_izquierdo' => 'Dentro de límites normales (0-25 dB)',
-                'concepto' => 'Audición normal bilateral',
+            'systems' => array_fill_keys(array_keys(ExamForm::SYSTEMS), ExamForm::NORMAL),
+            'assessments' => [
+                'visual' => 'Agudeza visual conservada, visión cromática y de profundidad normales.',
+                'hearing' => 'Audición dentro de límites normales de forma bilateral.',
+                'respiratory' => 'Patrón espirométrico normal, sin signos de obstrucción ni restricción.',
+                'cardiovascular' => 'Ritmo cardíaco regular y examen neurológico sin déficit.',
             ],
-            'espirometria' => [
-                'cvf' => random_int(92, 104).' % del predicho',
-                'vef1' => random_int(90, 103).' % del predicho',
-                'relacion_vef1_cvf' => random_int(80, 88).' %',
-                'concepto' => 'Patrón espirométrico normal',
-            ],
-            'laboratorio' => [
-                'glicemia' => random_int(76, 96).' mg/dL',
-                'colesterol_total' => random_int(150, 189).' mg/dL',
-                'trigliceridos' => random_int(80, 145).' mg/dL',
-                'hemoglobina' => $this->randomFloat(13.5, 16.5, 1).' g/dL',
-                'concepto' => 'Resultados dentro de parámetros normales',
-            ],
-            'examen_fisico' => [
-                'cabeza_cuello' => 'Normal',
-                'cardiopulmonar' => 'Ruidos cardíacos rítmicos, murmullo vesicular conservado',
-                'abdomen' => 'Blando, depresible, no doloroso',
-                'osteomuscular' => 'Sin limitación funcional, arcos de movilidad completos',
-                'neurologico' => 'Consciente, orientado, sin déficit motor ni sensitivo',
-                'piel_faneras' => 'Sin lesiones',
-                'columna' => 'Sin desviaciones ni dolor a la palpación',
-            ],
-            'antecedentes' => [
-                'personales' => 'No refiere',
-                'familiares' => 'No refiere',
-                'ocupacionales' => 'No refiere accidentes ni enfermedades laborales',
-                'alergicos' => 'No refiere',
-                'quirurgicos' => 'No refiere',
-            ],
-            'concepto_medico' => [
-                'diagnostico' => 'Z00.0 - Examen médico general sin hallazgos patológicos',
-                'restricciones' => 'Ninguna',
-                'observaciones' => 'Trabajador sin hallazgos que contraindiquen el desempeño del cargo.',
+            'history' => [
+                'personal' => 'No refiere',
+                'family' => 'No refiere',
+                'occupational' => 'No refiere accidentes ni enfermedades laborales',
+                'allergic' => 'No refiere',
+                'surgical' => 'No refiere',
             ],
         ];
+    }
+
+    /**
+     * Paraclinicos precargados como realizados y normales.
+     *
+     * @return array<string, array{performed: bool, status: string, result: string}>
+     */
+    public function paraclinicals(): array
+    {
+        $results = [
+            'visiometria' => 'Agudeza visual 20/20 en ambos ojos',
+            'audiometria' => 'Umbrales auditivos entre 0 y 25 dB',
+            'espirometria' => 'CVF y VEF1 por encima del 90 % del predicho',
+            'electrocardiograma' => 'Ritmo sinusal normal',
+            'glicemia' => random_int(76, 96).' mg/dL',
+            'colesterol' => random_int(150, 189).' mg/dL',
+            'trigliceridos' => random_int(80, 145).' mg/dL',
+        ];
+
+        $paraclinicals = [];
+
+        foreach (ExamForm::PARACLINICALS as $key => $label) {
+            $paraclinicals[$key] = [
+                'performed' => true,
+                'status' => ExamForm::NORMAL,
+                'result' => $results[$key] ?? '',
+            ];
+        }
+
+        return $paraclinicals;
     }
 
     /** @return array<int, string> */
@@ -100,6 +101,16 @@ class MedicalParameterGenerator
             'Realizar pausas activas durante la jornada laboral.',
             'Asistir al próximo examen médico ocupacional periódico según programación.',
         ];
+    }
+
+    private function classifyBmi(float $bmi): string
+    {
+        return match (true) {
+            $bmi < 18.5 => 'Bajo peso',
+            $bmi < 25.0 => 'Normal',
+            $bmi < 30.0 => 'Sobrepeso',
+            default => 'Obesidad',
+        };
     }
 
     private function randomFloat(float $min, float $max, int $decimals): float

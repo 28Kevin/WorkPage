@@ -123,6 +123,6 @@ class PublicVerificationTest extends TestCase
         $response = $this->getJson('/api/public/exams/search?document_number=1020304050')->assertOk();
 
         $this->assertSame(2, $response->json('total'));
-        $this->assertSame('Periódico', $response->json('results.0.exam_type_label'));
+        $this->assertSame('Periódica', $response->json('results.0.exam_type_label'));
     }
 }

@@ -36,11 +36,14 @@ class MedicalExamTest extends TestCase
     {
         return array_merge([
             'full_name' => 'Carlos Andrés Rodríguez Pérez',
+            'document_type' => 'CC',
             'document_number' => '1020304050',
             'birth_date' => '1990-05-14',
+            'sex' => 'M',
             'email' => 'carlos.rodriguez@example.com',
             'phone' => '3101234567',
             'height_cm' => 175,
+            'is_independent' => false,
             'company_name' => 'Constructora Andina S.A.S.',
             'company_nit' => '830.111.222-3',
             'eps_id' => Eps::first()->id,
@@ -50,6 +53,10 @@ class MedicalExamTest extends TestCase
             'risk_ids' => Risk::limit(2)->pluck('id')->all(),
             'exam_date' => now()->toDateString(),
             'exam_type' => 'ingreso',
+            'aptitude_position' => 'APTO',
+            'aptitude_heights' => 'APTO',
+            'aptitude_confined' => 'APTO',
+            'consent_accepted' => true,
         ], $overrides);
     }
 
@@ -90,17 +97,63 @@ class MedicalExamTest extends TestCase
                 'arls' => [['id', 'name', 'certificate_url']],
                 'cities' => [['id', 'name', 'department']],
                 'risks' => [['id', 'name', 'slug']],
+                'afps' => [['id', 'name']],
                 'exam_types' => [['value', 'label']],
+                'document_types' => [['value', 'label']],
+                'sexes' => [['value', 'label']],
+                'aptitude_results' => [['value', 'label']],
+                'form' => [
+                    'systems' => [['key', 'label', 'normal_label', 'findings_label']],
+                    'paraclinicals' => [['key', 'label']],
+                    'assessments' => [['key', 'label']],
+                    'aptitudes' => [['key', 'label']],
+                ],
             ])
-            ->assertJsonCount(5, 'exam_types');
+            ->assertJsonCount(6, 'exam_types')
+            ->assertJsonCount(7, 'form.paraclinicals')
+            ->assertJsonCount(3, 'form.aptitudes');
     }
 
-    public function test_arl_catalog_includes_direct_platform_link(): void
+    public function test_arl_catalog_links_to_each_certificate_page(): void
     {
-        $this->actingAs($this->admin(), 'sanctum')
+        $arls = $this->actingAs($this->admin(), 'sanctum')
             ->getJson('/api/catalogs')
             ->assertOk()
-            ->assertJsonPath('arls.0.certificate_url', fn ($url) => is_string($url) && str_starts_with($url, 'https://'));
+            ->json('arls');
+
+        $links = collect($arls)->pluck('certificate_url', 'name');
+
+        $this->assertSame('https://www.sura.co/arl/afiliacion/consulta', $links['ARL SURA']);
+        $this->assertSame('https://operacionesarl.positiva.gov.co', $links['Positiva Compañía de Seguros']);
+        $this->assertSame('https://www.segurosbolivar.com/arl', $links['Seguros Bolívar ARL']);
+
+        foreach ($links as $url) {
+            $this->assertStringStartsWith('https://', (string) $url);
+        }
+    }
+
+    public function test_retired_insurers_are_hidden_but_not_deleted(): void
+    {
+        // Simula una base sembrada antes de retirarlas.
+        Arl::create(['name' => 'Liberty Seguros ARL', 'active' => true]);
+        Arl::create(['name' => 'Mapfre Seguros ARL', 'active' => true]);
+
+        $this->seed(CatalogSeeder::class);
+
+        $names = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/catalogs')
+            ->assertOk()
+            ->collect('arls')
+            ->pluck('name');
+
+        // Liberty no es una ARL y Mapfre ya no opera en Colombia.
+        $this->assertNotContains('Liberty Seguros ARL', $names);
+        $this->assertNotContains('Mapfre Seguros ARL', $names);
+        $this->assertCount(5, $names);
+
+        // Siguen en la base: hay examenes emitidos que las referencian.
+        $this->assertDatabaseHas('arls', ['name' => 'Liberty Seguros ARL', 'active' => false]);
+        $this->assertDatabaseHas('arls', ['name' => 'Mapfre Seguros ARL', 'active' => false]);
     }
 
     public function test_ideal_weight_is_calculated_from_height(): void
@@ -131,20 +184,26 @@ class MedicalExamTest extends TestCase
                 'occupational' => ['company_name', 'eps', 'arl', 'city', 'risks'],
                 'exam' => ['exam_date', 'exam_type_label', 'result_label', 'recommendations'],
                 'medical_parameters' => [
-                    'signos_vitales', 'antropometria', 'agudeza_visual',
-                    'audiometria', 'espirometria', 'laboratorio', 'examen_fisico',
+                    'vitals', 'anthropometry', 'vision', 'systems', 'assessments', 'history',
                 ],
+                'paraclinicals' => [['key', 'label', 'performed', 'status', 'result']],
+                'aptitudes' => [['key', 'label', 'value', 'value_label']],
                 'verification' => ['code', 'url'],
                 'pdf_url',
             ],
         ]);
 
         $parameters = $response->json('data.medical_parameters');
-        $this->assertSame('Normal', $parameters['antropometria']['clasificacion_imc']);
-        $this->assertGreaterThanOrEqual(18.5, $parameters['antropometria']['imc']);
-        $this->assertLessThanOrEqual(24.9, $parameters['antropometria']['imc']);
-        $this->assertGreaterThanOrEqual(105, $parameters['signos_vitales']['presion_sistolica']);
-        $this->assertLessThanOrEqual(125, $parameters['signos_vitales']['presion_sistolica']);
+        $this->assertSame('Normal', $parameters['anthropometry']['bmi_classification']);
+        $this->assertGreaterThanOrEqual(18.5, $parameters['anthropometry']['bmi']);
+        $this->assertLessThanOrEqual(24.9, $parameters['anthropometry']['bmi']);
+        $this->assertGreaterThanOrEqual(105, $parameters['vitals']['systolic']);
+        $this->assertLessThanOrEqual(125, $parameters['vitals']['systolic']);
+
+        // Los sistemas se precargan como normales y quedan editables.
+        $this->assertSame('normal', $parameters['systems']['cardiovascular']);
+        $this->assertCount(8, $parameters['systems']);
+        $this->assertCount(7, $response->json('data.paraclinicals'));
     }
 
     public function test_order_numbers_are_consecutive_and_ascending(): void
@@ -185,13 +244,15 @@ class MedicalExamTest extends TestCase
             ->postJson('/api/exams', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'full_name', 'document_number', 'birth_date', 'email', 'phone',
-                'height_cm', 'company_name', 'company_nit', 'eps_id', 'arl_id',
-                'city_id', 'position', 'risk_ids', 'exam_date', 'exam_type',
+                'full_name', 'document_type', 'document_number', 'birth_date', 'sex',
+                'height_cm', 'company_name', 'company_nit', 'arl_id', 'city_id',
+                'position', 'exam_date', 'exam_type', 'is_independent',
+                'aptitude_position', 'aptitude_heights', 'aptitude_confined',
+                'consent_accepted',
             ]);
     }
 
-    public function test_exam_type_must_be_one_of_the_five_allowed_values(): void
+    public function test_exam_type_must_be_one_of_the_allowed_values(): void
     {
         $this->actingAs($this->admin(), 'sanctum')
             ->postJson('/api/exams', $this->payload(['exam_type' => 'inexistente']))

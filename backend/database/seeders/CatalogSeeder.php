@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Afp;
 use App\Models\Arl;
 use App\Models\City;
 use App\Models\Eps;
@@ -30,19 +31,25 @@ class CatalogSeeder extends Seeder
             Eps::updateOrCreate(['name' => $item['name']], $item);
         }
 
+        // Enlace directo a la pagina donde cada ARL entrega el certificado.
         $arls = [
-            ['name' => 'ARL SURA', 'certificate_url' => 'https://arlsura.com/'],
-            ['name' => 'Positiva Compañía de Seguros', 'certificate_url' => 'https://www.positiva.gov.co/'],
-            ['name' => 'Colmena Seguros', 'certificate_url' => 'https://www.colmenaseguros.com/'],
-            ['name' => 'Seguros Bolívar ARL', 'certificate_url' => 'https://www.segurosbolivar.com/'],
-            ['name' => 'Axa Colpatria ARL', 'certificate_url' => 'https://www.axacolpatria.co/'],
-            ['name' => 'Liberty Seguros ARL', 'certificate_url' => 'https://www.libertycolombia.com.co/'],
-            ['name' => 'Mapfre Seguros ARL', 'certificate_url' => 'https://www.mapfre.com.co/'],
+            ['name' => 'ARL SURA', 'certificate_url' => 'https://www.sura.co/arl/afiliacion/consulta'],
+            ['name' => 'Positiva Compañía de Seguros', 'certificate_url' => 'https://operacionesarl.positiva.gov.co'],
+            ['name' => 'Colmena Seguros', 'certificate_url' => 'https://www.colmenaseguros.com/certificados-de-afiliacion'],
+            ['name' => 'Seguros Bolívar ARL', 'certificate_url' => 'https://www.segurosbolivar.com/arl'],
+            ['name' => 'Axa Colpatria ARL', 'certificate_url' => 'https://www.axacolpatria.co/arl/certificacion-afiliacion-arl'],
         ];
 
         foreach ($arls as $item) {
-            Arl::updateOrCreate(['name' => $item['name']], $item);
+            Arl::updateOrCreate(['name' => $item['name']], [...$item, 'active' => true]);
         }
+
+        /*
+         * Liberty no es una ARL y Mapfre ya no opera en Colombia. Se desactivan
+         * en vez de borrarse: hay examenes emitidos que todavia las referencian.
+         */
+        Arl::whereIn('name', ['Liberty Seguros ARL', 'Mapfre Seguros ARL'])
+            ->update(['active' => false]);
 
         $cities = [
             ['name' => 'Bogotá D.C.', 'department' => 'Cundinamarca'],
@@ -69,6 +76,18 @@ class CatalogSeeder extends Seeder
             );
         }
 
+        $afps = [
+            ['name' => 'Porvenir'],
+            ['name' => 'Protección'],
+            ['name' => 'Colfondos'],
+            ['name' => 'Skandia'],
+            ['name' => 'Colpensiones'],
+        ];
+
+        foreach ($afps as $item) {
+            Afp::updateOrCreate(['name' => $item['name']], $item);
+        }
+
         $risks = [
             ['name' => 'Trabajo en alturas', 'description' => 'Tareas con riesgo de caída a distinto nivel superior a 2 metros.'],
             ['name' => 'Espacio confinado', 'description' => 'Ingreso a recintos con aberturas limitadas de entrada y salida.'],
@@ -82,6 +101,10 @@ class CatalogSeeder extends Seeder
             ['name' => 'Riesgo biológico', 'description' => 'Exposición a agentes biológicos infecciosos.'],
             ['name' => 'Trabajo en oficina', 'description' => 'Actividades administrativas con exposición a riesgo ergonómico.'],
             ['name' => 'Operación de maquinaria pesada', 'description' => 'Manejo de montacargas, retroexcavadoras y equipos similares.'],
+            ['name' => 'Atmósfera peligrosa', 'description' => 'Ambientes con deficiencia de oxígeno, gases tóxicos o riesgo de explosión.'],
+            ['name' => 'Ascenso y descenso', 'description' => 'Uso de escaleras, andamios y sistemas de acceso vertical.'],
+            ['name' => 'Esfuerzo físico', 'description' => 'Tareas con demanda física sostenida o posturas forzadas.'],
+            ['name' => 'Sistema anticaídas', 'description' => 'Uso de arnés, líneas de vida y puntos de anclaje certificados.'],
         ];
 
         foreach ($risks as $item) {
