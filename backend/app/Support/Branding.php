@@ -37,7 +37,7 @@ class Branding
             'theme' => [
                 'brand_color' => '#2563eb',
                 'accent_color' => '#0284c7',
-                'font_heading' => 'Archivo',
+                'font_heading' => 'Plus Jakarta Sans',
                 'font_body' => 'Source Sans 3',
                 'radius' => '0.75rem',
             ],

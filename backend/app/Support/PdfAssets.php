@@ -56,12 +56,27 @@ class PdfAssets
         return self::dataUri('sello.jpeg');
     }
 
+    /**
+     * Busca el archivo en public/images y, si no esta, en la raiz del proyecto,
+     * que es donde vivian antes de reorganizarlos.
+     */
+    private static function locate(string $file): ?string
+    {
+        foreach ([public_path('images/'.$file), base_path($file)] as $candidate) {
+            if (is_readable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     /** Devuelve el PNG con fondo transparente como data URI, o null si falta. */
     private static function dataUri(string $file): ?string
     {
-        $path = base_path($file);
+        $path = self::locate($file);
 
-        if (! is_readable($path)) {
+        if ($path === null) {
             return null;
         }
 

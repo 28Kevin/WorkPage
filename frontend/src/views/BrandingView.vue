@@ -14,7 +14,8 @@ const branding = useBrandingStore()
 
 /** Familias de Google Fonts sugeridas; el campo acepta cualquier otra. */
 const FONTS = [
-  'Archivo', 'Source Sans 3', 'Inter', 'Roboto', 'Open Sans', 'Lato',
+  'Plus Jakarta Sans', 'Source Sans 3', 'Archivo', 'Outfit', 'Sora', 'Figtree',
+  'Inter', 'Roboto', 'Open Sans', 'Lato',
   'Montserrat', 'Poppins', 'Nunito Sans', 'Work Sans', 'Manrope', 'Rubik',
   'IBM Plex Sans', 'Merriweather', 'Playfair Display', 'Libre Baskerville',
 ]

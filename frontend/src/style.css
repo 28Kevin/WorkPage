@@ -29,7 +29,7 @@
   --color-accent-900: #015783;
 
   --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
@@ -38,6 +38,14 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  /* El desplazamiento animado molesta a quien pidió menos movimiento. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 
   body {
@@ -46,6 +54,17 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  /* El carrusel se desplaza con las flechas o arrastrando: la barra sobra. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

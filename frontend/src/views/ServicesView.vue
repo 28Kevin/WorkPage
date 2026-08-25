@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
+import HeroBanner from '@/components/HeroBanner.vue'
+import ServiceCarousel from '@/components/ServiceCarousel.vue'
 import { useBrandingStore } from '@/stores/branding'
 import { useGalleryStore } from '@/stores/gallery'
 
@@ -61,6 +63,68 @@ const SECTORS = [
   { name: 'Industria de alimentos', note: 'Producción, distribución y servicio.' },
 ]
 
+/** Diapositivas del banner. Las imágenes se sirven desde public/images. */
+const SLIDES = [
+  {
+    image: '/images/fondo.jpg',
+    focus: 'right center',
+    eyebrow: 'Trabajo seguro en alturas',
+    title: 'Su equipo, certificado para trabajar en altura',
+    text:
+      'Evaluaciones médicas ocupacionales con concepto de aptitud, certificado en PDF y verificación ' +
+      'pública del documento. Sin filas y sin esperar días por el resultado.',
+  },
+  {
+    image: '/images/imagen1.jpeg',
+    focus: 'center',
+    eyebrow: 'Nuestras instalaciones',
+    title: 'Consultorios equipados para cada valoración',
+    text:
+      'Recepción, audiometría, visiometría y consulta médica en un mismo lugar, con equipos calibrados ' +
+      'y personal especializado en seguridad y salud en el trabajo.',
+  },
+  {
+    image: '/images/imagen2.jpeg',
+    focus: 'center',
+    eyebrow: 'Alturas y espacios confinados',
+    title: 'Todo el proceso, bajo un mismo techo',
+    text:
+      'Valoramos las condiciones específicas de quienes trabajan con sistemas anticaídas o ingresan ' +
+      'a espacios confinados, y emitimos el concepto para cada tarea.',
+  },
+]
+
+/** Argumentos de venta, en la franja bajo el banner. */
+const HIGHLIGHTS = [
+  {
+    title: 'Certificado el mismo día',
+    note: 'El documento queda en PDF apenas termina la valoración.',
+    icon: 'M13 2 3 14h7l-1 8 10-12h-7l1-8z',
+    tone: 'bg-amber-100 text-amber-700 ring-amber-200',
+  },
+  {
+    title: 'Verificable con código QR',
+    note: 'Cualquiera puede comprobar la autenticidad del certificado en línea.',
+    icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z',
+    tone: 'bg-brand-100 text-brand-700 ring-brand-200',
+  },
+  {
+    title: 'Atención a empresas',
+    note: 'Programación por grupos y cotización para toda su nómina.',
+    icon: 'M17 20h5v-2a3 3 0 0 0-5.4-1.8M17 20H7m10 0v-2c0-.7-.1-1.3-.4-1.8M7 20H2v-2a3 3 0 0 1 5.4-1.8M7 20v-2c0-.7.1-1.3.4-1.8m0 0a5 5 0 0 1 9.2 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+    tone: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
+  },
+]
+
+/** Un acento distinto por convenio, para que la retícula no quede plana. */
+const SECTOR_TONES = [
+  'from-brand-600 to-accent-500',
+  'from-accent-500 to-teal-500',
+  'from-indigo-500 to-brand-600',
+  'from-teal-500 to-emerald-500',
+  'from-amber-500 to-orange-500',
+]
+
 const schedule = computed(() =>
   (branding.center.schedule || '').split('\n').map((line) => line.trim()).filter(Boolean),
 )
@@ -72,99 +136,147 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-10">
-    <header class="text-center">
-      <p class="text-xs font-semibold tracking-[0.18em] text-brand-700 uppercase">Nuestros servicios</p>
-      <h1 class="mt-2 text-3xl font-bold text-slate-900">Exámenes de salud y servicios médicos</h1>
-      <p class="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
-        Evaluaciones médicas ocupacionales con concepto de aptitud, certificado en PDF y verificación pública
-        del documento mediante código QR.
-      </p>
-    </header>
+  <div class="space-y-16">
+    <!-- ============================================================= encabezado -->
+    <HeroBanner :slides="SLIDES" />
+
+    <!-- ------------------------------------------------------------ argumentos -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Por qué elegirnos">
+      <div v-for="item in HIGHLIGHTS" :key="item.title" class="card flex gap-4 bg-white p-6">
+        <span
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset"
+          :class="item.tone"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path :d="item.icon" />
+          </svg>
+        </span>
+
+        <div>
+          <h2 class="text-base font-bold text-slate-900">{{ item.title }}</h2>
+          <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ item.note }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------- los servicios -->
+    <section
+      id="servicios"
+      class="scroll-mt-24 rounded-2xl bg-gradient-to-b from-brand-50 via-accent-50/60 to-white px-5 py-14 sm:px-10 sm:py-20"
+    >
+      <header class="mx-auto max-w-2xl text-center">
+        <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Nuestros servicios</p>
+        <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-4xl">
+          Exámenes de salud y servicios médicos
+        </h2>
+        <p class="mt-4 text-base leading-relaxed text-slate-600">
+          Cada evaluación termina en un certificado con concepto de aptitud, firmado y verificable en línea.
+        </p>
+      </header>
+
+      <div class="mt-10">
+        <ServiceCarousel :services="SERVICES" />
+      </div>
+    </section>
 
     <!-- ------------------------------------------------------------- galería -->
-    <section v-if="gallery.images.length" aria-label="Fotografías del centro médico">
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <figure
-          v-for="image in gallery.images"
-          :key="image.id"
-          class="card group overflow-hidden"
-        >
-          <img
-            :src="image.image"
-            :alt="image.title"
-            loading="lazy"
-            class="h-36 w-full object-cover transition group-hover:scale-105"
-          >
-          <figcaption class="px-3 py-2">
-            <p class="text-xs font-semibold text-slate-900">{{ image.title }}</p>
+    <section v-if="gallery.images.length" aria-labelledby="galeria-title">
+      <header class="mx-auto max-w-2xl text-center">
+        <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Nuestras instalaciones</p>
+        <h2 id="galeria-title" class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Un espacio pensado para atenderle
+        </h2>
+      </header>
+
+      <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <figure v-for="image in gallery.images" :key="image.id" class="card group overflow-hidden">
+          <div class="overflow-hidden">
+            <img
+              :src="image.image"
+              :alt="image.title"
+              loading="lazy"
+              class="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
+            >
+          </div>
+
+          <figcaption class="px-3 py-2.5">
+            <p class="text-xs font-bold text-slate-900">{{ image.title }}</p>
             <p v-if="image.caption" class="mt-0.5 text-xs text-slate-500">{{ image.caption }}</p>
           </figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- --------------------------------------------------------- los servicios -->
-    <section class="space-y-4">
-      <article v-for="(service, index) in SERVICES" :key="service.title" class="card overflow-hidden">
-        <div class="flex flex-col gap-4 p-6 sm:flex-row">
-          <span
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800"
-            aria-hidden="true"
-          >
-            {{ String(index + 1).padStart(2, '0') }}
-          </span>
+    <!-- ------------------------------------------------------------ convenios -->
+    <section aria-labelledby="convenios-title">
+      <header class="mx-auto max-w-2xl text-center">
+        <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Con quién trabajamos</p>
+        <h2 id="convenios-title" class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Convenios
+        </h2>
+        <p class="mt-4 text-base leading-relaxed text-slate-600">
+          Atendemos empresas y centros de entrenamiento de los siguientes sectores.
+        </p>
+      </header>
 
-          <div class="min-w-0 flex-1">
-            <h2 class="text-base font-bold text-slate-900">{{ service.title }}</h2>
-            <p class="mt-1 text-sm font-medium text-brand-800">{{ service.summary }}</p>
-            <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ service.detail }}</p>
+      <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          v-for="(sector, position) in SECTORS"
+          :key="sector.name"
+          class="card overflow-hidden bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div class="h-1.5 bg-gradient-to-r" :class="SECTOR_TONES[position % SECTOR_TONES.length]"></div>
 
-            <ul class="mt-4 flex flex-wrap gap-1.5">
-              <li v-for="item in service.includes" :key="item" class="chip">{{ item }}</li>
-            </ul>
+          <div class="p-6">
+            <h3 class="text-lg font-bold text-slate-900">{{ sector.name }}</h3>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ sector.note }}</p>
           </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ------------------------------------------------------------- sectores -->
-    <section>
-      <h2 class="text-lg font-bold text-slate-900">Convenios</h2>
-      <p class="mt-1 text-sm text-slate-600">
-        Trabajamos con empresas y centros de entrenamiento de los siguientes sectores.
-      </p>
-
-      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div v-for="sector in SECTORS" :key="sector.name" class="card p-4">
-          <h3 class="text-sm font-semibold text-slate-900">{{ sector.name }}</h3>
-          <p class="mt-1 text-xs text-slate-500">{{ sector.note }}</p>
         </div>
       </div>
     </section>
 
-    <!-- ------------------------------------------------------------- horarios -->
-    <section class="card overflow-hidden">
-      <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-3">
+    <!-- ---------------------------------------------------- horarios y llamada -->
+    <section class="relative isolate overflow-hidden rounded-2xl bg-slate-900" aria-labelledby="cta-title">
+      <img
+        src="/images/fondo.jpg"
+        alt=""
+        class="absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-40"
+      >
+      <div class="absolute inset-0 -z-10 bg-slate-950/75" aria-hidden="true"></div>
+
+      <div class="grid grid-cols-1 gap-10 px-6 py-16 sm:px-12 lg:grid-cols-3 lg:py-20">
         <div>
-          <h2 class="text-sm font-bold text-slate-900">Horario de atención</h2>
-          <ul v-if="schedule.length" class="mt-2 space-y-1 text-sm text-slate-600">
+          <h2 class="text-lg font-bold text-white">Horario de atención</h2>
+          <ul v-if="schedule.length" class="mt-3 space-y-1 text-sm text-slate-200">
             <li v-for="line in schedule" :key="line">{{ line }}</li>
           </ul>
-          <p v-else class="mt-2 text-sm text-slate-500">Consúltenos el horario de atención.</p>
+          <p v-else class="mt-3 text-sm text-slate-300">Consúltenos el horario de atención.</p>
         </div>
 
         <div>
-          <h2 class="text-sm font-bold text-slate-900">Dónde estamos</h2>
-          <p class="mt-2 text-sm text-slate-600">{{ branding.center.address || '—' }}</p>
+          <h2 class="text-lg font-bold text-white">Dónde estamos</h2>
+          <p class="mt-3 text-sm leading-relaxed text-slate-200">{{ branding.center.address || '—' }}</p>
+          <p v-if="branding.center.phone" class="mt-1 text-sm text-slate-200">{{ branding.center.phone }}</p>
         </div>
 
-        <div>
-          <h2 class="text-sm font-bold text-slate-900">Agende su cita</h2>
-          <p class="mt-2 text-sm text-slate-600">
-            Escríbanos y le confirmamos disponibilidad para su empresa o de forma individual.
+        <div class="lg:text-right">
+          <h2 id="cta-title" class="text-lg font-bold text-white">¿Listo para programar?</h2>
+          <p class="mt-3 text-sm leading-relaxed text-slate-200">
+            Escríbanos y le confirmamos disponibilidad, para su empresa o de forma individual.
           </p>
-          <RouterLink :to="{ name: 'public.contact' }" class="btn-primary mt-3">Contáctenos</RouterLink>
+
+          <RouterLink
+            :to="{ name: 'public.contact' }"
+            class="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-slate-100"
+          >
+            Contáctenos
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </RouterLink>
         </div>
       </div>
     </section>

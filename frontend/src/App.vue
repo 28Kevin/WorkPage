@@ -34,7 +34,7 @@ async function handleLogout() {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-brand-800/95 text-white backdrop-blur">
       <div class="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
         <RouterLink :to="{ name: 'public.services' }" class="flex items-center gap-2.5">
           <img
@@ -45,7 +45,7 @@ async function handleLogout() {
           >
           <span
             v-else
-            class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-700 text-white"
+            class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white"
           >
             <svg
               class="h-5 w-5"
@@ -61,8 +61,8 @@ async function handleLogout() {
           </span>
 
           <span class="leading-tight">
-            <span class="block text-sm font-bold text-slate-900">{{ branding.appName }}</span>
-            <span class="block text-xs text-slate-500">{{ branding.tagline }}</span>
+            <span class="block text-sm font-bold text-white">{{ branding.appName }}</span>
+            <span class="block text-xs text-white/70">{{ branding.tagline }}</span>
           </span>
         </RouterLink>
 
@@ -71,35 +71,35 @@ async function handleLogout() {
             v-for="link in PUBLIC_LINKS"
             :key="link.name"
             :to="{ name: link.name }"
-            class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            active-class="bg-brand-50 text-brand-800"
+            class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+            active-class="bg-white/15 text-white"
           >
             {{ link.label }}
           </RouterLink>
 
           <template v-if="auth.isAuthenticated">
-            <span class="mx-1 hidden h-5 w-px bg-slate-200 sm:block" aria-hidden="true"></span>
+            <span class="mx-1 hidden h-5 w-px bg-white/25 sm:block" aria-hidden="true"></span>
 
             <RouterLink
               :to="{ name: 'admin.exams' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-              :class="isExamsArea ? 'bg-brand-50 text-brand-800' : ''"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              :class="isExamsArea ? 'bg-white/15 text-white' : ''"
             >
               Administración
             </RouterLink>
 
             <RouterLink
               :to="{ name: 'admin.messages' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-              active-class="bg-brand-50 text-brand-800"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              active-class="bg-white/15 text-white"
             >
               Mensajes
             </RouterLink>
 
             <RouterLink
               :to="{ name: 'admin.branding' }"
-              class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-              active-class="bg-brand-50 text-brand-800"
+              class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              active-class="bg-white/15 text-white"
               title="Configuración"
             >
               <svg
@@ -118,12 +118,24 @@ async function handleLogout() {
               <span class="hidden lg:inline">Configuración</span>
             </RouterLink>
 
-            <span class="mx-1 hidden text-sm text-slate-600 xl:inline">{{ auth.user?.name }}</span>
+            <span class="mx-1 hidden text-sm text-white/70 xl:inline">{{ auth.user?.name }}</span>
 
-            <button type="button" class="btn-ghost" @click="handleLogout">Salir</button>
+            <button
+              type="button"
+              class="rounded-lg px-3 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
+              @click="handleLogout"
+            >
+              Salir
+            </button>
           </template>
 
-          <RouterLink v-else :to="{ name: 'login' }" class="btn-primary">Ingresar</RouterLink>
+          <RouterLink
+            v-else
+            :to="{ name: 'login' }"
+            class="rounded-lg bg-white px-4 py-2 text-sm font-bold text-brand-800 shadow-sm transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800"
+          >
+            Ingresar
+          </RouterLink>
         </nav>
       </div>
     </header>
@@ -132,15 +144,37 @@ async function handleLogout() {
       <RouterView />
     </main>
 
-    <footer class="border-t border-slate-200 bg-white">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-slate-500">
-        <p>© {{ year }} {{ branding.appName }} · {{ branding.tagline }}</p>
+    <footer class="bg-brand-900 text-white">
+      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-3">
+        <div class="sm:col-span-2">
+          <p class="text-base font-bold">{{ branding.appName }}</p>
+          <p class="mt-1 text-sm text-white/70">{{ branding.tagline }}</p>
 
-        <nav class="flex gap-4">
-          <RouterLink :to="{ name: 'public.services' }" class="hover:text-brand-700">Servicios</RouterLink>
-          <RouterLink :to="{ name: 'public.search' }" class="hover:text-brand-700">Consulta pública</RouterLink>
-          <RouterLink :to="{ name: 'public.contact' }" class="hover:text-brand-700">Contáctenos</RouterLink>
+          <p v-if="branding.center.address" class="mt-4 text-sm text-white/70">
+            {{ branding.center.address }}
+          </p>
+          <p v-if="branding.center.phone" class="text-sm text-white/70">{{ branding.center.phone }}</p>
+          <p v-if="branding.center.email" class="text-sm text-white/70">{{ branding.center.email }}</p>
+        </div>
+
+        <nav class="flex flex-col gap-2 text-sm sm:items-end">
+          <RouterLink :to="{ name: 'public.services' }" class="text-white/80 transition hover:text-white">
+            Servicios
+          </RouterLink>
+          <RouterLink :to="{ name: 'public.search' }" class="text-white/80 transition hover:text-white">
+            Consulta pública
+          </RouterLink>
+          <RouterLink :to="{ name: 'public.contact' }" class="text-white/80 transition hover:text-white">
+            Contáctenos
+          </RouterLink>
         </nav>
+      </div>
+
+      <div class="border-t border-white/10">
+        <p class="mx-auto max-w-6xl px-4 py-4 text-center text-xs text-white/60">
+          © {{ year }} {{ branding.appName }} · Plataforma de generación y verificación de exámenes médicos
+          ocupacionales.
+        </p>
       </div>
     </footer>
   </div>
