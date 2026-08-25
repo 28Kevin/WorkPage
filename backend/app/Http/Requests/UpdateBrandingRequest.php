@@ -34,12 +34,10 @@ class UpdateBrandingRequest extends FormRequest
             'center' => ['required', 'array'],
             'center.name' => ['required', 'string', 'max:120'],
             'center.nit' => ['required', 'string', 'max:40'],
-            'center.license' => ['required', 'string', 'max:120'],
             'center.address' => ['required', 'string', 'max:160'],
             'center.phone' => ['required', 'string', 'max:40'],
             'center.email' => ['required', 'email', 'max:120'],
             'center.physician_name' => ['required', 'string', 'max:120'],
-            'center.physician_license' => ['required', 'string', 'max:120'],
             'center.schedule' => ['nullable', 'string', 'max:300'],
         ];
     }
@@ -57,12 +55,10 @@ class UpdateBrandingRequest extends FormRequest
             'theme.radius' => 'redondeo de bordes',
             'center.name' => 'razón social',
             'center.nit' => 'NIT',
-            'center.license' => 'licencia',
             'center.address' => 'dirección',
             'center.phone' => 'teléfono',
             'center.email' => 'correo electrónico',
             'center.physician_name' => 'médico responsable',
-            'center.physician_license' => 'registro profesional',
             'center.schedule' => 'horario de atención',
         ];
     }

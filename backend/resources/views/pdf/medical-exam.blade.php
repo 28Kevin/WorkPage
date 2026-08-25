@@ -40,6 +40,13 @@
         .masthead .title-cell .doc { font-size: 10px; font-weight: bold; margin-top: 2px; }
         .masthead .title-cell .scope { font-size: 8px; margin-top: 1px; }
         .masthead .order-cell { width: 19%; text-align: center; border-left: 1px solid {{ $palette[800] }}; }
+
+        /* Fotografia opcional del trabajador, junto al titulo. */
+        .masthead .photo-cell { width: 15%; text-align: center; border-left: 1px solid {{ $palette[800] }};
+                                padding: 4px; }
+        .masthead .photo-cell img { max-height: 72px; max-width: 100%; }
+        .masthead .photo-cell .label { font-size: 6px; text-transform: uppercase; letter-spacing: .3px;
+                                       color: #9ca3af; }
         .masthead .order-cell .label { font-size: 6.4px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; }
         .masthead .order-cell .value { font-size: 11px; font-weight: bold; color: {{ $palette[800] }}; }
 
@@ -156,6 +163,12 @@
             <div class="doc">EVALUACIÓN MÉDICA OCUPACIONAL</div>
             <div class="scope">TRABAJO EN ALTURAS Y ESPACIOS CONFINADOS</div>
         </td>
+        @if ($photo)
+            <td class="photo-cell">
+                <img src="{{ $photo }}" alt="Fotografía del trabajador">
+                <div class="label">Trabajador</div>
+            </td>
+        @endif
         <td class="order-cell">
             <div class="label">Orden No.</div>
             <div class="value">{{ $exam->order_code }}</div>
@@ -412,7 +425,6 @@
         <tr>
             <td>
                 Nombre: {{ $center['physician']['name'] }}<br>
-                Registro profesional: {{ $center['physician']['license'] }}<br>
                 @if ($signature)
                     Firma y sello:
                     <img class="stamp" src="{{ $signature }}" alt="Sello y firma del médico ocupacional">

@@ -4,8 +4,10 @@ import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import api, { parseApiError } from '@/services/api'
 import { useBrandingStore } from '@/stores/branding'
+import { useGalleryStore } from '@/stores/gallery'
 
 const branding = useBrandingStore()
+const gallery = useGalleryStore()
 
 const form = reactive({ name: '', email: '', phone: '', subject: '', message: '' })
 
@@ -25,7 +27,10 @@ const whatsapp = computed(() => {
   return digits.length >= 10 ? `https://wa.me/${digits}` : null
 })
 
-onMounted(() => branding.load())
+onMounted(() => {
+  branding.load()
+  gallery.load()
+})
 
 async function submit() {
   sending.value = true
@@ -118,6 +123,15 @@ async function submit() {
               </dd>
             </div>
           </dl>
+        </div>
+
+        <div v-if="gallery.images.length" class="card overflow-hidden">
+          <img
+            :src="gallery.images[0].image"
+            :alt="gallery.images[0].title"
+            loading="lazy"
+            class="h-40 w-full object-cover"
+          >
         </div>
 
         <div class="card p-5">

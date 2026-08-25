@@ -89,8 +89,6 @@ services:
         value: Centro Medico Ocupacional S.A.S.
       - key: MEDICAL_CENTER_NIT
         value: 900.123.456-7
-      - key: MEDICAL_CENTER_LICENSE
-        value: Licencia SST No. 0001-2026
       - key: MEDICAL_CENTER_ADDRESS
         value: "Calle 100 # 15-20, Bogota D.C."
       - key: MEDICAL_CENTER_PHONE
@@ -99,8 +97,6 @@ services:
         value: contacto@centromedico.test
       - key: MEDICAL_CENTER_PHYSICIAN
         value: Dra. Laura Gomez Restrepo
-      - key: MEDICAL_CENTER_PHYSICIAN_LICENSE
-        value: R.M. 12345 - Lic. SO 4567
 
   # ------------------------------------------------------------- SPA Vue (estatica)
   - type: web

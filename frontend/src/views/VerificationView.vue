@@ -100,7 +100,7 @@ onMounted(async () => {
 
         <div class="border-t border-slate-200 bg-slate-50 px-6 py-4 text-xs leading-relaxed text-slate-600">
           <p class="font-semibold text-slate-800">{{ data.issuer.name }}</p>
-          <p>NIT {{ data.issuer.nit }} · {{ data.issuer.license }}</p>
+          <p>NIT {{ data.issuer.nit }}</p>
           <p>Tel. {{ data.issuer.phone }} · {{ data.issuer.email }}</p>
         </div>
       </div>

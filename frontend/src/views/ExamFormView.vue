@@ -5,6 +5,7 @@ import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import api, { parseApiError } from '@/services/api'
+import { prepareImage } from '@/services/images'
 import { useCatalogStore } from '@/stores/catalogs'
 
 const route = useRoute()
@@ -29,6 +30,7 @@ const form = reactive({
   document_number: '',
   birth_date: '',
   sex: '',
+  photo: null,
   height_cm: '',
   weight_kg: '',
   eps_id: '',
@@ -73,6 +75,10 @@ const idealWeight = ref(null)
 const draftLoaded = ref(false)
 const loadingDraft = ref(false)
 const loadedExam = ref(null)
+const photoError = ref(null)
+
+/** Ancho maximo de la fotografia: en el PDF se imprime a unos 2 cm. */
+const MAX_PHOTO_PX = 600
 
 const selectedArl = computed(() => catalogs.findArl(form.arl_id))
 const selectedCity = computed(() => catalogs.findCity(form.city_id))
@@ -133,6 +139,7 @@ async function loadExam() {
       document_number: exam.worker.document_number,
       birth_date: exam.worker.birth_date,
       sex: exam.worker.sex || '',
+      photo: exam.worker.photo || null,
       height_cm: exam.worker.height_cm,
       weight_kg: exam.worker.weight_kg,
       eps_id: exam.occupational.eps?.id ?? '',
@@ -235,6 +242,25 @@ async function loadDraft() {
     // Sin borrador el médico diligencia a mano; el backend precarga al guardar.
   } finally {
     loadingDraft.value = false
+  }
+}
+
+/** La fotografia es opcional; se reduce antes de mandarla en el JSON. */
+async function pickPhoto(event) {
+  const file = event.target.files?.[0]
+
+  photoError.value = null
+
+  if (!file) return
+
+  try {
+    form.photo = await prepareImage(file, MAX_PHOTO_PX)
+  } catch (error) {
+    photoError.value = error.message === 'too-large'
+      ? 'La imagen supera los 5 MB. Use una más liviana.'
+      : 'No fue posible leer la imagen.'
+  } finally {
+    event.target.value = ''
   }
 }
 
@@ -427,6 +453,34 @@ async function submit() {
               <option v-for="item in catalogs.afps" :key="item.id" :value="item.id">{{ item.name }}</option>
             </select>
           </FormField>
+
+          <div class="sm:col-span-2 lg:col-span-3">
+            <span class="field-label">Fotografía del trabajador</span>
+
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                <img v-if="form.photo" :src="form.photo" alt="Fotografía seleccionada" class="h-full w-full object-cover">
+                <span v-else class="px-1 text-center text-xs text-slate-400">Sin foto</span>
+              </div>
+
+              <div class="flex flex-col items-start gap-2">
+                <label class="btn-secondary cursor-pointer">
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" @change="pickPhoto">
+                  Seleccionar fotografía
+                </label>
+
+                <button v-if="form.photo" type="button" class="btn-ghost text-xs" @click="form.photo = null">
+                  Quitar fotografía
+                </button>
+              </div>
+            </div>
+
+            <p v-if="photoError" class="field-error">{{ photoError }}</p>
+            <p v-else-if="errors.photo" class="field-error">{{ errors.photo[0] }}</p>
+            <p v-else class="field-hint">
+              Opcional. Si la incluye, aparece en el encabezado del certificado junto al título.
+            </p>
+          </div>
 
           <FormField v-slot="{ id, hasError }" label="Estatura (cm)" :error="errors.height_cm" required>
             <input :id="id" v-model="form.height_cm" type="number" min="120" max="230" step="1"
@@ -744,8 +798,12 @@ async function submit() {
         <div class="p-5">
           <p class="mb-3 text-xs leading-relaxed text-slate-600">
             El trabajador declara que recibió información clara sobre el propósito de la evaluación médica
-            ocupacional, las pruebas complementarias indicadas, su finalidad, procedimiento, posibles molestias
-            o riesgos, beneficios y el manejo confidencial de la información.
+            ocupacional y, cuando corresponda, sobre las pruebas o valoraciones complementarias indicadas, su
+            finalidad, procedimiento, posibles molestias o riesgos, beneficios y manejo confidencial de la
+            información. <strong>Otorgo mi consentimiento de manera libre, previa y por escrito para la
+            realización de las pruebas o valoraciones complementarias requeridas dentro de esta evaluación.
+            Entiendo que puedo manifestar mi negativa y que esta será registrada junto con la información y
+            consecuencias que correspondan.</strong>
           </p>
 
           <div class="flex flex-wrap gap-2">

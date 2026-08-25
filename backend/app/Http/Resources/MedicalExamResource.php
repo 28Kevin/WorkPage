@@ -26,6 +26,7 @@ class MedicalExamResource extends JsonResource
                 'age' => $this->age,
                 'sex' => $this->sex?->value,
                 'sex_label' => $this->sex?->label(),
+                'photo' => $this->photo,
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'height_cm' => $this->height_cm,

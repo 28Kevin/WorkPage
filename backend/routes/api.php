@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\GalleryImageController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,7 @@ Route::post('/public/contact', [ContactMessageController::class, 'store'])
 |--------------------------------------------------------------------------
 */
 Route::get('/branding', [BrandingController::class, 'show'])->name('api.branding.show');
+Route::get('/gallery', [GalleryImageController::class, 'index'])->name('api.gallery.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +61,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogs', [CatalogController::class, 'index'])->name('api.catalogs');
 
     Route::put('/branding', [BrandingController::class, 'update'])->name('api.branding.update');
+
+    Route::get('/gallery/all', [GalleryImageController::class, 'all'])->name('api.gallery.all');
+    Route::post('/gallery', [GalleryImageController::class, 'store'])->name('api.gallery.store');
+    Route::patch('/gallery/{image}', [GalleryImageController::class, 'update'])->name('api.gallery.update');
+    Route::delete('/gallery/{image}', [GalleryImageController::class, 'destroy'])->name('api.gallery.destroy');
 
     Route::get('/contact-messages', [ContactMessageController::class, 'index'])->name('api.messages.index');
     Route::patch('/contact-messages/{message}', [ContactMessageController::class, 'toggle'])->name('api.messages.toggle');

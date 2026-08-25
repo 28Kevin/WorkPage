@@ -21,8 +21,8 @@ class Branding
         'identity' => ['app_name', 'tagline', 'logo'],
         'theme' => ['brand_color', 'accent_color', 'font_heading', 'font_body', 'radius'],
         'center' => [
-            'name', 'nit', 'license', 'address', 'phone', 'email',
-            'physician_name', 'physician_license', 'schedule',
+            'name', 'nit', 'address', 'phone', 'email',
+            'physician_name', 'schedule',
         ],
     ];
 
@@ -44,12 +44,10 @@ class Branding
             'center' => [
                 'name' => config('medical_center.name'),
                 'nit' => config('medical_center.nit'),
-                'license' => config('medical_center.license'),
                 'address' => config('medical_center.address'),
                 'phone' => config('medical_center.phone'),
                 'email' => config('medical_center.email'),
                 'physician_name' => config('medical_center.physician.name'),
-                'physician_license' => config('medical_center.physician.license'),
                 'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
             ],
         ];

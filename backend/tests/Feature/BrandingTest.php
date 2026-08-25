@@ -31,12 +31,10 @@ class BrandingTest extends TestCase
             'center' => [
                 'name' => 'NUEVA SALUD INTEGRAL IPS SAS',
                 'nit' => '900526144-5',
-                'license' => 'Licencia SST No. 0001-2026',
                 'address' => 'CRA 24 N. 9-76',
                 'phone' => '+57 601 000 0000',
                 'email' => 'contacto@nuevasalud.test',
                 'physician_name' => 'Dr. Eduardo Marín',
-                'physician_license' => 'RM Lic. 8235 de 2017',
             ],
         ], $overrides);
     }

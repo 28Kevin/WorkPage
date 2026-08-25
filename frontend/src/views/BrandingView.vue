@@ -3,8 +3,10 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
+import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { parseApiError } from '@/services/api'
+import { prepareImage } from '@/services/images'
 import { applyBranding, buildPalette } from '@/services/theme'
 import { useBrandingStore } from '@/stores/branding'
 
@@ -38,8 +40,8 @@ const form = reactive({
     radius: '0.75rem',
   },
   center: {
-    name: '', nit: '', license: '', address: '',
-    phone: '', email: '', physician_name: '', physician_license: '', schedule: '',
+    name: '', nit: '', address: '',
+    phone: '', email: '', physician_name: '', schedule: '',
   },
 })
 
@@ -107,52 +109,17 @@ async function handleLogo(event) {
 
   if (!file) return
 
-  if (file.size > 2 * 1024 * 1024) {
-    logoError.value = 'La imagen supera los 2 MB. Use una más liviana.'
-    event.target.value = ''
-    return
-  }
-
   try {
-    const dataUrl = await readAsDataUrl(file)
-
-    form.identity.logo = file.type === 'image/svg+xml' ? dataUrl : await downscale(dataUrl)
+    // PNG para conservar la transparencia del logo.
+    form.identity.logo = await prepareImage(file, MAX_LOGO_PX, { format: 'image/png' })
     dirty.value = true
-  } catch {
-    logoError.value = 'No fue posible leer la imagen.'
+  } catch (error) {
+    logoError.value = error.message === 'too-large'
+      ? 'La imagen supera los 5 MB. Use una más liviana.'
+      : 'No fue posible leer la imagen.'
   } finally {
     event.target.value = ''
   }
-}
-
-function readAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error('read'))
-    reader.readAsDataURL(file)
-  })
-}
-
-function downscale(dataUrl) {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-
-    image.onload = () => {
-      const scale = Math.min(1, MAX_LOGO_PX / Math.max(image.width, image.height))
-      const canvas = document.createElement('canvas')
-
-      canvas.width = Math.round(image.width * scale)
-      canvas.height = Math.round(image.height * scale)
-      canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
-
-      resolve(canvas.toDataURL('image/png'))
-    }
-
-    image.onerror = () => reject(new Error('decode'))
-    image.src = dataUrl
-  })
 }
 
 function removeLogo() {
@@ -437,12 +404,6 @@ function discard() {
           </template>
         </FormField>
 
-        <FormField label="Licencia" :error="errors['center.license']" required>
-          <template #default="{ id }">
-            <input :id="id" v-model="form.center.license" type="text" class="field-input" @input="dirty = true">
-          </template>
-        </FormField>
-
         <FormField label="Dirección" :error="errors['center.address']" required>
           <template #default="{ id }">
             <input :id="id" v-model="form.center.address" type="text" class="field-input" @input="dirty = true">
@@ -484,18 +445,17 @@ function discard() {
           </template>
         </FormField>
 
-        <FormField label="Registro profesional" :error="errors['center.physician_license']" required>
-          <template #default="{ id }">
-            <input
-              :id="id"
-              v-model="form.center.physician_license"
-              type="text"
-              class="field-input"
-              @input="dirty = true"
-            >
-          </template>
-        </FormField>
       </div>
+    </section>
+
+    <!-- ------------------------------------------------------------- galería -->
+    <section class="card">
+      <div class="section-heading">
+        <span class="section-badge">4</span>
+        <h2 class="text-sm font-semibold text-slate-900">Galería de fotografías</h2>
+      </div>
+
+      <GalleryManager />
     </section>
 
     <div class="flex justify-end gap-2">

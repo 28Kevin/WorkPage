@@ -51,29 +51,81 @@ class CatalogSeeder extends Seeder
         Arl::whereIn('name', ['Liberty Seguros ARL', 'Mapfre Seguros ARL'])
             ->update(['active' => false]);
 
-        $cities = [
-            ['name' => 'Bogotá D.C.', 'department' => 'Cundinamarca'],
-            ['name' => 'Medellín', 'department' => 'Antioquia'],
-            ['name' => 'Cali', 'department' => 'Valle del Cauca'],
-            ['name' => 'Barranquilla', 'department' => 'Atlántico'],
-            ['name' => 'Cartagena', 'department' => 'Bolívar'],
-            ['name' => 'Bucaramanga', 'department' => 'Santander'],
-            ['name' => 'Pereira', 'department' => 'Risaralda'],
-            ['name' => 'Manizales', 'department' => 'Caldas'],
-            ['name' => 'Cúcuta', 'department' => 'Norte de Santander'],
-            ['name' => 'Ibagué', 'department' => 'Tolima'],
-            ['name' => 'Santa Marta', 'department' => 'Magdalena'],
-            ['name' => 'Villavicencio', 'department' => 'Meta'],
-            ['name' => 'Neiva', 'department' => 'Huila'],
-            ['name' => 'Armenia', 'department' => 'Quindío'],
-            ['name' => 'Pasto', 'department' => 'Nariño'],
+        /*
+         * Capitales de departamento y municipios con actividad industrial o de
+         * construccion, que son los que mas evaluaciones ocupacionales generan.
+         */
+        $municipalities = [
+            'Amazonas' => ['Leticia', 'Puerto Nariño'],
+            'Antioquia' => [
+                'Medellín', 'Bello', 'Itagüí', 'Envigado', 'Sabaneta', 'Caldas', 'La Estrella',
+                'Copacabana', 'Girardota', 'Barbosa', 'Rionegro', 'La Ceja', 'Marinilla',
+                'Apartadó', 'Turbo', 'Caucasia', 'Puerto Berrío', 'Segovia', 'Yarumal',
+            ],
+            'Arauca' => ['Arauca', 'Arauquita', 'Saravena', 'Tame'],
+            'Atlántico' => [
+                'Barranquilla', 'Soledad', 'Malambo', 'Puerto Colombia', 'Galapa',
+                'Sabanalarga', 'Baranoa', 'Sabanagrande',
+            ],
+            'Bolívar' => [
+                'Cartagena', 'Magangué', 'Turbaco', 'Arjona', 'El Carmen de Bolívar',
+                'Mompós', 'Santa Rosa del Sur',
+            ],
+            'Boyacá' => ['Tunja', 'Duitama', 'Sogamoso', 'Chiquinquirá', 'Paipa', 'Puerto Boyacá', 'Nobsa'],
+            'Caldas' => ['Manizales', 'Villamaría', 'La Dorada', 'Chinchiná', 'Riosucio', 'Anserma'],
+            'Caquetá' => ['Florencia', 'San Vicente del Caguán', 'Puerto Rico'],
+            'Casanare' => ['Yopal', 'Aguazul', 'Villanueva', 'Tauramena', 'Monterrey', 'Paz de Ariporo'],
+            'Cauca' => ['Popayán', 'Santander de Quilichao', 'Puerto Tejada', 'Guachené', 'Miranda', 'Patía'],
+            'Cesar' => [
+                'Valledupar', 'Aguachica', 'Agustín Codazzi', 'La Jagua de Ibirico',
+                'Bosconia', 'Chiriguaná', 'Curumaní',
+            ],
+            'Chocó' => ['Quibdó', 'Istmina', 'Riosucio', 'Bahía Solano'],
+            'Córdoba' => [
+                'Montería', 'Lorica', 'Cereté', 'Sahagún', 'Montelíbano',
+                'Planeta Rica', 'Tierralta', 'Ciénaga de Oro',
+            ],
+            'Cundinamarca' => [
+                'Bogotá D.C.', 'Soacha', 'Zipaquirá', 'Facatativá', 'Chía', 'Mosquera', 'Madrid',
+                'Funza', 'Fusagasugá', 'Girardot', 'Cajicá', 'Sibaté', 'Tocancipá', 'Cota',
+                'La Calera', 'Ubaté', 'Villeta', 'Tabio', 'Tenjo', 'Gachancipá', 'Sopó',
+            ],
+            'Guainía' => ['Inírida'],
+            'Guaviare' => ['San José del Guaviare'],
+            'Huila' => ['Neiva', 'Pitalito', 'Garzón', 'La Plata', 'Campoalegre', 'Palermo', 'Rivera'],
+            'La Guajira' => ['Riohacha', 'Maicao', 'Uribia', 'Fonseca', 'San Juan del Cesar', 'Albania', 'Barrancas'],
+            'Magdalena' => ['Santa Marta', 'Ciénaga', 'Fundación', 'El Banco', 'Zona Bananera', 'Plato'],
+            'Meta' => ['Villavicencio', 'Acacías', 'Granada', 'Puerto López', 'Puerto Gaitán', 'San Martín', 'Castilla la Nueva'],
+            'Nariño' => ['Pasto', 'Tumaco', 'Ipiales', 'Túquerres', 'La Unión', 'Sandoná'],
+            'Norte de Santander' => ['Cúcuta', 'Ocaña', 'Pamplona', 'Villa del Rosario', 'Los Patios', 'Tibú', 'Sardinata'],
+            'Putumayo' => ['Mocoa', 'Puerto Asís', 'Orito', 'Villagarzón', 'Valle del Guamuez'],
+            'Quindío' => ['Armenia', 'Calarcá', 'La Tebaida', 'Montenegro', 'Quimbaya', 'Circasia', 'Filandia'],
+            'Risaralda' => ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'La Virginia', 'Marsella'],
+            'San Andrés y Providencia' => ['San Andrés', 'Providencia'],
+            'Santander' => [
+                'Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta', 'Barrancabermeja',
+                'San Gil', 'Socorro', 'Málaga', 'Vélez', 'Sabana de Torres', 'Puerto Wilches',
+            ],
+            'Sucre' => ['Sincelejo', 'Corozal', 'Sampués', 'San Marcos', 'Santiago de Tolú', 'Coveñas'],
+            'Tolima' => [
+                'Ibagué', 'Espinal', 'Melgar', 'Honda', 'Líbano', 'Chaparral',
+                'San Sebastián de Mariquita', 'Purificación', 'Flandes',
+            ],
+            'Valle del Cauca' => [
+                'Cali', 'Palmira', 'Buenaventura', 'Tuluá', 'Cartago', 'Guadalajara de Buga',
+                'Jamundí', 'Yumbo', 'Candelaria', 'Zarzal', 'Florida', 'Pradera', 'Sevilla', 'Roldanillo',
+            ],
+            'Vaupés' => ['Mitú'],
+            'Vichada' => ['Puerto Carreño'],
         ];
 
-        foreach ($cities as $item) {
-            City::updateOrCreate(
-                ['name' => $item['name'], 'department' => $item['department']],
-                $item,
-            );
+        foreach ($municipalities as $department => $names) {
+            foreach ($names as $name) {
+                City::updateOrCreate(
+                    ['name' => $name, 'department' => $department],
+                    ['active' => true],
+                );
+            }
         }
 
         $afps = [

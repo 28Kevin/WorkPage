@@ -35,6 +35,7 @@ class ExamPdfGenerator
             'center' => $this->center($branding['center']),
             'palette' => $branding['theme']['palette'],
             'logo' => $branding['identity']['logo'],
+            'photo' => $exam->photo,
 
             // Marca de agua de todas las paginas y sello del medico.
             'watermark' => PdfAssets::watermark(),
@@ -52,10 +53,7 @@ class ExamPdfGenerator
     {
         return [
             ...$center,
-            'physician' => [
-                'name' => $center['physician_name'],
-                'license' => $center['physician_license'],
-            ],
+            'physician' => ['name' => $center['physician_name']],
         ];
     }
 }

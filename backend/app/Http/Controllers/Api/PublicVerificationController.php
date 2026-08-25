@@ -98,7 +98,6 @@ class PublicVerificationController extends Controller
             'issuer' => [
                 'name' => $center['name'],
                 'nit' => $center['nit'],
-                'license' => $center['license'],
                 'phone' => $center['phone'],
                 'email' => $center['email'],
             ],

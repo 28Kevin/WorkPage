@@ -40,8 +40,8 @@ class MedicalParameterGenerator
                 'bmi_classification' => $this->classifyBmi($bmi),
             ],
             'vision' => [
-                'right_eye' => '20/20',
-                'left_eye' => '20/20',
+                'right_eye' => $this->visualAcuity(),
+                'left_eye' => $this->visualAcuity(),
                 'optical_correction' => false,
             ],
             'systems' => array_fill_keys(array_keys(ExamForm::SYSTEMS), ExamForm::NORMAL),
@@ -101,6 +101,15 @@ class MedicalParameterGenerator
             'Realizar pausas activas durante la jornada laboral.',
             'Asistir al próximo examen médico ocupacional periódico según programación.',
         ];
+    }
+
+    /**
+     * Agudeza visual dentro de lo normal. 20/20 es lo esperado y 20/25 sigue
+     * siendo normal, asi que se sortea con mas peso en el primero.
+     */
+    private function visualAcuity(): string
+    {
+        return random_int(1, 10) <= 7 ? '20/20' : '20/25';
     }
 
     private function classifyBmi(float $bmi): string

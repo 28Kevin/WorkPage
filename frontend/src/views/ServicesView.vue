@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useBrandingStore } from '@/stores/branding'
+import { useGalleryStore } from '@/stores/gallery'
 
 const branding = useBrandingStore()
+const gallery = useGalleryStore()
 
 const SERVICES = [
   {
@@ -63,7 +65,10 @@ const schedule = computed(() =>
   (branding.center.schedule || '').split('\n').map((line) => line.trim()).filter(Boolean),
 )
 
-onMounted(() => branding.load())
+onMounted(() => {
+  branding.load()
+  gallery.load()
+})
 </script>
 
 <template>
@@ -76,6 +81,28 @@ onMounted(() => branding.load())
         del documento mediante código QR.
       </p>
     </header>
+
+    <!-- ------------------------------------------------------------- galería -->
+    <section v-if="gallery.images.length" aria-label="Fotografías del centro médico">
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <figure
+          v-for="image in gallery.images"
+          :key="image.id"
+          class="card group overflow-hidden"
+        >
+          <img
+            :src="image.image"
+            :alt="image.title"
+            loading="lazy"
+            class="h-36 w-full object-cover transition group-hover:scale-105"
+          >
+          <figcaption class="px-3 py-2">
+            <p class="text-xs font-semibold text-slate-900">{{ image.title }}</p>
+            <p v-if="image.caption" class="mt-0.5 text-xs text-slate-500">{{ image.caption }}</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
 
     <!-- --------------------------------------------------------- los servicios -->
     <section class="space-y-4">
@@ -103,9 +130,9 @@ onMounted(() => branding.load())
 
     <!-- ------------------------------------------------------------- sectores -->
     <section>
-      <h2 class="text-lg font-bold text-slate-900">Sectores que atendemos</h2>
+      <h2 class="text-lg font-bold text-slate-900">Convenios</h2>
       <p class="mt-1 text-sm text-slate-600">
-        Nuestros exámenes están enfocados en los siguientes perfiles ocupacionales.
+        Trabajamos con empresas y centros de entrenamiento de los siguientes sectores.
       </p>
 
       <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

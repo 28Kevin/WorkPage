@@ -13,12 +13,25 @@ use Illuminate\Support\Facades\Cache;
  */
 class PdfAssets
 {
-    /** Por encima de esta luminancia el pixel se considera fondo. */
+    /**
+     * Por encima de esta luminancia el pixel se considera fondo. No conviene
+     * subirlo: el ruido casi-blanco del JPEG se volveria un recuadro gris.
+     */
     private const WHITE_THRESHOLD = 242;
 
-    /** Cuanto se atenua cada imagen: la marca de agua debe quedar tenue. */
+    /** Cuanto se atenua cada imagen. */
     private const OPACITY = [
-        'logo1.jpeg' => 0.85,
+        'logo1.jpeg' => 1.0,
+        'sello.jpeg' => 1.0,
+    ];
+
+    /**
+     * Curva aplicada a la opacidad de cada pixel. El logo de origen es muy
+     * palido: por debajo de 1 se realza su tinta clara para que la marca de
+     * agua se perciba sin llegar a estorbar la lectura.
+     */
+    private const GAMMA = [
+        'logo1.jpeg' => 0.35,
         'sello.jpeg' => 1.0,
     ];
 
@@ -52,13 +65,22 @@ class PdfAssets
             return null;
         }
 
+        $opacity = self::OPACITY[$file] ?? 1.0;
+        $gamma = self::GAMMA[$file] ?? 1.0;
+        $maxWidth = self::MAX_WIDTH[$file] ?? 480;
+
+        // La clave incluye los parametros: al ajustarlos hay que reconvertir,
+        // aunque el archivo de origen siga siendo el mismo.
+        $key = sprintf(
+            'pdf.asset.%s.%d.%s',
+            $file,
+            filemtime($path),
+            md5($opacity.'|'.$gamma.'|'.$maxWidth.'|'.self::WHITE_THRESHOLD),
+        );
+
         return Cache::rememberForever(
-            'pdf.asset.'.$file.'.'.filemtime($path),
-            fn () => self::transparentPng(
-                $path,
-                self::OPACITY[$file] ?? 1.0,
-                self::MAX_WIDTH[$file] ?? 480,
-            ),
+            $key,
+            fn () => self::transparentPng($path, $opacity, $gamma, $maxWidth),
         );
     }
 
@@ -66,7 +88,7 @@ class PdfAssets
      * Recorta el fondo blanco y atenua el resto. La opacidad se aplica aqui y
      * no con CSS porque dompdf no siempre respeta opacity sobre imagenes.
      */
-    private static function transparentPng(string $path, float $opacity, int $maxWidth): ?string
+    private static function transparentPng(string $path, float $opacity, float $gamma, int $maxWidth): ?string
     {
         if (! extension_loaded('gd')) {
             return null;
@@ -104,7 +126,7 @@ class PdfAssets
                 }
 
                 // Cuanto mas oscuro el pixel, mas opaco queda (0 = opaco, 127 = invisible).
-                $strength = (1 - ($luminance / self::WHITE_THRESHOLD)) * $opacity;
+                $strength = ((1 - ($luminance / self::WHITE_THRESHOLD)) ** $gamma) * $opacity;
                 $alpha = (int) round(127 - (127 * $strength));
 
                 // Se compone el color a mano: allocate por pixel seria muy lento.

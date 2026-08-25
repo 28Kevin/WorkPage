@@ -5,7 +5,7 @@ import { useBrandingStore } from '@/stores/branding'
 const routes = [
   {
     path: '/',
-    redirect: '/consulta',
+    redirect: '/servicios',
   },
 
   // Modulo de consulta publica (acceso externo)

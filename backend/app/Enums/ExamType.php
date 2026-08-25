@@ -14,7 +14,7 @@ enum ExamType: string
     public function label(): string
     {
         return match ($this) {
-            self::Ingreso => 'Preingreso',
+            self::Ingreso => 'Ingreso',
             self::Periodico => 'Periódica',
             self::Seguimiento => 'Seguimiento / control',
             self::Retorno => 'Retorno / post-incapacidad',

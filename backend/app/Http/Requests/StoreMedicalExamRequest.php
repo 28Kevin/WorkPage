@@ -32,6 +32,8 @@ class StoreMedicalExamRequest extends FormRequest
             'document_number' => ['required', 'string', 'max:20', 'regex:/^[0-9]+$/'],
             'birth_date' => ['required', 'date', 'before:today', 'after:1920-01-01'],
             'sex' => ['required', Rule::enum(Sex::class)],
+            // Fotografia opcional: ~400 KB de base64 tras reducirla en el navegador.
+            'photo' => ['nullable', 'string', 'max:400000', 'regex:/^data:image\/(png|jpeg|webp);base64,/'],
             'email' => ['nullable', 'email:rfc', 'max:150'],
             'phone' => ['nullable', 'string', 'min:7', 'max:20'],
             'height_cm' => ['required', 'integer', 'min:120', 'max:230'],
@@ -106,6 +108,7 @@ class StoreMedicalExamRequest extends FormRequest
             'document_number' => 'número de documento',
             'birth_date' => 'fecha de nacimiento',
             'sex' => 'sexo',
+            'photo' => 'fotografía',
             'height_cm' => 'estatura',
             'weight_kg' => 'peso',
             'is_independent' => 'trabajador independiente',
@@ -136,6 +139,8 @@ class StoreMedicalExamRequest extends FormRequest
         return [
             'consent_accepted.required' => 'Debe registrar si el trabajador acepta o niega el consentimiento.',
             'company_nit.required' => 'Indique el NIT de la empresa o marque al trabajador como independiente.',
+            'photo.regex' => 'La fotografía debe ser una imagen PNG, JPG o WEBP.',
+            'photo.max' => 'La fotografía supera el tamaño permitido. Use una imagen más liviana.',
         ];
     }
 

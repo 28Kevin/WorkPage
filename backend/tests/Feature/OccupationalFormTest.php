@@ -17,6 +17,9 @@ class OccupationalFormTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Valores de agudeza visual que el generador considera normales. */
+    private const NORMAL_ACUITY = ['20/20', '20/25'];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -91,7 +94,23 @@ class OccupationalFormTest extends TestCase
         $this->assertLessThanOrEqual(84, $vitals['heart_rate']);
         $this->assertGreaterThanOrEqual(96, $vitals['spo2']);
 
-        $this->assertSame('20/20', $response->json('medical_parameters.vision.right_eye'));
+        $this->assertContains($response->json('medical_parameters.vision.right_eye'), self::NORMAL_ACUITY);
+    }
+
+    public function test_visual_acuity_varies_between_exams_within_normal_values(): void
+    {
+        $admin = $this->admin();
+
+        $draws = collect(range(1, 20))->flatMap(function () use ($admin) {
+            $vision = $this->actingAs($admin, 'sanctum')
+                ->getJson('/api/exams/draft')
+                ->json('medical_parameters.vision');
+
+            return [$vision['right_eye'], $vision['left_eye']];
+        });
+
+        $this->assertGreaterThan(1, $draws->unique()->count(), 'La agudeza visual deberia variar.');
+        $this->assertTrue($draws->every(fn (string $value) => in_array($value, self::NORMAL_ACUITY, true)));
     }
 
     public function test_each_draft_returns_different_values_within_normal_ranges(): void
@@ -176,7 +195,7 @@ class OccupationalFormTest extends TestCase
 
         // Lo que no se envio conserva el valor precargado.
         $this->assertSame('normal', $parameters['systems']['gait']);
-        $this->assertSame('20/20', $parameters['vision']['left_eye']);
+        $this->assertContains($parameters['vision']['left_eye'], self::NORMAL_ACUITY);
 
         $response->assertJsonPath('data.exam.clinical_findings', 'Soplo sistolico grado II en foco aortico.');
     }

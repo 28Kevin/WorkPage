@@ -24,6 +24,7 @@ class MedicalExam extends Model
         'document_number',
         'birth_date',
         'sex',
+        'photo',
         'email',
         'phone',
         'height_cm',

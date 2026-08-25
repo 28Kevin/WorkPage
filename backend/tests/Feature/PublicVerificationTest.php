@@ -90,7 +90,7 @@ class PublicVerificationTest extends TestCase
 
         $response->assertJsonPath('valid', true)
             ->assertJsonPath('exam.order_code', $exam->order_code)
-            ->assertJsonStructure(['legend', 'issuer' => ['name', 'nit', 'license'], 'exam']);
+            ->assertJsonStructure(['legend', 'issuer' => ['name', 'nit'], 'exam']);
 
         $this->assertStringContainsString($exam->order_code, $response->json('legend'));
         $this->assertStringContainsString(config('medical_center.name'), $response->json('legend'));
