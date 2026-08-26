@@ -7,7 +7,7 @@
     $systemValues = $parameters['systems'] ?? [];
     $assessments = $parameters['assessments'] ?? [];
 
-    $box = fn (bool $checked) => $checked ? '&#9746;' : '&#9744;';
+    $box = fn (bool $checked) => '<span class="box">'.($checked ? '&#9746;' : '&#9744;').'</span>';
     $blank = '_______________________';
 @endphp
 <!DOCTYPE html>
@@ -17,18 +17,18 @@
     <title>Evaluación médica ocupacional {{ $exam->order_code }}</title>
     <style>
         * { box-sizing: border-box; }
-        @page { margin: 62px 26px 46px 26px; }
+        @page { margin: 68px 26px 50px 26px; }
 
-        body { font-family: DejaVu Sans, sans-serif; font-size: 8.2px; color: #1f2937; margin: 0; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 9.8px; color: #1f2937; margin: 0; }
         h1, h2, h3 { margin: 0; }
         table { width: 100%; border-collapse: collapse; }
 
         /* Encabezado y pie repetidos en cada pagina. */
-        .running-head { position: fixed; top: -48px; left: 0; right: 0; text-align: center;
-                        font-size: 7px; font-weight: bold; color: {{ $palette[800] }};
+        .running-head { position: fixed; top: -54px; left: 0; right: 0; text-align: center;
+                        font-size: 8.4px; font-weight: bold; color: {{ $palette[800] }};
                         letter-spacing: .4px; text-transform: uppercase; }
-        .running-foot { position: fixed; bottom: -34px; left: 0; right: 0; text-align: center;
-                        font-size: 6.6px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px; }
+        .running-foot { position: fixed; bottom: -38px; left: 0; right: 0; text-align: center;
+                        font-size: 7.9px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px; }
 
         /* Banda superior con logo, titulo y consecutivo. */
         .masthead { border: 1px solid {{ $palette[800] }}; margin-bottom: 3px; }
@@ -36,25 +36,28 @@
         .masthead .logo-cell { width: 19%; text-align: center; border-right: 1px solid {{ $palette[800] }}; }
         .masthead .logo-cell img { max-height: 58px; max-width: 100%; }
         .masthead .title-cell { background: {{ $palette[800] }}; color: #ffffff; text-align: center; }
-        .masthead .title-cell .center { font-size: 12px; font-weight: bold; letter-spacing: .3px; }
-        .masthead .title-cell .doc { font-size: 10px; font-weight: bold; margin-top: 2px; }
-        .masthead .title-cell .scope { font-size: 8px; margin-top: 1px; }
+        .masthead .title-cell .center { font-size: 14.4px; font-weight: bold; letter-spacing: .3px; }
+        .masthead .title-cell .doc { font-size: 12px; font-weight: bold; margin-top: 2px; }
+        .masthead .title-cell .scope { font-size: 9.6px; margin-top: 1px; }
         .masthead .order-cell { width: 19%; text-align: center; border-left: 1px solid {{ $palette[800] }}; }
 
         /* Fotografia opcional del trabajador, junto al titulo. */
         .masthead .photo-cell { width: 15%; text-align: center; border-left: 1px solid {{ $palette[800] }};
                                 padding: 4px; }
         .masthead .photo-cell img { max-height: 72px; max-width: 100%; }
-        .masthead .photo-cell .label { font-size: 6px; text-transform: uppercase; letter-spacing: .3px;
+        .masthead .photo-cell .label { font-size: 7.2px; text-transform: uppercase; letter-spacing: .3px;
                                        color: #9ca3af; }
-        .masthead .order-cell .label { font-size: 6.4px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; }
-        .masthead .order-cell .value { font-size: 11px; font-weight: bold; color: {{ $palette[800] }}; }
+        .masthead .order-cell .label { font-size: 7.7px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; }
+        .masthead .order-cell .value { font-size: 13.2px; font-weight: bold; color: {{ $palette[800] }}; }
 
-        .ips-strip { font-size: 7px; color: {{ $palette[700] }}; padding: 2px 2px 5px; }
+        .ips-strip { font-size: 8.4px; color: {{ $palette[700] }}; padding: 2px 2px 5px; }
         .ips-strip b { color: #374151; }
 
         /* Bandas de seccion. */
-        .band { background: {{ $palette[800] }}; color: #ffffff; font-size: 7.6px; font-weight: bold;
+        /* Las casillas se leen mejor algo más grandes que su etiqueta. */
+        .box { font-size: 15px; line-height: 1; vertical-align: -1px; }
+
+        .band { background: {{ $palette[800] }}; color: #ffffff; font-size: 9.1px; font-weight: bold;
                 text-transform: uppercase; letter-spacing: .5px; padding: 3.5px 7px; margin-top: 5px; }
 
         .grid { border: 1px solid #d1d5db; border-top: none; }
@@ -62,49 +65,49 @@
                    width: 50%; vertical-align: top; }
         .grid td:last-child { border-right: none; }
         .grid tr:last-child td { border-bottom: none; }
-        .grid .k { display: block; font-size: 7px; color: #6b7280; }
-        .grid .v { display: block; font-weight: bold; color: #111827; font-size: 8.4px;
+        .grid .k { display: block; font-size: 8.4px; color: #6b7280; }
+        .grid .v { display: block; font-weight: bold; color: #111827; font-size: 10.1px;
                    border-bottom: 1px solid #9ca3af; padding-bottom: 1px; }
 
         /* Listas de casillas de verificacion en tres columnas. */
         .checks { border: 1px solid #d1d5db; border-top: none; }
-        .checks td { padding: 3px 7px; width: 33.33%; font-size: 7.6px; vertical-align: top; }
+        .checks td { padding: 3px 7px; width: 33.33%; font-size: 9.1px; vertical-align: top; }
 
         /* Tablas de datos con encabezado. */
         .data { border: 1px solid #d1d5db; border-top: none; }
-        .data th { background: {{ $palette[50] }}; color: {{ $palette[900] }}; font-size: 6.8px;
+        .data th { background: {{ $palette[50] }}; color: {{ $palette[900] }}; font-size: 8.2px;
                    text-transform: uppercase; letter-spacing: .4px; text-align: left;
                    padding: 3px 7px; border-bottom: 1px solid #d1d5db; }
-        .data td { padding: 3px 7px; border-bottom: 1px solid #f3f4f6; font-size: 7.8px; }
+        .data td { padding: 3px 7px; border-bottom: 1px solid #f3f4f6; font-size: 9.4px; }
         .data tr:last-child td { border-bottom: none; }
         .data .num { font-weight: bold; color: #111827; }
 
-        .findings { border: 1px solid #d1d5db; border-top: none; padding: 4px 7px; font-size: 7.6px; }
+        .findings { border: 1px solid #d1d5db; border-top: none; padding: 4px 7px; font-size: 9.1px; }
         .findings .k { color: #6b7280; }
 
         /* Concepto de aptitud. */
         .aptitude { border: 1px solid #d1d5db; border-top: none; }
         .aptitude td { padding: 4px 7px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
         .aptitude tr:last-child td { border-bottom: none; }
-        .aptitude .task { width: 34%; font-weight: bold; color: {{ $palette[800] }}; font-size: 7.8px;
+        .aptitude .task { width: 34%; font-weight: bold; color: {{ $palette[800] }}; font-size: 9.4px;
                           text-transform: uppercase; letter-spacing: .3px; }
-        .aptitude .opts { font-size: 7.6px; }
+        .aptitude .opts { font-size: 9.1px; }
         .aptitude .na { color: #9ca3af; font-style: italic; }
 
         .chips span { display: inline-block; background: {{ $palette[50] }}; border: 1px solid {{ $palette[200] }};
                       color: {{ $palette[900] }}; border-radius: 7px; padding: 1px 6px;
-                      margin: 1px 2px 1px 0; font-size: 7.2px; }
+                      margin: 1px 2px 1px 0; font-size: 8.6px; }
 
-        .note { border: 1px solid #d1d5db; border-top: none; padding: 5px 7px; font-size: 7.4px;
+        .note { border: 1px solid #d1d5db; border-top: none; padding: 5px 7px; font-size: 8.9px;
                 line-height: 1.5; color: #374151; }
         .note .line { border-bottom: 1px solid #9ca3af; min-height: 11px; padding-bottom: 1px; margin-top: 2px; }
 
         /* Firmas. */
         .sign { border: 1px solid #d1d5db; border-top: none; }
-        .sign th { background: {{ $palette[50] }}; color: {{ $palette[900] }}; font-size: 7px;
+        .sign th { background: {{ $palette[50] }}; color: {{ $palette[900] }}; font-size: 8.4px;
                    text-transform: uppercase; letter-spacing: .4px; padding: 3px 7px;
                    border-bottom: 1px solid #d1d5db; border-right: 1px solid #e5e7eb; }
-        .sign td { padding: 5px 7px; border-right: 1px solid #e5e7eb; vertical-align: top; font-size: 7.4px;
+        .sign td { padding: 5px 7px; border-right: 1px solid #e5e7eb; vertical-align: top; font-size: 8.9px;
                    line-height: 1.9; }
         .sign th:last-child, .sign td:last-child { border-right: none; }
         .sign .fingerprint { height: 62px; }
@@ -113,9 +116,9 @@
         .verify td { vertical-align: middle; }
         .verify .qr { width: 96px; text-align: center; }
         .verify .qr img { width: 88px; height: 88px; border: 1px solid #d1d5db; padding: 3px; }
-        .verify .legend { font-size: 7.2px; color: #4b5563; line-height: 1.5; padding-left: 10px; }
+        .verify .legend { font-size: 8.6px; color: #4b5563; line-height: 1.5; padding-left: 10px; }
         .verify .legend strong { color: {{ $palette[800] }}; }
-        .verify .code { font-family: DejaVu Sans Mono, monospace; font-size: 7.6px;
+        .verify .code { font-family: DejaVu Sans Mono, monospace; font-size: 9.1px;
                         color: {{ $palette[800] }}; word-break: break-all; }
 
         /* Marca de agua: dompdf repite los elementos fixed en cada pagina. */
@@ -127,7 +130,7 @@
 
         /* Sello de anulacion: el documento sigue existiendo pero sin validez. */
         .annulled-stamp { position: fixed; top: 300px; left: 0; right: 0; text-align: center;
-                          font-size: 74px; font-weight: bold; color: #dc2626; opacity: .18;
+                          font-size: 88.8px; font-weight: bold; color: #dc2626; opacity: .18;
                           letter-spacing: 12px; }
     </style>
 </head>

@@ -55,7 +55,7 @@ class StoreMedicalExamRequest extends FormRequest
             'position' => ['required', 'string', 'max:150'],
 
             // C. Datos de la evaluacion
-            'city_id' => ['required', 'integer', Rule::exists('cities', 'id')->where('active', true)],
+            'city_id' => ['nullable', 'integer', Rule::exists('cities', 'id')->where('active', true)],
             'exam_date' => ['required', 'date', 'before_or_equal:today'],
             'exam_type' => ['required', Rule::enum(ExamType::class)],
 

@@ -53,11 +53,11 @@ class MedicalExamResource extends JsonResource
                     'id' => $this->afp->id,
                     'name' => $this->afp->name,
                 ] : null),
-                'city' => $this->whenLoaded('city', fn () => [
+                'city' => $this->whenLoaded('city', fn () => $this->city ? [
                     'id' => $this->city->id,
                     'name' => $this->city->name,
                     'department' => $this->city->department,
-                ]),
+                ] : null),
                 'risks' => $this->whenLoaded('risks', fn () => $this->risks->map(fn ($risk) => [
                     'id' => $risk->id,
                     'name' => $risk->name,

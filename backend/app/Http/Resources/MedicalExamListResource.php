@@ -23,7 +23,7 @@ class MedicalExamListResource extends JsonResource
             'exam_type_label' => $this->exam_type->label(),
             'result' => $this->result->value,
             'result_label' => $this->result->shortLabel(),
-            'city' => $this->whenLoaded('city', fn () => $this->city->name),
+            'city' => $this->whenLoaded('city', fn () => $this->city?->name),
             'annulled' => $this->annulled_at !== null,
             'issued_at' => $this->issued_at?->toIso8601String(),
             'pdf_url' => route('api.exams.pdf', $this->id),

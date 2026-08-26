@@ -245,7 +245,7 @@ class MedicalExamTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors([
                 'full_name', 'document_type', 'document_number', 'birth_date', 'sex',
-                'height_cm', 'company_name', 'company_nit', 'arl_id', 'city_id',
+                'height_cm', 'company_name', 'company_nit', 'arl_id',
                 'position', 'exam_date', 'exam_type', 'is_independent',
                 'aptitude_position', 'aptitude_heights', 'aptitude_confined',
                 'consent_accepted',

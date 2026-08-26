@@ -112,7 +112,7 @@ class ExamGenerator
             'eps_id' => $data['eps_id'] ?? null,
             'arl_id' => $data['arl_id'],
             'afp_id' => $data['afp_id'] ?? null,
-            'city_id' => $data['city_id'],
+            'city_id' => $data['city_id'] ?? null,
             'position' => $data['position'],
 
             'exam_date' => $data['exam_date'],

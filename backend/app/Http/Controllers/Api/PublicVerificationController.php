@@ -110,7 +110,7 @@ class PublicVerificationController extends Controller
                 'exam_date' => $exam->exam_date->toDateString(),
                 'issued_at' => $exam->issued_at->toIso8601String(),
                 'issued_at_label' => $exam->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
-                'city' => $exam->city->name,
+                'city' => $exam->city?->name,
                 'arl' => $exam->arl->name,
             ],
         ]);

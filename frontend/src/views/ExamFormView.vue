@@ -285,7 +285,7 @@ async function submit() {
       eps_id: number(form.eps_id),
       arl_id: Number(form.arl_id),
       afp_id: number(form.afp_id),
-      city_id: Number(form.city_id),
+      city_id: number(form.city_id),
       company_nit: form.is_independent ? null : form.company_nit || null,
       client_company: form.client_company || null,
       economic_activity: form.economic_activity || null,
@@ -378,10 +378,10 @@ async function submit() {
           </FormField>
 
           <FormField v-slot="{ id, hasError }" label="Ciudad / municipio" :error="errors.city_id"
-                     :hint="selectedCity?.department ? `Departamento: ${selectedCity.department}` : null" required>
+                     :hint="selectedCity?.department ? `Departamento: ${selectedCity.department}` : 'Opcional.'">
             <select :id="id" v-model="form.city_id" class="field-input"
-                    :class="{ 'field-input-error': hasError }" required>
-              <option value="" disabled>Seleccione una ciudad…</option>
+                    :class="{ 'field-input-error': hasError }">
+              <option value="">Sin registrar</option>
               <option v-for="item in catalogs.cities" :key="item.id" :value="item.id">
                 {{ item.name }}{{ item.department ? ` — ${item.department}` : '' }}
               </option>

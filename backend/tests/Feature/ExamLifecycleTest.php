@@ -75,6 +75,25 @@ class ExamLifecycleTest extends TestCase
             ->assertCreated();
     }
 
+    public function test_the_city_can_be_left_blank(): void
+    {
+        $exam = $this->create(['city_id' => null]);
+
+        $this->assertNull($exam['occupational']['city']);
+
+        // Ni el listado, ni la verificación pública, ni el PDF deben romperse.
+        $this->actingAs($this->admin(), 'sanctum')->getJson('/api/exams')->assertOk();
+
+        $this->getJson("/api/public/verify/{$exam['verification']['code']}")
+            ->assertOk()
+            ->assertJsonPath('exam.city', null);
+
+        $pdf = $this->actingAs($this->admin(), 'sanctum')->get("/api/exams/{$exam['id']}/pdf");
+
+        $pdf->assertOk();
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+    }
+
     public function test_eps_can_be_left_blank(): void
     {
         $exam = $this->create(['eps_id' => null]);
