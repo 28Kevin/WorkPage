@@ -119,7 +119,8 @@
                         color: {{ $palette[800] }}; word-break: break-all; }
 
         /* Marca de agua: dompdf repite los elementos fixed en cada pagina. */
-        .watermark { position: fixed; top: 330px; left: 0; right: 0; text-align: center; }
+        /* z-index negativo: dompdf pinta los elementos fijos encima si no se indica. */
+        .watermark { position: fixed; top: 330px; left: 0; right: 0; text-align: center; z-index: -1; }
         .watermark img { width: 300px; }
 
         .sign .stamp { display: block; max-height: 58px; max-width: 190px; margin: 2px 0 -8px; }
