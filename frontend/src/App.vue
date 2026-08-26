@@ -149,6 +149,9 @@ async function handleLogout() {
         <div class="sm:col-span-2">
           <p class="text-base font-bold">{{ branding.appName }}</p>
           <p class="mt-1 text-sm text-white/70">{{ branding.tagline }}</p>
+          <p v-if="branding.center.nit" class="mt-1 text-sm text-white/70">
+            NIT {{ branding.center.nit }}
+          </p>
 
           <p v-if="branding.center.address" class="mt-4 text-sm text-white/70">
             {{ branding.center.address }}

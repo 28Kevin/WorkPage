@@ -77,6 +77,11 @@ async function submit() {
           <h2 class="text-sm font-bold text-slate-900">Información de contacto</h2>
 
           <dl class="mt-4 space-y-4 text-sm">
+            <div v-if="branding.center.nit">
+              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">NIT</dt>
+              <dd class="mt-0.5 font-medium text-slate-800">{{ branding.center.nit }}</dd>
+            </div>
+
             <div>
               <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Dirección</dt>
               <dd class="mt-0.5 text-slate-800">{{ branding.center.address || '—' }}</dd>
