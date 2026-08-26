@@ -39,6 +39,7 @@ Route::post('/public/contact', [ContactMessageController::class, 'store'])
 */
 Route::get('/branding', [BrandingController::class, 'show'])->name('api.branding.show');
 Route::get('/gallery', [GalleryImageController::class, 'index'])->name('api.gallery.index');
+Route::get('/gallery/{image}/file', [GalleryImageController::class, 'file'])->name('api.gallery.file');
 
 /*
 |--------------------------------------------------------------------------

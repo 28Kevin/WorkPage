@@ -173,7 +173,7 @@ async function remove(image) {
         class="overflow-hidden rounded-lg border border-slate-200"
         :class="image.active ? '' : 'opacity-60'"
       >
-        <img :src="image.image" :alt="image.title" class="h-32 w-full object-cover">
+        <img :src="image.url" :alt="image.title" loading="lazy" class="h-32 w-full object-cover">
 
         <figcaption class="space-y-2 p-3">
           <div>

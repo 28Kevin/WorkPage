@@ -127,7 +127,7 @@ async function submit() {
 
         <div v-if="gallery.images.length" class="card overflow-hidden">
           <img
-            :src="gallery.images[0].image"
+            :src="gallery.images[0].url"
             :alt="gallery.images[0].title"
             loading="lazy"
             class="h-40 w-full object-cover"

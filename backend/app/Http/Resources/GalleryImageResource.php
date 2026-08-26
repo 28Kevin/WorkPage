@@ -16,7 +16,9 @@ class GalleryImageResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'caption' => $this->caption,
-            'image' => $this->image,
+            // La imagen viaja como URL, no incrustada: asi el navegador la cachea
+            // y no se vuelve a descargar en cada visita.
+            'url' => $this->fileUrl(),
             'position' => $this->position,
             'active' => $this->active,
         ];

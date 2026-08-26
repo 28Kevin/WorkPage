@@ -34,7 +34,6 @@ class BrandingTest extends TestCase
                 'address' => 'CRA 24 N. 9-76',
                 'phone' => '+57 601 000 0000',
                 'email' => 'contacto@nuevasalud.test',
-                'physician_name' => 'Dr. Eduardo Marín',
             ],
         ], $overrides);
     }
@@ -49,6 +48,22 @@ class BrandingTest extends TestCase
 
         // La paleta se deriva del color base, no se guarda.
         $this->assertCount(10, $response->json('branding.theme.palette'));
+    }
+
+    public function test_the_physician_name_is_optional_and_empty_by_default(): void
+    {
+        $this->getJson('/api/branding')
+            ->assertOk()
+            ->assertJsonPath('branding.center.physician_name', '');
+
+        // Se puede guardar sin él: el sello impreso ya lleva nombre y registro.
+        $payload = $this->payload();
+        unset($payload['center']['physician_name']);
+
+        $this->actingAs(User::factory()->create(), 'sanctum')
+            ->putJson('/api/branding', $payload)
+            ->assertOk()
+            ->assertJsonPath('branding.center.physician_name', '');
     }
 
     public function test_guests_cannot_update_branding(): void

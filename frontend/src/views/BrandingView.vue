@@ -423,7 +423,11 @@ function discard() {
           </template>
         </FormField>
 
-        <FormField label="Médico responsable" :error="errors['center.physician_name']" required>
+        <FormField
+          label="Médico responsable"
+          :error="errors['center.physician_name']"
+          hint="Opcional. Si se deja vacío, el certificado muestra solo el sello."
+        >
           <template #default="{ id }">
             <input :id="id" v-model="form.center.physician_name" type="text" class="field-input" @input="dirty = true">
           </template>

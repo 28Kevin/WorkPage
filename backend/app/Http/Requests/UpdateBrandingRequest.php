@@ -37,7 +37,7 @@ class UpdateBrandingRequest extends FormRequest
             'center.address' => ['required', 'string', 'max:160'],
             'center.phone' => ['required', 'string', 'max:40'],
             'center.email' => ['required', 'email', 'max:120'],
-            'center.physician_name' => ['required', 'string', 'max:120'],
+            'center.physician_name' => ['nullable', 'string', 'max:120'],
             'center.schedule' => ['nullable', 'string', 'max:300'],
         ];
     }

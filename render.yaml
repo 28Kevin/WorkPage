@@ -95,8 +95,6 @@ services:
         value: "+57 601 000 0000"
       - key: MEDICAL_CENTER_EMAIL
         value: contacto@centromedico.test
-      - key: MEDICAL_CENTER_PHYSICIAN
-        value: Dra. Laura Gomez Restrepo
 
   # ------------------------------------------------------------- SPA Vue (estatica)
   - type: web

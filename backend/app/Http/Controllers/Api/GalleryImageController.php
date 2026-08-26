@@ -26,6 +26,23 @@ class GalleryImageController extends Controller
         );
     }
 
+    /**
+     * Sirve la imagen como archivo. La URL lleva la marca de tiempo, asi que el
+     * contenido de una direccion dada nunca cambia y se puede cachear un ano.
+     */
+    public function file(GalleryImage $image)
+    {
+        $binary = $image->binary();
+
+        abort_if($binary === null, Response::HTTP_NOT_FOUND);
+
+        return response($binary['contents'], Response::HTTP_OK, [
+            'Content-Type' => $binary['mime'],
+            'Content-Length' => strlen($binary['contents']),
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    }
+
     public function store(StoreGalleryImageRequest $request): JsonResponse
     {
         $image = GalleryImage::create([

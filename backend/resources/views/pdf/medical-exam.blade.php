@@ -424,7 +424,9 @@
     <tbody>
         <tr>
             <td>
-                Nombre: {{ $center['physician']['name'] }}<br>
+                @if ($center['physician']['name'])
+                    Nombre: {{ $center['physician']['name'] }}<br>
+                @endif
                 @if ($signature)
                     Firma y sello:
                     <img class="stamp" src="{{ $signature }}" alt="Sello y firma del médico ocupacional">

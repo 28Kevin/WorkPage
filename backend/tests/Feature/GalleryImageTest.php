@@ -38,6 +38,41 @@ class GalleryImageTest extends TestCase
             ->assertJsonPath('data.1.title', 'Segunda');
     }
 
+    public function test_the_image_is_served_as_a_cacheable_file(): void
+    {
+        $image = GalleryImage::create($this->payload());
+
+        // El JSON solo trae la URL: la imagen ya no viaja incrustada.
+        $listed = $this->getJson('/api/gallery')->assertOk()->json('data.0');
+
+        $this->assertArrayNotHasKey('image', $listed);
+        $this->assertStringContainsString("/api/gallery/{$image->id}/file", $listed['url']);
+
+        $response = $this->get($listed['url']);
+
+        $response->assertOk();
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('immutable', $response->headers->get('Cache-Control'));
+
+        // Los bytes salen tal cual, no en base64.
+        $this->assertSame("\x89PNG\r\n\x1a\n", substr($response->getContent(), 0, 8));
+    }
+
+    public function test_the_url_changes_when_the_image_is_replaced(): void
+    {
+        $image = GalleryImage::create($this->payload());
+        $before = $this->getJson('/api/gallery')->json('data.0.url');
+
+        $this->travel(5)->seconds();
+
+        $this->actingAs(User::factory()->create(), 'sanctum')
+            ->patchJson("/api/gallery/{$image->id}", ['title' => 'Otra sala', 'image' => self::PIXEL])
+            ->assertOk();
+
+        // Sin este cambio el navegador serviría la versión vieja durante un año.
+        $this->assertNotSame($before, $this->getJson('/api/gallery')->json('data.0.url'));
+    }
+
     public function test_uploading_requires_a_session(): void
     {
         $this->postJson('/api/gallery', $this->payload())->assertUnauthorized();

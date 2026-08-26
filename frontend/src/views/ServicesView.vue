@@ -194,7 +194,7 @@ onMounted(() => {
         <figure v-for="image in gallery.images" :key="image.id" class="card group overflow-hidden">
           <div class="overflow-hidden">
             <img
-              :src="image.image"
+              :src="image.url"
               :alt="image.title"
               loading="lazy"
               class="h-44 w-full object-cover transition duration-500 group-hover:scale-105"

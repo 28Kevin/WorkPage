@@ -47,7 +47,8 @@ class Branding
                 'address' => config('medical_center.address'),
                 'phone' => config('medical_center.phone'),
                 'email' => config('medical_center.email'),
-                'physician_name' => config('medical_center.physician.name'),
+                // Vacio a proposito: el sello estampado ya trae el nombre y el registro.
+                'physician_name' => '',
                 'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
             ],
         ];
