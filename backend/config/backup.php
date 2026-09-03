@@ -232,7 +232,15 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_MAIL_TO', env('ADMIN_EMAIL', 'admin@localhost')),
+            /*
+             * Sin destinatario configurado la lista queda vacia y Laravel no
+             * intenta enviar el correo. Ojo con poner aqui un valor de relleno:
+             * spatie valida esta direccion al construir sus comandos, asi que
+             * una invalida (por ejemplo "admin@localhost", que PHP rechaza por
+             * no llevar punto en el dominio) tumba hasta `package:discover` y
+             * con el la construccion de la imagen.
+             */
+            'to' => array_filter([trim((string) env('BACKUP_MAIL_TO', env('ADMIN_EMAIL', '')))]),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),

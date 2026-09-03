@@ -3,6 +3,10 @@
 **/.git
 **/dist
 **/.env
+# La cache de paquetes se regenera en el build; si se copiara la del equipo
+# de desarrollo, apuntaria a proveedores dev que no existen con --no-dev.
+backend/bootstrap/cache/*
+
 backend/storage/logs/*
 backend/storage/framework/cache/*
 backend/storage/framework/sessions/*

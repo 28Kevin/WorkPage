@@ -84,6 +84,9 @@ services:
         sync: false
       - key: MAIL_FROM_NAME
         value: Generador de Examenes Medicos Ocupacionales
+      # Destinatario de los avisos de respaldo. Solo existe en runtime, no
+      # durante el build, asi que config/backup.php tolera que llegue vacia.
+      # Si no la llenas en el dashboard, esos avisos no se envian.
       - key: BACKUP_MAIL_TO
         sync: false
 
