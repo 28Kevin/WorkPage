@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ContactMessageController;
@@ -62,6 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogs', [CatalogController::class, 'index'])->name('api.catalogs');
 
     Route::put('/branding', [BrandingController::class, 'update'])->name('api.branding.update');
+
+    Route::post('/backups', [BackupController::class, 'store'])
+        ->middleware('throttle:3,10')
+        ->name('api.backups.store');
 
     Route::get('/gallery/all', [GalleryImageController::class, 'all'])->name('api.gallery.all');
     Route::post('/gallery', [GalleryImageController::class, 'store'])->name('api.gallery.store');

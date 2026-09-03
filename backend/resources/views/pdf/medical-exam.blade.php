@@ -69,6 +69,12 @@
         .grid .v { display: block; font-weight: bold; color: #111827; font-size: 10.1px;
                    border-bottom: 1px solid #9ca3af; padding-bottom: 1px; }
 
+        /* Al omitir empresa usuaria y actividad economica sobra alto en la seccion
+           de empleador: se aprovecha para agrandar un poco la letra. */
+        .grid.grid-lg td { padding: 6px 7px; }
+        .grid.grid-lg .k { font-size: 9.4px; }
+        .grid.grid-lg .v { font-size: 11.6px; }
+
         /* Listas de casillas de verificacion en tres columnas. */
         .checks { border: 1px solid #d1d5db; border-top: none; }
         .checks td { padding: 3px 7px; width: 33.33%; font-size: 9.1px; vertical-align: top; }
@@ -197,7 +203,7 @@
         <td><span class="k">N.º de orden / historia</span><span class="v">{{ $exam->order_code }}</span></td>
     </tr>
     <tr>
-        <td><span class="k">Ciudad / municipio</span><span class="v">{{ $exam->city?->name ?? '—' }}</span></td>
+        <td><span class="k">Ciudad</span><span class="v">{{ $exam->city?->name ?? '—' }}</span></td>
         <td><span class="k">Departamento</span><span class="v">{{ $exam->city?->department ?? '—' }}</span></td>
     </tr>
 </table>
@@ -247,7 +253,7 @@
 
 {{-- ------------------------------------------------- empleador y riesgos --}}
 <div class="band">Empleador y riesgos del puesto</div>
-<table class="grid">
+<table class="grid grid-lg">
     <tr>
         <td><span class="k">Razón social / empleador</span><span class="v">{{ $exam->company_name }}</span></td>
         <td>
@@ -259,16 +265,6 @@
                     {{ $exam->company_nit ?: '—' }}
                 @endif
             </span>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <span class="k">Empresa usuaria (si aplica)</span>
-            <span class="v">{{ $exam->client_company ?: '—' }}</span>
-        </td>
-        <td>
-            <span class="k">Actividad económica</span>
-            <span class="v">{{ $exam->economic_activity ?: '—' }}</span>
         </td>
     </tr>
     <tr>

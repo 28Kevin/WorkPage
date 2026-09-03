@@ -5,6 +5,7 @@ import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import api, { parseApiError } from '@/services/api'
+import { findEmployer, forgetEmployer, loadEmployers, rememberEmployer } from '@/services/employers'
 import { prepareImage } from '@/services/images'
 import { useCatalogStore } from '@/stores/catalogs'
 
@@ -41,6 +42,8 @@ const form = reactive({
   is_independent: false,
   company_name: '',
   company_nit: '',
+  // Ya no se capturan en el formulario, pero se conservan en el estado para no
+  // borrar el valor historico al editar un examen antiguo.
   client_company: '',
   economic_activity: '',
   position: '',
@@ -77,6 +80,11 @@ const loadingDraft = ref(false)
 const loadedExam = ref(null)
 const photoError = ref(null)
 
+/** Autocompletado local de empleadores (ver services/employers.js). */
+const savedEmployers = ref([])
+const rememberCompany = ref(false)
+const autofilledNit = ref(null)
+
 /** Ancho maximo de la fotografia: en el PDF se imprime a unos 2 cm. */
 const MAX_PHOTO_PX = 600
 
@@ -86,6 +94,8 @@ const selectedCity = computed(() => catalogs.findCity(form.city_id))
 onMounted(async () => {
   await catalogs.load()
   initBlocks()
+
+  savedEmployers.value = loadEmployers()
 
   if (isEditing.value) {
     await loadExam()
@@ -213,6 +223,43 @@ watch(
   },
 )
 
+/**
+ * Al escribir o elegir una razón social ya guardada se trae su NIT. Solo se
+ * rellena si el campo está vacío o si el valor lo puso este mismo
+ * autocompletado, para no pisar lo que el médico haya escrito a mano.
+ */
+watch(
+  () => form.company_name,
+  (name) => {
+    if (!ready.value || form.is_independent) return
+
+    const match = findEmployer(name)
+
+    if (!match) return
+
+    if (!form.company_nit || form.company_nit === autofilledNit.value) {
+      form.company_nit = match.nit
+      autofilledNit.value = match.nit
+    }
+
+    rememberCompany.value = true
+  },
+)
+
+/** ¿La razón social escrita ya está en la lista local? */
+const currentEmployerSaved = computed(() => {
+  const name = (form.company_name || '').trim().toLowerCase()
+
+  return Boolean(name) && savedEmployers.value.some((item) => item.name.toLowerCase() === name)
+})
+
+/** Quita el empleador actual de la lista local y desmarca la casilla. */
+function forgetCurrentEmployer() {
+  savedEmployers.value = forgetEmployer(form.company_name)
+  rememberCompany.value = false
+  autofilledNit.value = null
+}
+
 /** Trae del backend un juego de valores dentro de rangos normales. */
 async function loadDraft() {
   const height = Number(form.height_cm)
@@ -301,6 +348,10 @@ async function submit() {
       ? await api.put(`/exams/${examId.value}`, payload)
       : await api.post('/exams', payload)
 
+    if (rememberCompany.value && !form.is_independent) {
+      savedEmployers.value = rememberEmployer(form.company_name, form.company_nit)
+    }
+
     router.push({
       name: 'admin.exams.show',
       params: { id: data.data.id },
@@ -364,7 +415,7 @@ async function submit() {
 
         <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
           <FormField v-slot="{ id, hasError }" label="Fecha de evaluación" :error="errors.exam_date" required>
-            <input :id="id" v-model="form.exam_date" type="date" :max="today" class="field-input"
+            <input :id="id" v-model="form.exam_date" type="date" class="field-input"
                    :class="{ 'field-input-error': hasError }" required>
           </FormField>
 
@@ -377,7 +428,7 @@ async function submit() {
             </select>
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="Ciudad / municipio" :error="errors.city_id"
+          <FormField v-slot="{ id, hasError }" label="Ciudad" :error="errors.city_id"
                      :hint="selectedCity?.department ? `Departamento: ${selectedCity.department}` : 'Opcional.'">
             <select :id="id" v-model="form.city_id" class="field-input"
                     :class="{ 'field-input-error': hasError }">
@@ -554,8 +605,13 @@ async function submit() {
             required
           >
             <input :id="id" v-model="form.company_name" type="text" class="field-input"
+                   :list="form.is_independent ? undefined : 'empleadores-guardados'"
                    :class="{ 'field-input-error': hasError }" required>
           </FormField>
+
+          <datalist id="empleadores-guardados">
+            <option v-for="item in savedEmployers" :key="item.name" :value="item.name" />
+          </datalist>
 
           <FormField v-if="!form.is_independent" v-slot="{ id, hasError }" label="NIT"
                      :error="errors.company_nit" required>
@@ -563,16 +619,28 @@ async function submit() {
                    :class="{ 'field-input-error': hasError }" placeholder="900.123.456-7">
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="Empresa usuaria" :error="errors.client_company"
-                     hint="Solo si el trabajador presta servicios a un tercero.">
-            <input :id="id" v-model="form.client_company" type="text" class="field-input"
-                   :class="{ 'field-input-error': hasError }" placeholder="Opcional">
-          </FormField>
+          <div v-if="!form.is_independent" class="sm:col-span-2 lg:col-span-3">
+            <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5">
+              <label class="flex flex-1 cursor-pointer items-center gap-2.5">
+                <input v-model="rememberCompany" type="checkbox"
+                       class="h-4 w-4 rounded border-slate-300 text-brand-700 focus:ring-brand-500">
+                <span class="text-sm text-slate-700">
+                  Recordar estos datos
+                  <span class="text-slate-500">— la empresa y su NIT quedan disponibles en el próximo examen</span>
+                </span>
+              </label>
 
-          <FormField v-slot="{ id, hasError }" label="Actividad económica" :error="errors.economic_activity">
-            <input :id="id" v-model="form.economic_activity" type="text" class="field-input"
-                   :class="{ 'field-input-error': hasError }" placeholder="Ej. Construcción de edificios">
-          </FormField>
+              <button v-if="currentEmployerSaved" type="button" class="btn-ghost shrink-0 py-1 text-xs"
+                      @click="forgetCurrentEmployer">
+                Olvidar
+              </button>
+            </div>
+
+            <p v-if="savedEmployers.length" class="field-hint">
+              {{ savedEmployers.length }} {{ savedEmployers.length === 1 ? 'empresa guardada' : 'empresas guardadas' }}
+              en este equipo. Empiece a escribir la razón social para autocompletarla junto con el NIT.
+            </p>
+          </div>
 
           <FormField v-slot="{ id, hasError }" label="Cargo / ocupación" :error="errors.position" required>
             <input :id="id" v-model="form.position" type="text" class="field-input"

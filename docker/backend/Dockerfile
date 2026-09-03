@@ -2,7 +2,7 @@
 FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
-        bash git unzip icu-dev libzip-dev libpng-dev freetype-dev libjpeg-turbo-dev \
+        bash git unzip postgresql-client icu-dev libzip-dev libpng-dev freetype-dev libjpeg-turbo-dev \
         postgresql-dev oniguruma-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \

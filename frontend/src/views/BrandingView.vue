@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
+import BackupPanel from '@/components/BackupPanel.vue'
 import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { parseApiError } from '@/services/api'
@@ -461,6 +462,8 @@ function discard() {
       </div>
 
       <GalleryManager />
+
+      <BackupPanel />
     </section>
 
     <div class="flex justify-end gap-2">

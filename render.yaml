@@ -67,8 +67,25 @@ services:
         value: stderr
       - key: LOG_LEVEL
         value: warning
+      # Correo saliente. Sin esto el respaldo no sale del servidor.
       - key: MAIL_MAILER
-        value: log
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_SCHEME
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Generador de Examenes Medicos Ocupacionales
+      - key: BACKUP_MAIL_TO
+        sync: false
 
       - key: RUN_MIGRATIONS
         value: "true"

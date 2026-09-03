@@ -28,3 +28,6 @@
 .vscode
 .DS_Store
 Thumbs.db
+
+# Respaldos generados por spatie/laravel-backup
+/backend/storage/app/private
