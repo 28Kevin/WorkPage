@@ -35,12 +35,27 @@ export async function openExamPdf(examId) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
+/**
+ * La cabecera trae dos variantes: `filename` en ASCII (sin tildes) y
+ * `filename*` en UTF-8. Se prefiere la segunda para no perder los acentos del
+ * nombre del trabajador.
+ */
 function filenameFromHeaders(headers) {
   const disposition = headers?.['content-disposition']
 
   if (!disposition) return null
 
-  const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition)
+  const utf8 = /filename\*=\s*UTF-8''([^;]+)/i.exec(disposition)
 
-  return match ? decodeURIComponent(match[1]) : null
+  if (utf8) {
+    try {
+      return decodeURIComponent(utf8[1].trim())
+    } catch {
+      // Secuencia porcentual invalida: se sigue con la variante ASCII.
+    }
+  }
+
+  const ascii = /filename=\s*"?([^";]+)"?/i.exec(disposition)
+
+  return ascii ? ascii[1].trim() : null
 }

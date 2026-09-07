@@ -15,7 +15,7 @@ enum ExamType: string
     {
         return match ($this) {
             self::Ingreso => 'Ingreso',
-            self::Periodico => 'Periódica',
+            self::Periodico => 'Periódico',
             self::Seguimiento => 'Seguimiento / control',
             self::Retorno => 'Retorno / post-incapacidad',
             self::CambioOcupacion => 'Cambio de ocupación',

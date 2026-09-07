@@ -8,6 +8,7 @@ use App\Support\ExamForm;
 use App\Support\PdfAssets;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as PdfWrapper;
+use Illuminate\Support\Str;
 
 class ExamPdfGenerator
 {
@@ -45,7 +46,24 @@ class ExamPdfGenerator
 
     public function filename(MedicalExam $exam): string
     {
-        return 'examen-medico-'.$exam->order_code.'-'.$exam->document_number.'.pdf';
+        $name = $this->sanitizeForFilename((string) $exam->full_name);
+
+        return trim($name.' - '.$exam->order_code, ' -').'.pdf';
+    }
+
+    /**
+     * El nombre viaja en la cabecera Content-Disposition y termina siendo un
+     * archivo en el disco de quien descarga: fuera separadores de ruta, los
+     * caracteres que Windows no admite y los espacios de mas.
+     */
+    private function sanitizeForFilename(string $value): string
+    {
+        // Separadores de ruta y caracteres que Windows rechaza en un nombre.
+        $clean = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], ' ', $value);
+        $clean = preg_replace('~[\x00-\x1F]+~u', ' ', $clean) ?? '';
+        $clean = trim(preg_replace('~\s+~u', ' ', $clean) ?? '');
+
+        return Str::limit($clean, 80, '');
     }
 
     /** Conserva la forma anidada que ya espera la plantilla. */
