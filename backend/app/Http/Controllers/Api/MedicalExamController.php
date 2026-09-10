@@ -23,12 +23,11 @@ class MedicalExamController extends Controller
     /** Estatura de referencia del borrador inicial, antes de medir al trabajador. */
     private const DEFAULT_HEIGHT_CM = 170;
 
-    private const RELATIONS = ['eps', 'arl', 'afp', 'city', 'risks', 'creator'];
+    private const RELATIONS = ['eps', 'arl', 'risks', 'creator'];
 
     public function index(Request $request): AnonymousResourceCollection
     {
         $exams = MedicalExam::query()
-            ->with('city')
             // Los anulados quedan fuera salvo que se pidan expresamente.
             ->when($request->input('status', 'active') === 'active', fn ($q) => $q->active())
             ->when($request->input('status') === 'annulled', fn ($q) => $q->annulled())

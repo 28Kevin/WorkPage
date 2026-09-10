@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\City;
 use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
@@ -48,7 +47,6 @@ class MedicalExamTest extends TestCase
             'company_nit' => '830.111.222-3',
             'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
-            'city_id' => City::first()->id,
             'position' => 'Oficial de obra',
             'risk_ids' => Risk::limit(2)->pluck('id')->all(),
             'exam_date' => now()->toDateString(),
@@ -87,7 +85,7 @@ class MedicalExamTest extends TestCase
         $this->getJson('/api/catalogs')->assertUnauthorized();
     }
 
-    public function test_catalogs_expose_eps_arl_cities_risks_and_exam_types(): void
+    public function test_catalogs_expose_eps_arl_risks_and_exam_types(): void
     {
         $this->actingAs($this->admin(), 'sanctum')
             ->getJson('/api/catalogs')
@@ -95,9 +93,7 @@ class MedicalExamTest extends TestCase
             ->assertJsonStructure([
                 'eps' => [['id', 'name']],
                 'arls' => [['id', 'name', 'certificate_url']],
-                'cities' => [['id', 'name', 'department']],
                 'risks' => [['id', 'name', 'slug']],
-                'afps' => [['id', 'name']],
                 'exam_types' => [['value', 'label']],
                 'document_types' => [['value', 'label']],
                 'sexes' => [['value', 'label']],
@@ -181,7 +177,7 @@ class MedicalExamTest extends TestCase
             'data' => [
                 'order_number', 'order_code',
                 'worker' => ['full_name', 'document_number', 'age', 'height_cm', 'ideal_weight_kg'],
-                'occupational' => ['company_name', 'eps', 'arl', 'city', 'risks'],
+                'occupational' => ['company_name', 'eps', 'arl', 'risks'],
                 'exam' => ['exam_date', 'exam_type_label', 'result_label', 'recommendations'],
                 'medical_parameters' => [
                     'vitals', 'anthropometry', 'vision', 'systems', 'assessments', 'history',

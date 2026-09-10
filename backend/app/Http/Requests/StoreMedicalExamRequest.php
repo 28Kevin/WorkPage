@@ -40,7 +40,6 @@ class StoreMedicalExamRequest extends FormRequest
             'weight_kg' => ['nullable', 'numeric', 'min:30', 'max:250'],
             'eps_id' => ['nullable', 'integer', Rule::exists('eps', 'id')->where('active', true)],
             'arl_id' => ['required', 'integer', Rule::exists('arls', 'id')->where('active', true)],
-            'afp_id' => ['nullable', 'integer', Rule::exists('afps', 'id')->where('active', true)],
 
             // B. Empleador
             'is_independent' => ['required', 'boolean'],
@@ -55,7 +54,6 @@ class StoreMedicalExamRequest extends FormRequest
             'position' => ['required', 'string', 'max:150'],
 
             // C. Datos de la evaluacion
-            'city_id' => ['nullable', 'integer', Rule::exists('cities', 'id')->where('active', true)],
             'exam_date' => ['required', 'date'],
             'exam_type' => ['required', Rule::enum(ExamType::class)],
 
@@ -118,8 +116,6 @@ class StoreMedicalExamRequest extends FormRequest
             'economic_activity' => 'actividad económica',
             'eps_id' => 'EPS',
             'arl_id' => 'ARL',
-            'afp_id' => 'AFP',
-            'city_id' => 'ciudad',
             'position' => 'cargo',
             'exam_date' => 'fecha de evaluación',
             'exam_type' => 'tipo de evaluación',

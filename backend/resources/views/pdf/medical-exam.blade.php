@@ -202,10 +202,6 @@
         <td><span class="k">Fecha de evaluación</span><span class="v">{{ $exam->exam_date->format('d/m/Y') }}</span></td>
         <td><span class="k">N.º de orden / historia</span><span class="v">{{ $exam->order_code }}</span></td>
     </tr>
-    <tr>
-        <td><span class="k">Ciudad</span><span class="v">{{ $exam->city?->name ?? '—' }}</span></td>
-        <td><span class="k">Departamento</span><span class="v">{{ $exam->city?->department ?? '—' }}</span></td>
-    </tr>
 </table>
 
 <table class="checks">
@@ -243,8 +239,7 @@
         <td><span class="k">ARL</span><span class="v">{{ $exam->arl?->name ?? '—' }}</span></td>
     </tr>
     <tr>
-        <td><span class="k">AFP</span><span class="v">{{ $exam->afp?->name ?? '—' }}</span></td>
-        <td>
+        <td colspan="2">
             <span class="k">Estatura / peso</span>
             <span class="v">{{ $exam->height_cm }} cm &middot; {{ number_format((float) $exam->weight_kg, 1, ',', '.') }} kg</span>
         </td>

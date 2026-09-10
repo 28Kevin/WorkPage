@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\City;
 use App\Models\Eps;
 use App\Models\MedicalExam;
 use App\Models\User;
@@ -44,7 +43,6 @@ class ExamLifecycleTest extends TestCase
             'is_independent' => false,
             'company_name' => 'Alturas Seguras S.A.S.',
             'company_nit' => '900.777.888-1',
-            'city_id' => City::first()->id,
             'position' => 'Tecnico de mantenimiento',
             'exam_date' => now()->toDateString(),
             'exam_type' => 'ingreso',
@@ -75,18 +73,15 @@ class ExamLifecycleTest extends TestCase
             ->assertCreated();
     }
 
-    public function test_the_city_can_be_left_blank(): void
+    public function test_the_exam_no_longer_registers_afp_or_city(): void
     {
-        $exam = $this->create(['city_id' => null]);
+        $exam = $this->create();
 
-        $this->assertNull($exam['occupational']['city']);
+        $this->assertArrayNotHasKey('afp', $exam['occupational']);
+        $this->assertArrayNotHasKey('city', $exam['occupational']);
 
-        // Ni el listado, ni la verificación pública, ni el PDF deben romperse.
-        $this->actingAs($this->admin(), 'sanctum')->getJson('/api/exams')->assertOk();
-
-        $this->getJson("/api/public/verify/{$exam['verification']['code']}")
-            ->assertOk()
-            ->assertJsonPath('exam.city', null);
+        // El certificado y la verificación pública siguen funcionando sin ellos.
+        $this->getJson("/api/public/verify/{$exam['verification']['code']}")->assertOk();
 
         $pdf = $this->actingAs($this->admin(), 'sanctum')->get("/api/exams/{$exam['id']}/pdf");
 

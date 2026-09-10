@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Afp;
 use App\Models\Arl;
-use App\Models\City;
 use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
@@ -41,13 +39,11 @@ class OccupationalFormTest extends TestCase
             'height_cm' => 165,
             'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
-            'afp_id' => Afp::first()->id,
             'is_independent' => false,
             'company_name' => 'Montajes del Norte S.A.S.',
             'company_nit' => '901.222.333-4',
             'client_company' => 'Refineria Costa Azul',
             'economic_activity' => 'Montaje de estructuras metalicas',
-            'city_id' => City::first()->id,
             'position' => 'Tecnica de mantenimiento',
             'risk_ids' => [Risk::where('slug', 'trabajo-en-alturas')->value('id')],
             'exam_date' => now()->toDateString(),
@@ -145,8 +141,7 @@ class OccupationalFormTest extends TestCase
         $response->assertJsonPath('data.worker.document_type', 'CC')
             ->assertJsonPath('data.worker.sex_label', 'Femenino')
             ->assertJsonPath('data.occupational.client_company', 'Refineria Costa Azul')
-            ->assertJsonPath('data.occupational.economic_activity', 'Montaje de estructuras metalicas')
-            ->assertJsonPath('data.occupational.afp.name', Afp::first()->name);
+            ->assertJsonPath('data.occupational.economic_activity', 'Montaje de estructuras metalicas');
     }
 
     public function test_overall_result_is_the_most_restrictive_of_the_three_concepts(): void

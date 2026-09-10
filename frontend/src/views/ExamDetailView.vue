@@ -306,15 +306,6 @@ function formatDate(value) {
               Descargar certificado ↗
             </a>
           </div>
-          <div>
-            <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">AFP</p>
-            <p class="mt-0.5 text-sm text-slate-900">{{ exam.occupational.afp?.name || '—' }}</p>
-          </div>
-          <div>
-            <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">Ciudad</p>
-            <p class="mt-0.5 text-sm text-slate-900">{{ exam.occupational.city?.name }}</p>
-            <p class="text-xs text-slate-500">{{ exam.occupational.city?.department }}</p>
-          </div>
 
           <div class="sm:col-span-2 lg:col-span-4">
             <p class="mb-1.5 text-xs font-medium tracking-wide text-slate-500 uppercase">Riesgos del puesto</p>

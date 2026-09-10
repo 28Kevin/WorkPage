@@ -5,8 +5,6 @@ import api from '@/services/api'
 export const useCatalogStore = defineStore('catalogs', () => {
   const eps = ref([])
   const arls = ref([])
-  const afps = ref([])
-  const cities = ref([])
   const risks = ref([])
   const examTypes = ref([])
   const documentTypes = ref([])
@@ -33,8 +31,6 @@ export const useCatalogStore = defineStore('catalogs', () => {
 
       eps.value = data.eps
       arls.value = data.arls
-      afps.value = data.afps ?? []
-      cities.value = data.cities
       risks.value = data.risks
       examTypes.value = data.exam_types
       documentTypes.value = data.document_types ?? []
@@ -56,15 +52,9 @@ export const useCatalogStore = defineStore('catalogs', () => {
     return arls.value.find((item) => item.id === Number(id)) || null
   }
 
-  function findCity(id) {
-    return cities.value.find((item) => item.id === Number(id)) || null
-  }
-
   function reset() {
     eps.value = []
     arls.value = []
-    afps.value = []
-    cities.value = []
     risks.value = []
     examTypes.value = []
     documentTypes.value = []
@@ -78,9 +68,9 @@ export const useCatalogStore = defineStore('catalogs', () => {
   }
 
   return {
-    eps, arls, afps, cities, risks,
+    eps, arls, risks,
     examTypes, documentTypes, sexes, aptitudeResults,
     systems, paraclinicals, assessments, aptitudes,
-    loaded, loading, load, findArl, findCity, reset,
+    loaded, loading, load, findArl, reset,
   }
 })

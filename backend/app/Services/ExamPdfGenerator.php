@@ -16,7 +16,7 @@ class ExamPdfGenerator
 
     public function make(MedicalExam $exam): PdfWrapper
     {
-        $exam->loadMissing(['eps', 'arl', 'afp', 'city', 'risks']);
+        $exam->loadMissing(['eps', 'arl', 'risks']);
 
         $branding = Branding::all();
 

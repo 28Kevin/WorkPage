@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\City;
 use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
@@ -36,7 +35,6 @@ class PublicVerificationTest extends TestCase
             'company_nit' => '830.111.222-3',
             'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
-            'city_id' => City::first()->id,
             'position' => 'Oficial de obra',
             'risk_ids' => Risk::limit(2)->pluck('id')->all(),
             'exam_date' => now()->toDateString(),

@@ -18,7 +18,7 @@ class ExamGenerator
     /** Bloques del examen fisico que el formulario puede sobreescribir. */
     private const OVERRIDABLE = ['vitals', 'vision', 'systems', 'assessments'];
 
-    private const RELATIONS = ['eps', 'arl', 'afp', 'city', 'risks', 'creator'];
+    private const RELATIONS = ['eps', 'arl', 'risks', 'creator'];
 
     public function __construct(
         private readonly OrderNumberGenerator $orderNumbers,
@@ -111,8 +111,6 @@ class ExamGenerator
             'economic_activity' => $data['economic_activity'] ?? null,
             'eps_id' => $data['eps_id'] ?? null,
             'arl_id' => $data['arl_id'],
-            'afp_id' => $data['afp_id'] ?? null,
-            'city_id' => $data['city_id'] ?? null,
             'position' => $data['position'],
 
             'exam_date' => $data['exam_date'],

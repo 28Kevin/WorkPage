@@ -23,7 +23,6 @@ const form = reactive({
   // A. Datos de la evaluación
   exam_date: today,
   exam_type: 'ingreso',
-  city_id: '',
 
   // B. Identificación del trabajador
   full_name: '',
@@ -36,7 +35,6 @@ const form = reactive({
   weight_kg: '',
   eps_id: '',
   arl_id: '',
-  afp_id: '',
 
   // C. Empleador
   is_independent: false,
@@ -89,7 +87,6 @@ const autofilledNit = ref(null)
 const MAX_PHOTO_PX = 600
 
 const selectedArl = computed(() => catalogs.findArl(form.arl_id))
-const selectedCity = computed(() => catalogs.findCity(form.city_id))
 
 onMounted(async () => {
   await catalogs.load()
@@ -142,7 +139,6 @@ async function loadExam() {
     Object.assign(form, {
       exam_date: exam.exam.exam_date,
       exam_type: exam.exam.exam_type,
-      city_id: exam.occupational.city?.id ?? '',
 
       full_name: exam.worker.full_name,
       document_type: exam.worker.document_type || 'CC',
@@ -154,7 +150,6 @@ async function loadExam() {
       weight_kg: exam.worker.weight_kg,
       eps_id: exam.occupational.eps?.id ?? '',
       arl_id: exam.occupational.arl?.id ?? '',
-      afp_id: exam.occupational.afp?.id ?? '',
 
       is_independent: exam.occupational.is_independent,
       company_name: exam.occupational.company_name,
@@ -331,8 +326,6 @@ async function submit() {
       weight_kg: number(form.weight_kg),
       eps_id: number(form.eps_id),
       arl_id: Number(form.arl_id),
-      afp_id: number(form.afp_id),
-      city_id: number(form.city_id),
       company_nit: form.is_independent ? null : form.company_nit || null,
       client_company: form.client_company || null,
       economic_activity: form.economic_activity || null,
@@ -428,16 +421,6 @@ async function submit() {
             </select>
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="Ciudad" :error="errors.city_id"
-                     :hint="selectedCity?.department ? `Departamento: ${selectedCity.department}` : 'Opcional.'">
-            <select :id="id" v-model="form.city_id" class="field-input"
-                    :class="{ 'field-input-error': hasError }">
-              <option value="">Sin registrar</option>
-              <option v-for="item in catalogs.cities" :key="item.id" :value="item.id">
-                {{ item.name }}{{ item.department ? ` — ${item.department}` : '' }}
-              </option>
-            </select>
-          </FormField>
         </div>
       </section>
 
@@ -498,12 +481,6 @@ async function submit() {
             </select>
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="AFP" :error="errors.afp_id" hint="Opcional.">
-            <select :id="id" v-model="form.afp_id" class="field-input" :class="{ 'field-input-error': hasError }">
-              <option value="">Sin registrar</option>
-              <option v-for="item in catalogs.afps" :key="item.id" :value="item.id">{{ item.name }}</option>
-            </select>
-          </FormField>
 
           <div class="sm:col-span-2 lg:col-span-3">
             <span class="field-label">Fotografía del trabajador</span>
