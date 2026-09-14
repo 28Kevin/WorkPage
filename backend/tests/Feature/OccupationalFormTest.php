@@ -144,6 +144,26 @@ class OccupationalFormTest extends TestCase
             ->assertJsonPath('data.occupational.economic_activity', 'Montaje de estructuras metalicas');
     }
 
+    public function test_the_temporary_protection_permit_is_accepted(): void
+    {
+        $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/exams', $this->payload(['document_type' => 'PPT']))
+            ->assertCreated()
+            ->assertJsonPath('data.worker.document_type', 'PPT')
+            ->assertJsonPath('data.worker.document_type_label', 'Permiso por protección temporal');
+    }
+
+    public function test_the_catalog_offers_every_document_type(): void
+    {
+        $types = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/catalogs')
+            ->assertOk()
+            ->collect('document_types')
+            ->pluck('value');
+
+        $this->assertSame(['CC', 'CE', 'TI', 'PA', 'PEP', 'PPT'], $types->all());
+    }
+
     public function test_overall_result_is_the_most_restrictive_of_the_three_concepts(): void
     {
         $this->actingAs($this->admin(), 'sanctum')

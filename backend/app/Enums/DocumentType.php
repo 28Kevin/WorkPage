@@ -9,6 +9,7 @@ enum DocumentType: string
     case TarjetaIdentidad = 'TI';
     case Pasaporte = 'PA';
     case PermisoEspecial = 'PEP';
+    case PermisoProteccionTemporal = 'PPT';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum DocumentType: string
             self::TarjetaIdentidad => 'Tarjeta de identidad',
             self::Pasaporte => 'Pasaporte',
             self::PermisoEspecial => 'Permiso especial de permanencia',
+            self::PermisoProteccionTemporal => 'Permiso por protección temporal',
         };
     }
 
