@@ -33,7 +33,6 @@ const form = reactive({
   photo: null,
   height_cm: '',
   weight_kg: '',
-  eps_id: '',
   arl_id: '',
 
   // C. Empleador
@@ -148,7 +147,6 @@ async function loadExam() {
       photo: exam.worker.photo || null,
       height_cm: exam.worker.height_cm,
       weight_kg: exam.worker.weight_kg,
-      eps_id: exam.occupational.eps?.id ?? '',
       arl_id: exam.occupational.arl?.id ?? '',
 
       is_independent: exam.occupational.is_independent,
@@ -324,7 +322,6 @@ async function submit() {
       ...form,
       height_cm: Number(form.height_cm),
       weight_kg: number(form.weight_kg),
-      eps_id: number(form.eps_id),
       arl_id: Number(form.arl_id),
       company_nit: form.is_independent ? null : form.company_nit || null,
       client_company: form.client_company || null,
@@ -463,14 +460,6 @@ async function submit() {
           <FormField v-slot="{ id, hasError }" label="Fecha de nacimiento" :error="errors.birth_date" required>
             <input :id="id" v-model="form.birth_date" type="date" :max="today" class="field-input"
                    :class="{ 'field-input-error': hasError }" required>
-          </FormField>
-
-          <FormField v-slot="{ id, hasError }" label="EPS / entidad de salud" :error="errors.eps_id"
-                     hint="Puede dejarse en blanco.">
-            <select :id="id" v-model="form.eps_id" class="field-input" :class="{ 'field-input-error': hasError }">
-              <option value="">Sin registrar</option>
-              <option v-for="item in catalogs.eps" :key="item.id" :value="item.id">{{ item.name }}</option>
-            </select>
           </FormField>
 
           <FormField v-slot="{ id, hasError }" label="ARL" :error="errors.arl_id" required>

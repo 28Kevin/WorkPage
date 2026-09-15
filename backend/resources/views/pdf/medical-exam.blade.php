@@ -235,8 +235,7 @@
         <td><span class="k">Sexo</span><span class="v">{{ $exam->sex?->label() ?? '—' }}</span></td>
     </tr>
     <tr>
-        <td><span class="k">EPS / entidad de salud</span><span class="v">{{ $exam->eps?->name ?? '—' }}</span></td>
-        <td><span class="k">ARL</span><span class="v">{{ $exam->arl?->name ?? '—' }}</span></td>
+        <td colspan="2"><span class="k">ARL</span><span class="v">{{ $exam->arl?->name ?? '—' }}</span></td>
     </tr>
     <tr>
         <td colspan="2">

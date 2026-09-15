@@ -40,10 +40,6 @@ class MedicalExamResource extends JsonResource
                 'client_company' => $this->client_company,
                 'economic_activity' => $this->economic_activity,
                 'position' => $this->position,
-                'eps' => $this->whenLoaded('eps', fn () => [
-                    'id' => $this->eps->id,
-                    'name' => $this->eps->name,
-                ]),
                 'arl' => $this->whenLoaded('arl', fn () => [
                     'id' => $this->arl->id,
                     'name' => $this->arl->name,

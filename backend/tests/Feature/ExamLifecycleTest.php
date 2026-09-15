@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\Eps;
 use App\Models\MedicalExam;
 use App\Models\User;
 use App\Services\ExamGenerator;
@@ -11,7 +10,7 @@ use Database\Seeders\CatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** Trabajador independiente, EPS opcional, correccion y anulacion. */
+/** Trabajador independiente, correccion y anulacion. */
 class ExamLifecycleTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,7 +37,6 @@ class ExamLifecycleTest extends TestCase
             'birth_date' => '1988-09-02',
             'sex' => 'M',
             'height_cm' => 178,
-            'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
             'is_independent' => false,
             'company_name' => 'Alturas Seguras S.A.S.',
@@ -89,11 +87,11 @@ class ExamLifecycleTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());
     }
 
-    public function test_eps_can_be_left_blank(): void
+    public function test_the_exam_no_longer_registers_eps(): void
     {
-        $exam = $this->create(['eps_id' => null]);
+        $exam = $this->create();
 
-        $this->assertNull($exam['occupational']['eps']);
+        $this->assertArrayNotHasKey('eps', $exam['occupational']);
     }
 
     public function test_independent_worker_is_stored_without_nit(): void

@@ -38,7 +38,6 @@ class StoreMedicalExamRequest extends FormRequest
             'phone' => ['nullable', 'string', 'min:7', 'max:20'],
             'height_cm' => ['required', 'integer', 'min:120', 'max:230'],
             'weight_kg' => ['nullable', 'numeric', 'min:30', 'max:250'],
-            'eps_id' => ['nullable', 'integer', Rule::exists('eps', 'id')->where('active', true)],
             'arl_id' => ['required', 'integer', Rule::exists('arls', 'id')->where('active', true)],
 
             // B. Empleador
@@ -114,7 +113,6 @@ class StoreMedicalExamRequest extends FormRequest
             'company_nit' => 'NIT',
             'client_company' => 'empresa usuaria',
             'economic_activity' => 'actividad económica',
-            'eps_id' => 'EPS',
             'arl_id' => 'ARL',
             'position' => 'cargo',
             'exam_date' => 'fecha de evaluación',

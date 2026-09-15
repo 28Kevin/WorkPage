@@ -23,7 +23,7 @@ class MedicalExamController extends Controller
     /** Estatura de referencia del borrador inicial, antes de medir al trabajador. */
     private const DEFAULT_HEIGHT_CM = 170;
 
-    private const RELATIONS = ['eps', 'arl', 'risks', 'creator'];
+    private const RELATIONS = ['arl', 'risks', 'creator'];
 
     public function index(Request $request): AnonymousResourceCollection
     {

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
 use App\Services\ExamGenerator;
@@ -33,7 +32,6 @@ class PublicVerificationTest extends TestCase
             'height_cm' => 175,
             'company_name' => 'Constructora Andina S.A.S.',
             'company_nit' => '830.111.222-3',
-            'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
             'position' => 'Oficial de obra',
             'risk_ids' => Risk::limit(2)->pluck('id')->all(),

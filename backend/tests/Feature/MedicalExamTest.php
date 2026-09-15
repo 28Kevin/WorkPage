@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
 use Database\Seeders\CatalogSeeder;
@@ -45,7 +44,6 @@ class MedicalExamTest extends TestCase
             'is_independent' => false,
             'company_name' => 'Constructora Andina S.A.S.',
             'company_nit' => '830.111.222-3',
-            'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
             'position' => 'Oficial de obra',
             'risk_ids' => Risk::limit(2)->pluck('id')->all(),
@@ -85,13 +83,12 @@ class MedicalExamTest extends TestCase
         $this->getJson('/api/catalogs')->assertUnauthorized();
     }
 
-    public function test_catalogs_expose_eps_arl_risks_and_exam_types(): void
+    public function test_catalogs_expose_arl_risks_and_exam_types(): void
     {
         $this->actingAs($this->admin(), 'sanctum')
             ->getJson('/api/catalogs')
             ->assertOk()
             ->assertJsonStructure([
-                'eps' => [['id', 'name']],
                 'arls' => [['id', 'name', 'certificate_url']],
                 'risks' => [['id', 'name', 'slug']],
                 'exam_types' => [['value', 'label']],
@@ -177,7 +174,7 @@ class MedicalExamTest extends TestCase
             'data' => [
                 'order_number', 'order_code',
                 'worker' => ['full_name', 'document_number', 'age', 'height_cm', 'ideal_weight_kg'],
-                'occupational' => ['company_name', 'eps', 'arl', 'risks'],
+                'occupational' => ['company_name', 'arl', 'risks'],
                 'exam' => ['exam_date', 'exam_type_label', 'result_label', 'recommendations'],
                 'medical_parameters' => [
                     'vitals', 'anthropometry', 'vision', 'systems', 'assessments', 'history',
@@ -270,6 +267,22 @@ class MedicalExamTest extends TestCase
         $content = $response->getContent();
         $this->assertStringStartsWith('%PDF-', $content);
         $this->assertGreaterThan(20000, strlen($content), 'El PDF debería incluir la imagen del QR.');
+    }
+
+    public function test_the_downloaded_file_is_named_after_the_worker_and_the_order(): void
+    {
+        $admin = $this->admin();
+        $exam = $this->actingAs($admin, 'sanctum')->postJson('/api/exams', $this->payload())->json('data');
+
+        $disposition = (string) $this->actingAs($admin, 'sanctum')
+            ->get("/api/exams/{$exam['id']}/pdf")
+            ->headers->get('content-disposition');
+
+        // La variante UTF-8 conserva las tildes del nombre; la ASCII es el respaldo.
+        $expected = rawurlencode("Carlos Andrés Rodríguez Pérez - {$exam['order_code']}.pdf");
+
+        $this->assertStringContainsString("filename*=utf-8''{$expected}", $disposition);
+        $this->assertStringContainsString($exam['order_code'], $disposition);
     }
 
     public function test_exam_list_is_searchable_by_document_and_ordered_by_consecutive(): void

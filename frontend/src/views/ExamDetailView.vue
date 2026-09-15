@@ -290,10 +290,6 @@ function formatDate(value) {
           </div>
 
           <div>
-            <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">EPS</p>
-            <p class="mt-0.5 text-sm text-slate-900">{{ exam.occupational.eps?.name }}</p>
-          </div>
-          <div>
             <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">ARL</p>
             <p class="mt-0.5 text-sm text-slate-900">{{ exam.occupational.arl?.name }}</p>
             <a

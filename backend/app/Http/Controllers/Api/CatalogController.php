@@ -8,7 +8,6 @@ use App\Enums\ExamType;
 use App\Enums\Sex;
 use App\Http\Controllers\Controller;
 use App\Models\Arl;
-use App\Models\Eps;
 use App\Models\Risk;
 use App\Support\ExamForm;
 use Illuminate\Http\JsonResponse;
@@ -18,8 +17,6 @@ class CatalogController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'eps' => Eps::where('active', true)->orderBy('name')
-                ->get(['id', 'name', 'code']),
             'arls' => Arl::where('active', true)->orderBy('name')
                 ->get(['id', 'name', 'certificate_url']),
             'risks' => Risk::where('active', true)->orderBy('name')

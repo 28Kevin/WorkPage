@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Arl;
-use App\Models\Eps;
 use App\Models\Risk;
 use App\Models\User;
 use Database\Seeders\CatalogSeeder;
@@ -37,7 +36,6 @@ class OccupationalFormTest extends TestCase
             'email' => 'ana.torres@example.com',
             'phone' => '3109998877',
             'height_cm' => 165,
-            'eps_id' => Eps::first()->id,
             'arl_id' => Arl::first()->id,
             'is_independent' => false,
             'company_name' => 'Montajes del Norte S.A.S.',

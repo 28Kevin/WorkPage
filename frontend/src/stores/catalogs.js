@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import api from '@/services/api'
 
 export const useCatalogStore = defineStore('catalogs', () => {
-  const eps = ref([])
   const arls = ref([])
   const risks = ref([])
   const examTypes = ref([])
@@ -29,7 +28,6 @@ export const useCatalogStore = defineStore('catalogs', () => {
     try {
       const { data } = await api.get('/catalogs')
 
-      eps.value = data.eps
       arls.value = data.arls
       risks.value = data.risks
       examTypes.value = data.exam_types
@@ -53,7 +51,6 @@ export const useCatalogStore = defineStore('catalogs', () => {
   }
 
   function reset() {
-    eps.value = []
     arls.value = []
     risks.value = []
     examTypes.value = []
@@ -68,7 +65,7 @@ export const useCatalogStore = defineStore('catalogs', () => {
   }
 
   return {
-    eps, arls, risks,
+    arls, risks,
     examTypes, documentTypes, sexes, aptitudeResults,
     systems, paraclinicals, assessments, aptitudes,
     loaded, loading, load, findArl, reset,
