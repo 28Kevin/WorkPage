@@ -259,6 +259,72 @@ class OccupationalFormTest extends TestCase
             ->assertJsonPath('data.exam.consent_accepted', false);
     }
 
+    /** Firma de prueba: un trazo sobre fondo transparente, como la del canvas. */
+    private function signature(): string
+    {
+        $canvas = imagecreatetruecolor(120, 40);
+        imagesavealpha($canvas, true);
+        imagealphablending($canvas, false);
+        imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
+        imagealphablending($canvas, true);
+        imageline($canvas, 10, 30, 110, 10, imagecolorallocate($canvas, 15, 23, 42));
+
+        ob_start();
+        imagepng($canvas);
+
+        return 'data:image/png;base64,'.base64_encode((string) ob_get_clean());
+    }
+
+    public function test_the_drawn_signature_is_stored_and_travels_to_the_certificate(): void
+    {
+        $signature = $this->signature();
+
+        $exam = $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/exams', $this->payload(['worker_signature' => $signature]))
+            ->assertCreated()
+            ->assertJsonPath('data.worker.signature', $signature)
+            ->json('data');
+
+        $this->assertDatabaseHas('medical_exams', [
+            'id' => $exam['id'],
+            'worker_signature' => $signature,
+        ]);
+
+        $signed = $this->actingAs($this->admin(), 'sanctum')->get("/api/exams/{$exam['id']}/pdf");
+
+        $signed->assertOk();
+        $this->assertStringStartsWith('%PDF-', $signed->getContent());
+
+        // El trazo queda embebido: dompdf descarta en silencio lo que no puede
+        // pintar, asi que se cuentan las imagenes contra el mismo examen sin firma.
+        $unsigned = $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/exams', $this->payload(['document_number' => '1020304051']))
+            ->assertCreated()
+            ->json('data');
+
+        $this->assertGreaterThan(
+            substr_count(
+                $this->actingAs($this->admin(), 'sanctum')->get("/api/exams/{$unsigned['id']}/pdf")->getContent(),
+                '/Subtype /Image',
+            ),
+            substr_count($signed->getContent(), '/Subtype /Image'),
+        );
+    }
+
+    public function test_the_signature_is_optional_and_has_to_be_an_image(): void
+    {
+        // Sin firmar, el certificado sale con la linea en blanco.
+        $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/exams', $this->payload())
+            ->assertCreated()
+            ->assertJsonPath('data.worker.signature', null);
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/exams', $this->payload(['worker_signature' => 'https://ejemplo.test/firma.png']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('worker_signature');
+    }
+
     public function test_restrictions_and_validity_travel_to_the_certificate(): void
     {
         $exam = $this->actingAs($this->admin(), 'sanctum')

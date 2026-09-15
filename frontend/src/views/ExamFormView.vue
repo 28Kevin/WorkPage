@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import SignaturePad from '@/components/SignaturePad.vue'
 import api, { parseApiError } from '@/services/api'
 import { findEmployer, forgetEmployer, loadEmployers, rememberEmployer } from '@/services/employers'
 import { prepareImage } from '@/services/images'
@@ -64,6 +65,7 @@ const form = reactive({
 
   // G. Consentimiento informado
   consent_accepted: true,
+  worker_signature: null,
 })
 
 const errors = ref({})
@@ -160,6 +162,7 @@ async function loadExam() {
       restrictions: exam.exam.restrictions || '',
       restrictions_validity: exam.exam.restrictions_validity || '',
       consent_accepted: exam.exam.consent_accepted,
+      worker_signature: exam.worker.signature || null,
     })
 
     Object.assign(form.vitals, exam.medical_parameters.vitals)
@@ -864,6 +867,18 @@ async function submit() {
           </div>
 
           <p v-if="errors.consent_accepted" class="field-error">{{ errors.consent_accepted[0] }}</p>
+
+          <div class="mt-5 border-t border-slate-200 pt-4">
+            <span class="field-label">Firma del trabajador</span>
+
+            <SignaturePad v-model="form.worker_signature" />
+
+            <p v-if="errors.worker_signature" class="field-error">{{ errors.worker_signature[0] }}</p>
+            <p v-else class="field-hint">
+              Opcional. Si la traza, aparece en el espacio de firma del trabajador en el certificado; si la
+              deja vacía, el PDF sale con la línea en blanco para firmar a mano.
+            </p>
+          </div>
         </div>
       </section>
 

@@ -34,6 +34,8 @@ class StoreMedicalExamRequest extends FormRequest
             'sex' => ['required', Rule::enum(Sex::class)],
             // Fotografia opcional: ~400 KB de base64 tras reducirla en el navegador.
             'photo' => ['nullable', 'string', 'max:400000', 'regex:/^data:image\/(png|jpeg|webp);base64,/'],
+            // Firma trazada en el canvas del formulario: PNG con fondo transparente.
+            'worker_signature' => ['nullable', 'string', 'max:400000', 'regex:/^data:image\/(png|jpeg|webp);base64,/'],
             'email' => ['nullable', 'email:rfc', 'max:150'],
             'phone' => ['nullable', 'string', 'min:7', 'max:20'],
             'height_cm' => ['required', 'integer', 'min:120', 'max:230'],
@@ -106,6 +108,7 @@ class StoreMedicalExamRequest extends FormRequest
             'birth_date' => 'fecha de nacimiento',
             'sex' => 'sexo',
             'photo' => 'fotografía',
+            'worker_signature' => 'firma del trabajador',
             'height_cm' => 'estatura',
             'weight_kg' => 'peso',
             'is_independent' => 'trabajador independiente',
@@ -135,6 +138,8 @@ class StoreMedicalExamRequest extends FormRequest
             'company_nit.required' => 'Indique el NIT de la empresa o marque al trabajador como independiente.',
             'photo.regex' => 'La fotografía debe ser una imagen PNG, JPG o WEBP.',
             'photo.max' => 'La fotografía supera el tamaño permitido. Use una imagen más liviana.',
+            'worker_signature.regex' => 'La firma no tiene un formato de imagen válido. Vuelva a trazarla.',
+            'worker_signature.max' => 'La firma supera el tamaño permitido. Vuelva a trazarla.',
         ];
     }
 

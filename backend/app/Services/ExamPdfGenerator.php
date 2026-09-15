@@ -37,6 +37,7 @@ class ExamPdfGenerator
             'palette' => $branding['theme']['palette'],
             'logo' => $branding['identity']['logo'],
             'photo' => $exam->photo,
+            'workerSignature' => $exam->worker_signature,
 
             // Marca de agua de todas las paginas y sello del medico.
             'watermark' => PdfAssets::watermark(),

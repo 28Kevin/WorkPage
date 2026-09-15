@@ -134,6 +134,10 @@
 
         .sign .stamp { display: block; max-height: 58px; max-width: 190px; margin: 2px 0 -8px; }
 
+        /* Firma manuscrita del trabajador: se traza en el formulario. */
+        .sign .drawn { display: block; max-height: 46px; max-width: 200px; margin: 1px 0 0; }
+        .sign .drawn-rule { border-bottom: 1px solid #9ca3af; width: 200px; margin-top: 1px; }
+
         /* Sello de anulacion: el documento sigue existiendo pero sin validez. */
         .annulled-stamp { position: fixed; top: 300px; left: 0; right: 0; text-align: center;
                           font-size: 88.8px; font-weight: bold; color: #dc2626; opacity: .18;
@@ -431,7 +435,13 @@
             <td>
                 Nombre: {{ $exam->full_name }}<br>
                 Documento: {{ $exam->document_type?->value ?? 'CC' }} {{ $exam->document_number }}<br>
-                Firma: {{ $blank }}
+                @if ($workerSignature)
+                    Firma:
+                    <img class="drawn" src="{{ $workerSignature }}" alt="Firma del trabajador">
+                    <div class="drawn-rule"></div>
+                @else
+                    Firma: {{ $blank }}
+                @endif
             </td>
             <td class="fingerprint"></td>
         </tr>

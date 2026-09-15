@@ -98,6 +98,7 @@ class ExamGenerator
             'birth_date' => $data['birth_date'],
             'sex' => $data['sex'] ?? null,
             'photo' => $data['photo'] ?? null,
+            'worker_signature' => $data['worker_signature'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'height_cm' => $heightCm,
