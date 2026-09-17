@@ -110,7 +110,7 @@ class ExamGenerator
             'company_nit' => $independent ? null : ($data['company_nit'] ?? null),
             'client_company' => $data['client_company'] ?? null,
             'economic_activity' => $data['economic_activity'] ?? null,
-            'arl_id' => $data['arl_id'],
+            'arl_id' => $data['arl_id'] ?? null,
             'position' => $data['position'],
 
             'exam_date' => $data['exam_date'],

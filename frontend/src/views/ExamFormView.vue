@@ -325,7 +325,7 @@ async function submit() {
       ...form,
       height_cm: Number(form.height_cm),
       weight_kg: number(form.weight_kg),
-      arl_id: Number(form.arl_id),
+      arl_id: form.arl_id === '' ? null : Number(form.arl_id),
       company_nit: form.is_independent ? null : form.company_nit || null,
       client_company: form.client_company || null,
       economic_activity: form.economic_activity || null,
@@ -465,10 +465,14 @@ async function submit() {
                    :class="{ 'field-input-error': hasError }" required>
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="ARL" :error="errors.arl_id" required>
-            <select :id="id" v-model="form.arl_id" class="field-input"
-                    :class="{ 'field-input-error': hasError }" required>
-              <option value="" disabled>Seleccione una ARL…</option>
+          <FormField
+            v-slot="{ id, hasError }"
+            label="ARL"
+            :error="errors.arl_id"
+            hint="Opcional. Déjela sin especificar si el trabajador no tiene afiliación vigente."
+          >
+            <select :id="id" v-model="form.arl_id" class="field-input" :class="{ 'field-input-error': hasError }">
+              <option value="">Sin especificar</option>
               <option v-for="item in catalogs.arls" :key="item.id" :value="item.id">{{ item.name }}</option>
             </select>
           </FormField>

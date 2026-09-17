@@ -85,12 +85,8 @@ onMounted(async () => {
             <dd class="mt-0.5 text-sm text-slate-900">{{ data.exam.exam_type_label }}</dd>
           </div>
           <div>
-            <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Ciudad</dt>
-            <dd class="mt-0.5 text-sm text-slate-900">{{ data.exam.city }}</dd>
-          </div>
-          <div>
             <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">ARL</dt>
-            <dd class="mt-0.5 text-sm text-slate-900">{{ data.exam.arl }}</dd>
+            <dd class="mt-0.5 text-sm text-slate-900">{{ data.exam.arl || '—' }}</dd>
           </div>
           <div>
             <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha de expedición</dt>

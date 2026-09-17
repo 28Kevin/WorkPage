@@ -94,6 +94,23 @@ class ExamLifecycleTest extends TestCase
         $this->assertArrayNotHasKey('eps', $exam['occupational']);
     }
 
+    public function test_arl_can_be_left_blank(): void
+    {
+        $exam = $this->create(['arl_id' => null]);
+
+        $this->assertNull($exam['occupational']['arl']);
+
+        // La consulta publica y el certificado salen igual sin afiliacion.
+        $this->getJson("/api/public/verify/{$exam['verification']['code']}")
+            ->assertOk()
+            ->assertJsonPath('exam.arl', null);
+
+        $pdf = $this->actingAs($this->admin(), 'sanctum')->get("/api/exams/{$exam['id']}/pdf");
+
+        $pdf->assertOk();
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+    }
+
     public function test_independent_worker_is_stored_without_nit(): void
     {
         $exam = $this->create([

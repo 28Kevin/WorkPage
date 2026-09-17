@@ -40,7 +40,7 @@ class StoreMedicalExamRequest extends FormRequest
             'phone' => ['nullable', 'string', 'min:7', 'max:20'],
             'height_cm' => ['required', 'integer', 'min:120', 'max:230'],
             'weight_kg' => ['nullable', 'numeric', 'min:30', 'max:250'],
-            'arl_id' => ['required', 'integer', Rule::exists('arls', 'id')->where('active', true)],
+            'arl_id' => ['nullable', 'integer', Rule::exists('arls', 'id')->where('active', true)],
 
             // B. Empleador
             'is_independent' => ['required', 'boolean'],
