@@ -57,6 +57,36 @@ class PdfAssets
     }
 
     /**
+     * Imagen de plantilla tal cual, sin volver transparente el fondo: las del
+     * paquete de alimentos llegan ya recortadas. Devuelve null si el archivo
+     * todavia no se ha subido, y entonces la plantilla deja la linea en blanco.
+     */
+    public static function raw(string $file): ?string
+    {
+        $path = self::locate($file);
+
+        if ($path === null) {
+            return null;
+        }
+
+        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            default => null,
+        };
+
+        if ($mime === null) {
+            return null;
+        }
+
+        return Cache::rememberForever(
+            sprintf('pdf.raw.%s.%d', $file, filemtime($path)),
+            fn () => 'data:'.$mime.';base64,'.base64_encode((string) file_get_contents($path)),
+        );
+    }
+
+    /**
      * Busca el archivo en public/images y, si no esta, en la raiz del proyecto,
      * que es donde vivian antes de reorganizarlos.
      */

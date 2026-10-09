@@ -22,6 +22,8 @@ const PUBLIC_LINKS = [
 // "Administración" no debe quedar activa en las otras secciones del panel.
 const isExamsArea = computed(
   () => route.path.startsWith('/admin')
+    && !route.path.startsWith('/admin/alimentos')
+    && !route.path.startsWith('/admin/certificados')
     && !['login', 'admin.branding', 'admin.messages'].includes(route.name),
 )
 
@@ -86,6 +88,22 @@ async function handleLogout() {
               :class="isExamsArea ? 'bg-white/15 text-white' : ''"
             >
               Administración
+            </RouterLink>
+
+            <RouterLink
+              :to="{ name: 'admin.food' }"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              :class="$route.path.startsWith('/admin/alimentos') ? 'bg-white/15 text-white' : ''"
+            >
+              M. Alimentos
+            </RouterLink>
+
+            <RouterLink
+              :to="{ name: 'admin.certificates' }"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              :class="$route.path.startsWith('/admin/certificados') ? 'bg-white/15 text-white' : ''"
+            >
+              Certificados
             </RouterLink>
 
             <RouterLink

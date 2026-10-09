@@ -6,7 +6,6 @@ use App\Enums\ExamResult;
 use App\Models\MedicalExam;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 /**
  * Orquesta la creacion y correccion de un examen: numeracion consecutiva,
@@ -24,6 +23,7 @@ class ExamGenerator
         private readonly OrderNumberGenerator $orderNumbers,
         private readonly IdealWeightCalculator $weights,
         private readonly MedicalParameterGenerator $parameters,
+        private readonly VerificationCodeGenerator $verificationCodes,
     ) {}
 
     /** @param array<string, mixed> $data */
@@ -39,7 +39,7 @@ class ExamGenerator
                     $orderNumber,
                     (int) date('Y', strtotime($data['exam_date'])),
                 ),
-                'verification_code' => $this->verificationCode(),
+                'verification_code' => $this->verificationCodes->generate(),
                 'issued_at' => now(),
                 'created_by' => $user?->id,
             ]);
@@ -182,14 +182,5 @@ class ExamGenerator
             fn (?string $value) => $value ? ExamResult::from($value) : null,
             array_values($aptitudes),
         ));
-    }
-
-    private function verificationCode(): string
-    {
-        do {
-            $code = strtoupper(Str::random(6).'-'.Str::random(6).'-'.Str::random(6));
-        } while (MedicalExam::where('verification_code', $code)->exists());
-
-        return $code;
     }
 }

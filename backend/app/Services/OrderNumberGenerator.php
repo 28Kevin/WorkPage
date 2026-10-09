@@ -12,16 +12,34 @@ use Illuminate\Support\Facades\DB;
  */
 class OrderNumberGenerator
 {
+    /** Secuencia del examen medico ocupacional. */
     public const KEY = 'medical_exam_order';
 
     public const PREFIX = 'EMO';
 
-    public function next(): int
+    /**
+     * Secuencia del paquete de manipulacion de alimentos. Cada tipo de
+     * documento lleva su propio contador y su propio prefijo: el serial dice
+     * de que documento se trata sin tener que consultarlo.
+     */
+    public const FOOD_HANDLER_KEY = 'food_handler_order';
+
+    public const FOOD_HANDLER_PREFIX = 'MA';
+
+    /**
+     * Secuencia del certificado de capacitacion. Su formato no lleva anio ni
+     * relleno: el documento de guia numera "S.S-1370".
+     */
+    public const TRAINING_KEY = 'training_certificate_order';
+
+    public const TRAINING_PREFIX = 'S.S';
+
+    public function next(string $key = self::KEY): int
     {
-        return DB::transaction(function () {
+        return DB::transaction(function () use ($key) {
             $sequence = ExamSequence::query()
                 ->lockForUpdate()
-                ->firstOrCreate(['key' => self::KEY], ['current_value' => 0]);
+                ->firstOrCreate(['key' => $key], ['current_value' => 0]);
 
             $sequence->increment('current_value');
 
@@ -29,15 +47,15 @@ class OrderNumberGenerator
         });
     }
 
-    public function format(int $number, ?int $year = null): string
+    public function format(int $number, ?int $year = null, string $prefix = self::PREFIX): string
     {
         $year ??= (int) date('Y');
 
-        return sprintf('%s-%d-%06d', self::PREFIX, $year, $number);
+        return sprintf('%s-%d-%06d', $prefix, $year, $number);
     }
 
-    public function current(): int
+    public function current(string $key = self::KEY): int
     {
-        return (int) (ExamSequence::query()->where('key', self::KEY)->value('current_value') ?? 0);
+        return (int) (ExamSequence::query()->where('key', $key)->value('current_value') ?? 0);
     }
 }

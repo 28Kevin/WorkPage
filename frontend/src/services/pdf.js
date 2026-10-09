@@ -4,10 +4,10 @@ import api from './api'
  * El endpoint del PDF exige el token Bearer, por lo que no puede abrirse con un
  * enlace directo: se descarga como blob y se entrega al navegador.
  */
-export async function downloadExamPdf(examId, filename = null) {
-  const { data, headers } = await api.get(`/exams/${examId}/pdf`, { responseType: 'blob' })
+async function downloadPdf(endpoint, fallbackName, filename = null) {
+  const { data, headers } = await api.get(endpoint, { responseType: 'blob' })
 
-  const name = filename || filenameFromHeaders(headers) || `examen-medico-${examId}.pdf`
+  const name = filename || filenameFromHeaders(headers) || fallbackName
   const url = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }))
   const link = document.createElement('a')
 
@@ -21,8 +21,8 @@ export async function downloadExamPdf(examId, filename = null) {
 }
 
 /** Abre el PDF en una pestaña nueva para previsualizarlo. */
-export async function openExamPdf(examId) {
-  const { data } = await api.get(`/exams/${examId}/pdf`, {
+async function openPdf(endpoint) {
+  const { data } = await api.get(endpoint, {
     params: { inline: 1 },
     responseType: 'blob',
   })
@@ -33,6 +33,26 @@ export async function openExamPdf(examId) {
 
   // El navegador necesita la URL viva mientras carga la pestaña.
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
+}
+
+// --- Examen medico ocupacional ---------------------------------------------
+
+export function downloadExamPdf(examId, filename = null) {
+  return downloadPdf(`/exams/${examId}/pdf`, `examen-medico-${examId}.pdf`, filename)
+}
+
+export function openExamPdf(examId) {
+  return openPdf(`/exams/${examId}/pdf`)
+}
+
+// --- Paquete de manipulacion de alimentos ----------------------------------
+
+export function downloadFoodHandlerPdf(recordId, filename = null) {
+  return downloadPdf(`/food-handler/${recordId}/pdf`, `manipulacion-alimentos-${recordId}.pdf`, filename)
+}
+
+export function openFoodHandlerPdf(recordId) {
+  return openPdf(`/food-handler/${recordId}/pdf`)
 }
 
 /**
@@ -58,4 +78,14 @@ function filenameFromHeaders(headers) {
   const ascii = /filename=\s*"?([^";]+)"?/i.exec(disposition)
 
   return ascii ? ascii[1].trim() : null
+}
+
+// --- Certificado de capacitacion -------------------------------------------
+
+export function downloadCertificatePdf(certificateId, filename = null) {
+  return downloadPdf(`/certificates/${certificateId}/pdf`, `certificado-${certificateId}.pdf`, filename)
+}
+
+export function openCertificatePdf(certificateId) {
+  return openPdf(`/certificates/${certificateId}/pdf`)
 }

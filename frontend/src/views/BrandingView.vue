@@ -45,6 +45,12 @@ const form = reactive({
     name: '', nit: '', address: '',
     phone: '', email: '', physician_name: '', schedule: '',
   },
+  // Textos fijos del paquete de manipulacion de alimentos.
+  food_handler: {
+    course_name: '', course_hours: '', training_resolution: '',
+    card_authorization: '', bacteriologist_name: '', food_engineer_name: '',
+    advisor_name: '', advisor_phone: '',
+  },
 })
 
 const ready = ref(false)
@@ -94,6 +100,7 @@ function fill(value) {
 
   Object.assign(form.identity, value.identity)
   Object.assign(form.center, value.center)
+  if (value.food_handler) Object.assign(form.food_handler, value.food_handler)
   Object.assign(form.theme, {
     brand_color: value.theme.brand_color,
     accent_color: value.theme.accent_color,
@@ -138,6 +145,7 @@ async function submit() {
       identity: { ...form.identity },
       theme: { ...form.theme },
       center: { ...form.center },
+      food_handler: { ...form.food_handler },
     })
 
     dirty.value = false
@@ -454,10 +462,85 @@ function discard() {
       </div>
     </section>
 
-    <!-- ------------------------------------------------------------- galería -->
+    <!-- -------------------------------------- textos del paquete de alimentos -->
     <section class="card">
       <div class="section-heading">
         <span class="section-badge">4</span>
+        <h2 class="text-sm font-semibold text-slate-900">Manipulación de alimentos</h2>
+      </div>
+
+      <div class="grid gap-4 p-5 sm:grid-cols-2">
+        <p class="text-sm text-slate-600 sm:col-span-2">
+          Textos fijos que se imprimen en el paquete y en el carné. Al cambiarlos aquí, los
+          documentos que se emitan en adelante los toman sin tocar la plantilla.
+        </p>
+
+        <FormField label="Nombre del curso" :error="errors['food_handler.course_name']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.course_name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Intensidad horaria" :error="errors['food_handler.course_hours']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.course_hours" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Resolución de la capacitación" :error="errors['food_handler.training_resolution']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.training_resolution" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField
+          label="Autorización del carné"
+          hint="Línea al pie del carné, por ejemplo la resolución que autoriza su expedición."
+          :error="errors['food_handler.card_authorization']"
+        >
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.card_authorization" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField
+          label="Bacterióloga"
+          hint="Firma las páginas de laboratorio. Vacío deja la línea en blanco."
+          :error="errors['food_handler.bacteriologist_name']"
+        >
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.bacteriologist_name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField
+          label="Ingeniera de alimentos"
+          hint="Firma la capacitación y el carné."
+          :error="errors['food_handler.food_engineer_name']"
+        >
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.food_engineer_name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Asesora" :error="errors['food_handler.advisor_name']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.advisor_name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Teléfono de la asesora" :error="errors['food_handler.advisor_phone']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.food_handler.advisor_phone" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------- galería -->
+    <section class="card">
+      <div class="section-heading">
+        <span class="section-badge">5</span>
         <h2 class="text-sm font-semibold text-slate-900">Galería de fotografías</h2>
       </div>
 

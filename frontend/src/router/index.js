@@ -22,6 +22,12 @@ const routes = [
     meta: { public: true, title: 'Verificación de documento' },
   },
   {
+    path: '/certificado/:code',
+    name: 'public.certificate',
+    component: () => import('@/views/CertificateVerificationView.vue'),
+    meta: { public: true, title: 'Verificación de certificado' },
+  },
+  {
     path: '/servicios',
     name: 'public.services',
     component: () => import('@/views/ServicesView.vue'),
@@ -64,6 +70,48 @@ const routes = [
     name: 'admin.exams.edit',
     component: () => import('@/views/ExamFormView.vue'),
     meta: { requiresAuth: true, title: 'Corregir evaluación' },
+  },
+  {
+    path: '/admin/alimentos',
+    name: 'admin.food',
+    component: () => import('@/views/FoodHandlerListView.vue'),
+    meta: { requiresAuth: true, title: 'Manipulación de alimentos' },
+  },
+  {
+    path: '/admin/alimentos/nuevo',
+    name: 'admin.food.create',
+    component: () => import('@/views/FoodHandlerFormView.vue'),
+    meta: { requiresAuth: true, title: 'Nuevo paquete de alimentos' },
+  },
+  {
+    path: '/admin/alimentos/:id',
+    name: 'admin.food.show',
+    component: () => import('@/views/FoodHandlerDetailView.vue'),
+    meta: { requiresAuth: true, title: 'Detalle del paquete' },
+  },
+  {
+    path: '/admin/alimentos/:id/editar',
+    name: 'admin.food.edit',
+    component: () => import('@/views/FoodHandlerFormView.vue'),
+    meta: { requiresAuth: true, title: 'Corregir paquete' },
+  },
+  {
+    path: '/admin/certificados',
+    name: 'admin.certificates',
+    component: () => import('@/views/CertificateListView.vue'),
+    meta: { requiresAuth: true, title: 'Certificados de capacitación' },
+  },
+  {
+    path: '/admin/certificados/nuevo',
+    name: 'admin.certificates.create',
+    component: () => import('@/views/CertificateFormView.vue'),
+    meta: { requiresAuth: true, title: 'Nuevo certificado' },
+  },
+  {
+    path: '/admin/certificados/:id/editar',
+    name: 'admin.certificates.edit',
+    component: () => import('@/views/CertificateFormView.vue'),
+    meta: { requiresAuth: true, title: 'Corregir certificado' },
   },
   {
     path: '/admin/configuracion',

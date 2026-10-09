@@ -39,6 +39,17 @@ class UpdateBrandingRequest extends FormRequest
             'center.email' => ['required', 'email', 'max:120'],
             'center.physician_name' => ['nullable', 'string', 'max:120'],
             'center.schedule' => ['nullable', 'string', 'max:300'],
+
+            // 'sometimes': un cliente que no mande el grupo sigue guardando el resto.
+            'food_handler' => ['sometimes', 'array'],
+            'food_handler.course_name' => ['nullable', 'string', 'max:160'],
+            'food_handler.course_hours' => ['nullable', 'string', 'max:60'],
+            'food_handler.training_resolution' => ['nullable', 'string', 'max:160'],
+            'food_handler.card_authorization' => ['nullable', 'string', 'max:200'],
+            'food_handler.bacteriologist_name' => ['nullable', 'string', 'max:120'],
+            'food_handler.food_engineer_name' => ['nullable', 'string', 'max:120'],
+            'food_handler.advisor_name' => ['nullable', 'string', 'max:120'],
+            'food_handler.advisor_phone' => ['nullable', 'string', 'max:40'],
         ];
     }
 
@@ -60,6 +71,14 @@ class UpdateBrandingRequest extends FormRequest
             'center.email' => 'correo electrónico',
             'center.physician_name' => 'médico responsable',
             'center.schedule' => 'horario de atención',
+            'food_handler.course_name' => 'nombre del curso',
+            'food_handler.course_hours' => 'intensidad horaria',
+            'food_handler.training_resolution' => 'resolución de la capacitación',
+            'food_handler.card_authorization' => 'autorización del carné',
+            'food_handler.bacteriologist_name' => 'bacterióloga',
+            'food_handler.food_engineer_name' => 'ingeniera de alimentos',
+            'food_handler.advisor_name' => 'asesora',
+            'food_handler.advisor_phone' => 'teléfono de la asesora',
         ];
     }
 

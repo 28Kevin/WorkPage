@@ -24,6 +24,13 @@ class Branding
             'name', 'nit', 'address', 'phone', 'email',
             'physician_name', 'schedule',
         ],
+        // Textos fijos del paquete de manipulacion de alimentos: se editan en
+        // el panel para no tener que tocar la plantilla al cambiar una norma.
+        'food_handler' => [
+            'course_name', 'course_hours', 'training_resolution',
+            'card_authorization', 'bacteriologist_name', 'food_engineer_name',
+            'advisor_name', 'advisor_phone',
+        ],
     ];
 
     public static function defaults(): array
@@ -50,6 +57,18 @@ class Branding
                 // Vacio a proposito: el sello estampado ya trae el nombre y el registro.
                 'physician_name' => '',
                 'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
+            ],
+            'food_handler' => [
+                'course_name' => 'Curso de manipulación higiénica de alimentos',
+                'course_hours' => '10 horas',
+                'training_resolution' => 'Resolución 2674 de 2013',
+                'card_authorization' => 'CP. Autorizado hospital de Chapinero E.S.E. Res. 177 / 2015',
+                // Vacios a proposito: si no se diligencian, el documento sale
+                // con la linea en blanco para firmar a mano.
+                'bacteriologist_name' => '',
+                'food_engineer_name' => '',
+                'advisor_name' => '',
+                'advisor_phone' => '',
             ],
         ];
     }

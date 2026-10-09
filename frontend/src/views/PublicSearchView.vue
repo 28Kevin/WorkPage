@@ -94,29 +94,35 @@ function formatDate(value) {
         <article v-for="item in result.results" :key="item.order_code" class="card overflow-hidden">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3">
             <div>
-              <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">Orden No.</p>
+              <p class="text-xs font-medium tracking-wide text-slate-500 uppercase">
+                {{ item.document_type_label }}
+              </p>
               <p class="font-mono text-sm font-bold text-brand-800">{{ item.order_code }}</p>
             </div>
-            <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 ring-1 ring-emerald-300 ring-inset">
+            <!-- El concepto de aptitud solo existe en el examen ocupacional. -->
+            <span
+              v-if="item.result_label"
+              class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 ring-1 ring-emerald-300 ring-inset"
+            >
               {{ item.result_label }}
             </span>
           </div>
 
           <dl class="grid grid-cols-1 gap-x-6 gap-y-3.5 px-5 py-4 sm:grid-cols-2">
             <div>
-              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Trabajador</dt>
+              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Titular</dt>
               <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ item.full_name }}</dd>
             </div>
             <div>
               <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Cédula</dt>
               <dd class="mt-0.5 font-mono text-sm text-slate-900">{{ item.document_number }}</dd>
             </div>
-            <div>
+            <div v-if="item.exam_type_label">
               <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Tipo de examen</dt>
               <dd class="mt-0.5 text-sm text-slate-900">{{ item.exam_type_label }}</dd>
             </div>
             <div>
-              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha del examen</dt>
+              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha del documento</dt>
               <dd class="mt-0.5 text-sm text-slate-900">{{ formatDate(item.exam_date) }}</dd>
             </div>
             <div class="sm:col-span-2">
@@ -138,7 +144,7 @@ function formatDate(value) {
     </div>
 
     <p class="mt-8 text-center text-xs text-slate-500">
-      Por protección de datos personales solo se muestran las iniciales del trabajador y los últimos
+      Por protección de datos personales solo se muestran las iniciales del titular y los últimos
       cuatro dígitos del documento.
     </p>
   </div>

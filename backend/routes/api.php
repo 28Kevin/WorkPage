@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\FoodHandlerRecordController;
 use App\Http\Controllers\Api\GalleryImageController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
+use App\Http\Controllers\Api\TrainingCertificateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('public')->name('api.public.')->middleware('throttle:30,1')->group(function () {
     Route::get('/exams/search', [PublicVerificationController::class, 'search'])->name('search');
     Route::get('/verify/{code}', [PublicVerificationController::class, 'verify'])->name('verify');
+    Route::get('/certificates/{code}', [PublicVerificationController::class, 'certificate'])->name('certificate');
 });
 
 /*
@@ -87,4 +90,40 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/exams/{exam}', [MedicalExamController::class, 'update'])->name('api.exams.update');
     Route::delete('/exams/{exam}', [MedicalExamController::class, 'destroy'])->name('api.exams.destroy');
     Route::get('/exams/{exam}/pdf', [MedicalExamController::class, 'pdf'])->name('api.exams.pdf');
+
+    /*
+    |----------------------------------------------------------------------
+    | Paquete de manipulacion de alimentos (segundo tipo de documento)
+    |----------------------------------------------------------------------
+    |
+    | Las rutas con segmento fijo van antes de /{record}: si no, 'draft' se
+    | tomaria como el identificador de un documento.
+    |
+    */
+    Route::get('/food-handler/next-order-number', [FoodHandlerRecordController::class, 'nextOrderNumber'])
+        ->name('api.food-handler.next-order');
+    Route::get('/food-handler/draft', [FoodHandlerRecordController::class, 'draft'])
+        ->name('api.food-handler.draft');
+
+    Route::get('/food-handler', [FoodHandlerRecordController::class, 'index'])->name('api.food-handler.index');
+    Route::post('/food-handler', [FoodHandlerRecordController::class, 'store'])->name('api.food-handler.store');
+    Route::get('/food-handler/{record}', [FoodHandlerRecordController::class, 'show'])->name('api.food-handler.show');
+    Route::put('/food-handler/{record}', [FoodHandlerRecordController::class, 'update'])->name('api.food-handler.update');
+    Route::delete('/food-handler/{record}', [FoodHandlerRecordController::class, 'destroy'])->name('api.food-handler.destroy');
+    Route::get('/food-handler/{record}/pdf', [FoodHandlerRecordController::class, 'pdf'])->name('api.food-handler.pdf');
+
+    /*
+    |----------------------------------------------------------------------
+    | Certificados de capacitacion (tercer tipo de documento)
+    |----------------------------------------------------------------------
+    */
+    Route::get('/certificates/next-order-number', [TrainingCertificateController::class, 'nextOrderNumber'])
+        ->name('api.certificates.next-order');
+
+    Route::get('/certificates', [TrainingCertificateController::class, 'index'])->name('api.certificates.index');
+    Route::post('/certificates', [TrainingCertificateController::class, 'store'])->name('api.certificates.store');
+    Route::get('/certificates/{certificate}', [TrainingCertificateController::class, 'show'])->name('api.certificates.show');
+    Route::put('/certificates/{certificate}', [TrainingCertificateController::class, 'update'])->name('api.certificates.update');
+    Route::delete('/certificates/{certificate}', [TrainingCertificateController::class, 'destroy'])->name('api.certificates.destroy');
+    Route::get('/certificates/{certificate}/pdf', [TrainingCertificateController::class, 'pdf'])->name('api.certificates.pdf');
 });
