@@ -24,6 +24,11 @@ class Branding
             'name', 'nit', 'address', 'phone', 'email',
             'physician_name', 'schedule',
         ],
+        // Emisor de las cuentas de cobro: se configura una vez y aparece en
+        // todas las que se generen.
+        'biller' => [
+            'name', 'nit', 'document', 'mobile', 'email', 'signature',
+        ],
         // Textos fijos del paquete de manipulacion de alimentos: se editan en
         // el panel para no tener que tocar la plantilla al cambiar una norma.
         'food_handler' => [
@@ -57,6 +62,14 @@ class Branding
                 // Vacio a proposito: el sello estampado ya trae el nombre y el registro.
                 'physician_name' => '',
                 'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
+            ],
+            'biller' => [
+                'name' => '',
+                'nit' => '',
+                'document' => '',
+                'mobile' => '',
+                'email' => '',
+                'signature' => null,
             ],
             'food_handler' => [
                 'course_name' => 'Curso de manipulación higiénica de alimentos',

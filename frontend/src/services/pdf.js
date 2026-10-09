@@ -89,3 +89,13 @@ export function downloadCertificatePdf(certificateId, filename = null) {
 export function openCertificatePdf(certificateId) {
   return openPdf(`/certificates/${certificateId}/pdf`)
 }
+
+// --- Cuenta de cobro --------------------------------------------------------
+
+export function downloadBillingPdf(accountId, filename = null) {
+  return downloadPdf(`/billing/${accountId}/pdf`, `cuenta-de-cobro-${accountId}.pdf`, filename)
+}
+
+export function openBillingPdf(accountId) {
+  return openPdf(`/billing/${accountId}/pdf`)
+}

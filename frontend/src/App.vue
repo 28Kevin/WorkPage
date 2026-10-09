@@ -24,6 +24,7 @@ const isExamsArea = computed(
   () => route.path.startsWith('/admin')
     && !route.path.startsWith('/admin/alimentos')
     && !route.path.startsWith('/admin/certificados')
+    && !route.path.startsWith('/admin/cuentas-de-cobro')
     && !['login', 'admin.branding', 'admin.messages'].includes(route.name),
 )
 
@@ -104,6 +105,14 @@ async function handleLogout() {
               :class="$route.path.startsWith('/admin/certificados') ? 'bg-white/15 text-white' : ''"
             >
               Certificados
+            </RouterLink>
+
+            <RouterLink
+              :to="{ name: 'admin.billing' }"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              :class="$route.path.startsWith('/admin/cuentas-de-cobro') ? 'bg-white/15 text-white' : ''"
+            >
+              Cuentas de cobro
             </RouterLink>
 
             <RouterLink

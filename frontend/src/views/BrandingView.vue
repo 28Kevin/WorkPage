@@ -4,6 +4,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import BackupPanel from '@/components/BackupPanel.vue'
+import BillingConceptsManager from '@/components/BillingConceptsManager.vue'
 import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { parseApiError } from '@/services/api'
@@ -45,6 +46,10 @@ const form = reactive({
     name: '', nit: '', address: '',
     phone: '', email: '', physician_name: '', schedule: '',
   },
+  // Emisor de las cuentas de cobro.
+  biller: {
+    name: '', nit: '', document: '', mobile: '', email: '', signature: null,
+  },
   // Textos fijos del paquete de manipulacion de alimentos.
   food_handler: {
     course_name: '', course_hours: '', training_resolution: '',
@@ -57,6 +62,7 @@ const ready = ref(false)
 const errors = ref({})
 const alert = ref(null)
 const logoError = ref(null)
+const signatureError = ref(null)
 const dirty = ref(false)
 
 const previewPalette = computed(() => buildPalette(form.theme.brand_color))
@@ -101,6 +107,7 @@ function fill(value) {
   Object.assign(form.identity, value.identity)
   Object.assign(form.center, value.center)
   if (value.food_handler) Object.assign(form.food_handler, value.food_handler)
+  if (value.biller) Object.assign(form.biller, value.biller)
   Object.assign(form.theme, {
     brand_color: value.theme.brand_color,
     accent_color: value.theme.accent_color,
@@ -136,6 +143,26 @@ function removeLogo() {
   dirty.value = true
 }
 
+/** Firma del emisor: va en base64 dentro del JSON, como el logo. */
+async function handleSignature(event) {
+  const file = event.target.files?.[0]
+
+  signatureError.value = null
+
+  if (!file) return
+
+  try {
+    form.biller.signature = await prepareImage(file, 600, { format: 'image/png' })
+    dirty.value = true
+  } catch (error) {
+    signatureError.value = error.message === 'too-large'
+      ? 'La imagen supera los 5 MB. Use una más liviana.'
+      : 'No fue posible leer la imagen.'
+  } finally {
+    event.target.value = ''
+  }
+}
+
 async function submit() {
   errors.value = {}
   alert.value = null
@@ -146,6 +173,7 @@ async function submit() {
       theme: { ...form.theme },
       center: { ...form.center },
       food_handler: { ...form.food_handler },
+      biller: { ...form.biller },
     })
 
     dirty.value = false
@@ -462,10 +490,88 @@ function discard() {
       </div>
     </section>
 
-    <!-- -------------------------------------- textos del paquete de alimentos -->
+    <!-- ----------------------------------------- emisor de cuentas de cobro -->
     <section class="card">
       <div class="section-heading">
         <span class="section-badge">4</span>
+        <h2 class="text-sm font-semibold text-slate-900">Cuentas de cobro</h2>
+      </div>
+
+      <div class="grid gap-4 p-5 sm:grid-cols-2">
+        <p class="text-sm text-slate-600 sm:col-span-2">
+          Datos del emisor. Se configuran una vez y aparecen en todas las cuentas que se generen.
+        </p>
+
+        <FormField label="Nombre del emisor" :error="errors['biller.name']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.biller.name" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="NIT" :error="errors['biller.nit']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.biller.nit" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Cédula" :error="errors['biller.document']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.biller.document" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Teléfono celular" :error="errors['biller.mobile']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.biller.mobile" type="text" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <FormField label="Correo electrónico" :error="errors['biller.email']">
+          <template #default="{ id }">
+            <input :id="id" v-model="form.biller.email" type="email" class="field-input" @input="dirty = true">
+          </template>
+        </FormField>
+
+        <div>
+          <span class="field-label">Firma</span>
+
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex h-20 w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+              <img v-if="form.biller.signature" :src="form.biller.signature" alt="Firma del emisor" class="max-h-full max-w-full object-contain">
+              <span v-else class="px-1 text-center text-xs text-slate-400">Sin firma</span>
+            </div>
+
+            <div class="flex flex-col items-start gap-2">
+              <label class="btn-secondary cursor-pointer">
+                <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" @change="handleSignature">
+                Seleccionar firma
+              </label>
+
+              <button
+                v-if="form.biller.signature"
+                type="button"
+                class="btn-ghost text-xs"
+                @click="form.biller.signature = null; dirty = true"
+              >
+                Quitar firma
+              </button>
+            </div>
+          </div>
+
+          <p v-if="signatureError" class="field-error">{{ signatureError }}</p>
+          <p v-else-if="errors['biller.signature']" class="field-error">{{ errors['biller.signature'][0] }}</p>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200">
+        <BillingConceptsManager />
+      </div>
+    </section>
+
+    <!-- -------------------------------------- textos del paquete de alimentos -->
+    <section class="card">
+      <div class="section-heading">
+        <span class="section-badge">5</span>
         <h2 class="text-sm font-semibold text-slate-900">Manipulación de alimentos</h2>
       </div>
 
@@ -540,7 +646,7 @@ function discard() {
     <!-- ------------------------------------------------------------- galería -->
     <section class="card">
       <div class="section-heading">
-        <span class="section-badge">5</span>
+        <span class="section-badge">6</span>
         <h2 class="text-sm font-semibold text-slate-900">Galería de fotografías</h2>
       </div>
 

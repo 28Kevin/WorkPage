@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillingAccountController;
+use App\Http\Controllers\Api\BillingConceptController;
 use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\BrandingController;
 use App\Http\Controllers\Api\CatalogController;
@@ -126,4 +128,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/certificates/{certificate}', [TrainingCertificateController::class, 'update'])->name('api.certificates.update');
     Route::delete('/certificates/{certificate}', [TrainingCertificateController::class, 'destroy'])->name('api.certificates.destroy');
     Route::get('/certificates/{certificate}/pdf', [TrainingCertificateController::class, 'pdf'])->name('api.certificates.pdf');
+
+    /*
+    |----------------------------------------------------------------------
+    | Cuentas de cobro para empresas
+    |----------------------------------------------------------------------
+    |
+    | Las rutas con segmento fijo van antes de /{account}: si no, 'form' se
+    | tomaria como el identificador de una cuenta.
+    |
+    */
+    Route::get('/billing/form', [BillingAccountController::class, 'form'])->name('api.billing.form');
+    Route::get('/billing/amount', [BillingAccountController::class, 'amount'])->name('api.billing.amount');
+
+    Route::get('/billing/concepts', [BillingConceptController::class, 'index'])->name('api.billing.concepts.index');
+    Route::post('/billing/concepts', [BillingConceptController::class, 'store'])->name('api.billing.concepts.store');
+    Route::patch('/billing/concepts/{concept}', [BillingConceptController::class, 'update'])->name('api.billing.concepts.update');
+    Route::delete('/billing/concepts/{concept}', [BillingConceptController::class, 'destroy'])->name('api.billing.concepts.destroy');
+
+    Route::get('/billing', [BillingAccountController::class, 'index'])->name('api.billing.index');
+    Route::post('/billing', [BillingAccountController::class, 'store'])->name('api.billing.store');
+    Route::get('/billing/{account}', [BillingAccountController::class, 'show'])->name('api.billing.show');
+    Route::put('/billing/{account}', [BillingAccountController::class, 'update'])->name('api.billing.update');
+    Route::delete('/billing/{account}', [BillingAccountController::class, 'destroy'])->name('api.billing.destroy');
+    Route::get('/billing/{account}/pdf', [BillingAccountController::class, 'pdf'])->name('api.billing.pdf');
 });

@@ -114,6 +114,24 @@ const routes = [
     meta: { requiresAuth: true, title: 'Corregir certificado' },
   },
   {
+    path: '/admin/cuentas-de-cobro',
+    name: 'admin.billing',
+    component: () => import('@/views/BillingListView.vue'),
+    meta: { requiresAuth: true, title: 'Cuentas de cobro' },
+  },
+  {
+    path: '/admin/cuentas-de-cobro/nueva',
+    name: 'admin.billing.create',
+    component: () => import('@/views/BillingFormView.vue'),
+    meta: { requiresAuth: true, title: 'Nueva cuenta de cobro' },
+  },
+  {
+    path: '/admin/cuentas-de-cobro/:id/editar',
+    name: 'admin.billing.edit',
+    component: () => import('@/views/BillingFormView.vue'),
+    meta: { requiresAuth: true, title: 'Corregir cuenta de cobro' },
+  },
+  {
     path: '/admin/configuracion',
     name: 'admin.branding',
     component: () => import('@/views/BrandingView.vue'),

@@ -34,6 +34,9 @@ class OrderNumberGenerator
 
     public const TRAINING_PREFIX = 'S.S';
 
+    /** Secuencia de las cuentas de cobro: consecutivo de cinco digitos. */
+    public const BILLING_KEY = 'billing_account_number';
+
     public function next(string $key = self::KEY): int
     {
         return DB::transaction(function () use ($key) {

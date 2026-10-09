@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Afp;
 use App\Models\Arl;
+use App\Models\BillingConcept;
 use App\Models\City;
 use App\Models\Eps;
 use App\Models\Risk;
@@ -163,6 +164,31 @@ class CatalogSeeder extends Seeder
             Risk::updateOrCreate(
                 ['slug' => Str::slug($item['name'])],
                 [...$item, 'slug' => Str::slug($item['name'])],
+            );
+        }
+
+        $this->billingConcepts();
+    }
+
+    /** Lista desplegable de items de la cuenta de cobro. Editable en el panel. */
+    private function billingConcepts(): void
+    {
+        $concepts = [
+            'Certificado de capacitación para trabajo seguro en alturas',
+            'Certificado de capacitación para entrante en espacios confinados',
+            'Certificado de capacitación para trabajo de Vigía en espacios confinados',
+            'Certificado de capacitación para supervisor de trabajo en espacios confinados',
+            'Certificado de capacitación para coordinador de trabajo seguro en alturas',
+            'Certificado médico para trabajo seguro en alturas',
+            'Certificado de manipulación de alimentos',
+        ];
+
+        foreach ($concepts as $position => $name) {
+            // Solo se siembra la posicion: si en el panel renombraron o
+            // desactivaron un concepto, el sembrado no lo revierte.
+            BillingConcept::firstOrCreate(
+                ['name' => $name],
+                ['position' => $position + 1, 'active' => true],
             );
         }
     }

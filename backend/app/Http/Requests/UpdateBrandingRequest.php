@@ -40,6 +40,17 @@ class UpdateBrandingRequest extends FormRequest
             'center.physician_name' => ['nullable', 'string', 'max:120'],
             'center.schedule' => ['nullable', 'string', 'max:300'],
 
+            'biller' => ['sometimes', 'array'],
+            'biller.name' => ['nullable', 'string', 'max:150'],
+            'biller.nit' => ['nullable', 'string', 'max:40'],
+            'biller.document' => ['nullable', 'string', 'max:40'],
+            'biller.mobile' => ['nullable', 'string', 'max:40'],
+            'biller.email' => ['nullable', 'email', 'max:120'],
+            'biller.signature' => [
+                'nullable', 'string', 'max:700000',
+                'regex:/^data:image\/(png|jpeg|webp);base64,/',
+            ],
+
             // 'sometimes': un cliente que no mande el grupo sigue guardando el resto.
             'food_handler' => ['sometimes', 'array'],
             'food_handler.course_name' => ['nullable', 'string', 'max:160'],
@@ -71,6 +82,12 @@ class UpdateBrandingRequest extends FormRequest
             'center.email' => 'correo electrónico',
             'center.physician_name' => 'médico responsable',
             'center.schedule' => 'horario de atención',
+            'biller.name' => 'nombre del emisor',
+            'biller.nit' => 'NIT del emisor',
+            'biller.document' => 'cédula del emisor',
+            'biller.mobile' => 'celular del emisor',
+            'biller.email' => 'correo del emisor',
+            'biller.signature' => 'firma del emisor',
             'food_handler.course_name' => 'nombre del curso',
             'food_handler.course_hours' => 'intensidad horaria',
             'food_handler.training_resolution' => 'resolución de la capacitación',
