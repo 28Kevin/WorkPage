@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue'
-import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import AdminMenu from '@/components/AdminMenu.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useBrandingStore } from '@/stores/branding'
 import { useCatalogStore } from '@/stores/catalogs'
@@ -8,7 +8,6 @@ import { useCatalogStore } from '@/stores/catalogs'
 const auth = useAuthStore()
 const branding = useBrandingStore()
 const catalogs = useCatalogStore()
-const route = useRoute()
 const router = useRouter()
 
 const year = new Date().getFullYear()
@@ -18,16 +17,6 @@ const PUBLIC_LINKS = [
   { name: 'public.search', label: 'Consulta pública' },
   { name: 'public.contact', label: 'Contáctenos' },
 ]
-
-// "Administración" no debe quedar activa en las otras secciones del panel.
-const isExamsArea = computed(
-  () => route.path.startsWith('/admin')
-    && !route.path.startsWith('/admin/alimentos')
-    && !route.path.startsWith('/admin/certificados')
-    && !route.path.startsWith('/admin/cuentas-de-cobro')
-    && route.name !== 'admin.usage'
-    && !['login', 'admin.branding', 'admin.messages'].includes(route.name),
-)
 
 async function handleLogout() {
   await auth.logout()
@@ -84,87 +73,7 @@ async function handleLogout() {
           <template v-if="auth.isAuthenticated">
             <span class="mx-1 hidden h-5 w-px bg-white/25 sm:block" aria-hidden="true"></span>
 
-            <RouterLink
-              :to="{ name: 'admin.exams' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              :class="isExamsArea ? 'bg-white/15 text-white' : ''"
-            >
-              Administración
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: 'admin.food' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              :class="$route.path.startsWith('/admin/alimentos') ? 'bg-white/15 text-white' : ''"
-            >
-              M. Alimentos
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: 'admin.certificates' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              :class="$route.path.startsWith('/admin/certificados') ? 'bg-white/15 text-white' : ''"
-            >
-              Certificados
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: 'admin.billing' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              :class="$route.path.startsWith('/admin/cuentas-de-cobro') ? 'bg-white/15 text-white' : ''"
-            >
-              Cuentas de cobro
-            </RouterLink>
-
-            <RouterLink
-              v-if="auth.isDeveloper"
-              :to="{ name: 'admin.usage' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              :class="$route.name === 'admin.usage' ? 'bg-white/15 text-white' : ''"
-              title="Uso de la plataforma"
-            >
-              Uso
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: 'admin.messages' }"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              active-class="bg-white/15 text-white"
-            >
-              Mensajes
-            </RouterLink>
-
-            <RouterLink
-              :to="{ name: 'admin.branding' }"
-              class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
-              active-class="bg-white/15 text-white"
-              title="Configuración"
-            >
-              <svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-              <span class="hidden lg:inline">Configuración</span>
-            </RouterLink>
-
-            <span class="mx-1 hidden text-sm text-white/70 xl:inline">{{ auth.user?.name }}</span>
-
-            <button
-              type="button"
-              class="rounded-lg px-3 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
-              @click="handleLogout"
-            >
-              Salir
-            </button>
+            <AdminMenu @logout="handleLogout" />
           </template>
 
           <RouterLink

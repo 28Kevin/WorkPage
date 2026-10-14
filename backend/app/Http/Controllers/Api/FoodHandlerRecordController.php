@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\SortsListings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFoodHandlerRecordRequest;
 use App\Http\Requests\UpdateFoodHandlerRecordRequest;
@@ -19,7 +20,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FoodHandlerRecordController extends Controller
 {
+    use SortsListings;
+
     private const RELATIONS = ['creator'];
+
+    /** Columnas por las que se puede ordenar el listado. */
+    private const SORTABLE = [
+        'order_code' => 'order_number',
+        'full_name' => 'full_name',
+        'document_number' => 'document_number',
+        'age' => 'age',
+        'issue_date' => 'issue_date',
+    ];
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -34,8 +46,8 @@ class FoodHandlerRecordController extends Controller
                     ->orWhere('document_number', 'like', "%{$search}%")
                     ->orWhere('order_code', 'like', "%{$search}%"));
             })
-            ->latest('order_number')
-            ->paginate($request->integer('per_page', 15))
+            ->tap(fn ($query) => $this->sorted($query, $request, self::SORTABLE, 'order_code'))
+            ->paginate($this->perPage($request))
             ->withQueryString();
 
         return FoodHandlerRecordListResource::collection($records);

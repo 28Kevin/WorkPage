@@ -3,6 +3,9 @@ import { onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import PerPageSelect from '@/components/PerPageSelect.vue'
+import SortableHeader from '@/components/SortableHeader.vue'
+import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
 import { downloadCertificatePdf } from '@/services/pdf'
 
@@ -17,6 +20,10 @@ const loading = ref(true)
 const error = ref(null)
 const notice = ref(null)
 const downloading = ref(null)
+
+/** Orden y tamaño de página del listado. */
+const { sort, direction, perPage, toggleSort, params } = useTableQuery('order_code')
+
 
 const annulling = ref(null)
 const annulReason = ref('')
@@ -35,6 +42,7 @@ async function fetchCertificates() {
         search: search.value.trim() || undefined,
         status: status.value,
         page: page.value,
+        ...params.value,
       },
     })
 
@@ -69,6 +77,17 @@ watch(status, () => {
 })
 
 watch(page, fetchCertificates)
+
+// Al cambiar el orden o el tamaño se vuelve a la primera página.
+watch([sort, direction, perPage], () => {
+  if (page.value === 1) {
+    fetchCertificates()
+
+    return
+  }
+
+  page.value = 1
+})
 
 async function download(certificate) {
   downloading.value = certificate.id
@@ -180,10 +199,11 @@ function formatDate(value) {
       <table class="w-full text-sm">
         <thead class="border-b border-slate-200 bg-slate-50 text-left">
           <tr class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-            <th class="px-4 py-3">Consecutivo</th>
-            <th class="px-4 py-3">Participante</th>
-            <th class="px-4 py-3">Curso</th>
-            <th class="px-4 py-3">Finalización</th>
+            <SortableHeader field="order_code" label="Consecutivo" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="participant_name" label="Participante" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="course" label="Curso" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="hours" label="Horas" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="end_date" label="Finalización" :sort="sort" :direction="direction" @sort="toggleSort" />
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
@@ -199,10 +219,8 @@ function formatDate(value) {
               {{ certificate.participant_name }}
               <span class="block text-xs font-normal text-slate-500">{{ certificate.document_number }}</span>
             </td>
-            <td class="px-4 py-3 text-slate-600">
-              {{ certificate.course }}
-              <span class="block text-xs text-slate-500">{{ certificate.hours }} horas</span>
-            </td>
+            <td class="px-4 py-3 text-slate-600">{{ certificate.course }}</td>
+            <td class="px-4 py-3 text-slate-600">{{ certificate.hours }}</td>
             <td class="px-4 py-3 text-slate-600">{{ formatDate(certificate.end_date) }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap items-center justify-end gap-2">
@@ -238,10 +256,14 @@ function formatDate(value) {
       </table>
     </div>
 
-    <div v-if="meta && meta.last_page > 1" class="mt-4 flex items-center justify-between text-sm">
-      <button type="button" class="btn-secondary" :disabled="page <= 1" @click="page -= 1">Anterior</button>
-      <span class="text-slate-600">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
-      <button type="button" class="btn-secondary" :disabled="page >= meta.last_page" @click="page += 1">Siguiente</button>
+    <div v-if="meta" class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <PerPageSelect v-model="perPage" :total="meta.total" />
+
+      <div v-if="meta.last_page > 1" class="flex items-center gap-3">
+        <button type="button" class="btn-secondary" :disabled="page <= 1" @click="page -= 1">Anterior</button>
+        <span class="text-slate-600">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
+        <button type="button" class="btn-secondary" :disabled="page >= meta.last_page" @click="page += 1">Siguiente</button>
+      </div>
     </div>
 
     <div v-if="annulling" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">

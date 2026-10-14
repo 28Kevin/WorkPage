@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\SortsListings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTrainingCertificateRequest;
 use App\Http\Requests\UpdateTrainingCertificateRequest;
@@ -18,7 +19,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TrainingCertificateController extends Controller
 {
+    use SortsListings;
+
     private const RELATIONS = ['creator'];
+
+    /** Columnas por las que se puede ordenar el listado. */
+    private const SORTABLE = [
+        'order_code' => 'order_number',
+        'participant_name' => 'participant_name',
+        'document_number' => 'document_number',
+        'course' => 'course',
+        'hours' => 'hours',
+        'end_date' => 'end_date',
+    ];
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -33,8 +46,8 @@ class TrainingCertificateController extends Controller
                     ->orWhere('order_code', 'like', "%{$search}%")
                     ->orWhere('course', 'like', "%{$search}%"));
             })
-            ->latest('order_number')
-            ->paginate($request->integer('per_page', 15))
+            ->tap(fn ($query) => $this->sorted($query, $request, self::SORTABLE, 'order_code'))
+            ->paginate($this->perPage($request))
             ->withQueryString();
 
         return TrainingCertificateListResource::collection($certificates);

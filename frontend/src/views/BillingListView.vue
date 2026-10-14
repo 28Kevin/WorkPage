@@ -3,6 +3,9 @@ import { onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AlertMessage from '@/components/AlertMessage.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import PerPageSelect from '@/components/PerPageSelect.vue'
+import SortableHeader from '@/components/SortableHeader.vue'
+import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
 import { downloadBillingPdf } from '@/services/pdf'
 
@@ -17,6 +20,10 @@ const loading = ref(true)
 const error = ref(null)
 const notice = ref(null)
 const downloading = ref(null)
+
+/** Orden y tamaño de página del listado. */
+const { sort, direction, perPage, toggleSort, params } = useTableQuery('number_code')
+
 
 const annulling = ref(null)
 const annulReason = ref('')
@@ -35,6 +42,7 @@ async function fetchAccounts() {
         search: search.value.trim() || undefined,
         status: status.value,
         page: page.value,
+        ...params.value,
       },
     })
 
@@ -69,6 +77,17 @@ watch(status, () => {
 })
 
 watch(page, fetchAccounts)
+
+// Al cambiar el orden o el tamaño se vuelve a la primera página.
+watch([sort, direction, perPage], () => {
+  if (page.value === 1) {
+    fetchAccounts()
+
+    return
+  }
+
+  page.value = 1
+})
 
 async function download(account) {
   downloading.value = account.id
@@ -180,10 +199,10 @@ function formatDate(value) {
       <table class="w-full text-sm">
         <thead class="border-b border-slate-200 bg-slate-50 text-left">
           <tr class="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-            <th class="px-4 py-3">No.</th>
-            <th class="px-4 py-3">Empresa</th>
-            <th class="px-4 py-3">Expedición</th>
-            <th class="px-4 py-3 text-right">Total</th>
+            <SortableHeader field="number_code" label="No." :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="company_name" label="Empresa" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="issue_date" label="Expedición" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="total" label="Total" align="right" :sort="sort" :direction="direction" @sort="toggleSort" />
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
@@ -240,10 +259,14 @@ function formatDate(value) {
       </table>
     </div>
 
-    <div v-if="meta && meta.last_page > 1" class="mt-4 flex items-center justify-between text-sm">
-      <button type="button" class="btn-secondary" :disabled="page <= 1" @click="page -= 1">Anterior</button>
-      <span class="text-slate-600">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
-      <button type="button" class="btn-secondary" :disabled="page >= meta.last_page" @click="page += 1">Siguiente</button>
+    <div v-if="meta" class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <PerPageSelect v-model="perPage" :total="meta.total" />
+
+      <div v-if="meta.last_page > 1" class="flex items-center gap-3">
+        <button type="button" class="btn-secondary" :disabled="page <= 1" @click="page -= 1">Anterior</button>
+        <span class="text-slate-600">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
+        <button type="button" class="btn-secondary" :disabled="page >= meta.last_page" @click="page += 1">Siguiente</button>
+      </div>
     </div>
 
     <div v-if="annulling" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">

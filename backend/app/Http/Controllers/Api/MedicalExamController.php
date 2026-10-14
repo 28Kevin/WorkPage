@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\SortsListings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMedicalExamRequest;
 use App\Http\Requests\UpdateMedicalExamRequest;
@@ -20,6 +21,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MedicalExamController extends Controller
 {
+    use SortsListings;
+
+    /** Columnas por las que se puede ordenar el listado. */
+    private const SORTABLE = [
+        // El consecutivo se ordena por su numero, no por el texto del codigo.
+        'order_code' => 'order_number',
+        'full_name' => 'full_name',
+        'company_name' => 'company_name',
+        'exam_type' => 'exam_type',
+        'exam_date' => 'exam_date',
+        'result' => 'result',
+    ];
+
     /** Estatura de referencia del borrador inicial, antes de medir al trabajador. */
     private const DEFAULT_HEIGHT_CM = 170;
 
@@ -40,8 +54,8 @@ class MedicalExamController extends Controller
                     ->orWhere('company_name', 'like', "%{$search}%"));
             })
             ->when($request->filled('exam_type'), fn ($q) => $q->where('exam_type', $request->input('exam_type')))
-            ->latest('order_number')
-            ->paginate($request->integer('per_page', 15))
+            ->tap(fn ($query) => $this->sorted($query, $request, self::SORTABLE, 'order_code'))
+            ->paginate($this->perPage($request))
             ->withQueryString();
 
         return MedicalExamListResource::collection($exams);

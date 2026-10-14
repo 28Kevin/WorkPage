@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\SortsListings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBillingAccountRequest;
 use App\Http\Requests\UpdateBillingAccountRequest;
@@ -20,7 +21,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class BillingAccountController extends Controller
 {
+    use SortsListings;
+
     private const RELATIONS = ['creator', 'company'];
+
+    /** Columnas por las que se puede ordenar el listado. */
+    private const SORTABLE = [
+        'number_code' => 'number',
+        'company_name' => 'company_name',
+        'company_nit' => 'company_nit',
+        'issue_date' => 'issue_date',
+        'total' => 'total',
+    ];
 
     /** Historial, con busqueda por empresa o por numero. */
     public function index(Request $request): AnonymousResourceCollection
@@ -35,8 +47,8 @@ class BillingAccountController extends Controller
                     ->orWhere('company_nit', 'like', "%{$search}%")
                     ->orWhere('number_code', 'like', "%{$search}%"));
             })
-            ->latest('number')
-            ->paginate($request->integer('per_page', 15))
+            ->tap(fn ($query) => $this->sorted($query, $request, self::SORTABLE, 'number_code'))
+            ->paginate($this->perPage($request))
             ->withQueryString();
 
         return BillingAccountResource::collection($accounts);

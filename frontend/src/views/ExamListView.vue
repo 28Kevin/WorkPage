@@ -2,6 +2,9 @@
 import { onMounted, ref, watch } from 'vue'
 import AlertMessage from '@/components/AlertMessage.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import PerPageSelect from '@/components/PerPageSelect.vue'
+import SortableHeader from '@/components/SortableHeader.vue'
+import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
 import { downloadExamPdf } from '@/services/pdf'
 
@@ -14,6 +17,10 @@ const loading = ref(true)
 const error = ref(null)
 const notice = ref(null)
 const downloading = ref(null)
+
+/** Orden y tamaño de página del listado. */
+const { sort, direction, perPage, toggleSort, params } = useTableQuery('order_code')
+
 
 // Anulación: se pide un motivo antes de confirmar.
 const annulling = ref(null)
@@ -41,6 +48,7 @@ async function fetchExams() {
         search: search.value.trim() || undefined,
         status: status.value,
         page: page.value,
+        ...params.value,
       },
     })
 
@@ -69,6 +77,18 @@ watch(status, () => {
 })
 
 watch(page, fetchExams)
+
+// Al cambiar el orden o el tamaño se vuelve a la primera página: la que se
+// estaba viendo ya no corresponde al mismo tramo de resultados.
+watch([sort, direction, perPage], () => {
+  if (page.value === 1) {
+    fetchExams()
+
+    return
+  }
+
+  page.value = 1
+})
 
 async function download(exam) {
   downloading.value = exam.id
@@ -180,12 +200,12 @@ function formatDate(value) {
         <table class="w-full text-left text-sm">
           <thead class="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
             <tr>
-              <th scope="col" class="px-4 py-3 font-semibold">Orden</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Trabajador</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Empleador</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Tipo</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Fecha</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Concepto</th>
+              <SortableHeader field="order_code" label="Orden" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="full_name" label="Trabajador" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="company_name" label="Empleador" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="exam_type" label="Tipo" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="exam_date" label="Fecha" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="result" label="Concepto" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
               <th scope="col" class="px-4 py-3 text-right font-semibold">Acciones</th>
             </tr>
           </thead>
@@ -259,10 +279,15 @@ function formatDate(value) {
         </table>
       </div>
 
-      <div v-if="meta && meta.last_page > 1"
-           class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-        <span class="text-slate-600">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
-        <div class="flex gap-2">
+      <div v-if="meta"
+           class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+        <PerPageSelect v-model="perPage" :total="meta.total" />
+
+        <span v-if="meta.last_page > 1" class="text-slate-600">
+          Página {{ meta.current_page }} de {{ meta.last_page }}
+        </span>
+
+        <div v-if="meta.last_page > 1" class="flex gap-2">
           <button type="button" class="btn-secondary py-1.5 text-xs" :disabled="page <= 1" @click="page--">
             Anterior
           </button>
