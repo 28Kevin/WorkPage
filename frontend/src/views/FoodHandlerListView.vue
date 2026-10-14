@@ -7,6 +7,7 @@ import PerPageSelect from '@/components/PerPageSelect.vue'
 import SortableHeader from '@/components/SortableHeader.vue'
 import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
+import { formatDateTime } from '@/services/dates'
 import { downloadFoodHandlerPdf } from '@/services/pdf'
 
 const records = ref([])
@@ -196,6 +197,7 @@ function formatDate(value) {
             <SortableHeader field="full_name" label="Paciente" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="document_number" label="Cédula" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="issue_date" label="Fecha" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="created_at" label="Registrado" :sort="sort" :direction="direction" @sort="toggleSort" />
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
@@ -213,6 +215,7 @@ function formatDate(value) {
             </td>
             <td class="px-4 py-3 text-slate-600">{{ record.document_number }}</td>
             <td class="px-4 py-3 text-slate-600">{{ formatDate(record.issue_date) }}</td>
+            <td class="px-4 py-3 text-xs whitespace-nowrap text-slate-500">{{ formatDateTime(record.created_at) }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <RouterLink

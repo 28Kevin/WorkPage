@@ -32,6 +32,7 @@ class MedicalExamController extends Controller
         'exam_type' => 'exam_type',
         'exam_date' => 'exam_date',
         'result' => 'result',
+        'created_at' => 'created_at',
     ];
 
     /** Estatura de referencia del borrador inicial, antes de medir al trabajador. */

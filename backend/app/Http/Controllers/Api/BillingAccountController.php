@@ -32,6 +32,7 @@ class BillingAccountController extends Controller
         'company_nit' => 'company_nit',
         'issue_date' => 'issue_date',
         'total' => 'total',
+        'created_at' => 'created_at',
     ];
 
     /** Historial, con busqueda por empresa o por numero. */

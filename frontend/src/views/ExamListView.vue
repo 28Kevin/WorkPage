@@ -6,6 +6,7 @@ import PerPageSelect from '@/components/PerPageSelect.vue'
 import SortableHeader from '@/components/SortableHeader.vue'
 import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
+import { formatDateTime } from '@/services/dates'
 import { downloadExamPdf } from '@/services/pdf'
 
 const exams = ref([])
@@ -206,6 +207,7 @@ function formatDate(value) {
               <SortableHeader field="exam_type" label="Tipo" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
               <SortableHeader field="exam_date" label="Fecha" :sort="sort" :direction="direction" @sort="toggleSort" />
               <SortableHeader field="result" label="Concepto" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
+              <SortableHeader field="created_at" label="Registrado" :sort="sort" :direction="direction" @sort="toggleSort" />
               <th scope="col" class="px-4 py-3 text-right font-semibold">Acciones</th>
             </tr>
           </thead>
@@ -239,6 +241,9 @@ function formatDate(value) {
                 >
                   {{ exam.result_label }}
                 </span>
+              </td>
+              <td class="px-4 py-3 text-xs whitespace-nowrap text-slate-500">
+                {{ formatDateTime(exam.created_at) }}
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <RouterLink

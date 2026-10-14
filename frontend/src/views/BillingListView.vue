@@ -7,6 +7,7 @@ import PerPageSelect from '@/components/PerPageSelect.vue'
 import SortableHeader from '@/components/SortableHeader.vue'
 import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
+import { formatDateTime } from '@/services/dates'
 import { downloadBillingPdf } from '@/services/pdf'
 
 const route = useRoute()
@@ -203,6 +204,7 @@ function formatDate(value) {
             <SortableHeader field="company_name" label="Empresa" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="issue_date" label="Expedición" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="total" label="Total" align="right" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="created_at" label="Registrado" :sort="sort" :direction="direction" @sort="toggleSort" />
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
@@ -225,6 +227,7 @@ function formatDate(value) {
             <td class="px-4 py-3 text-right font-mono font-semibold text-slate-900">
               {{ account.total_label }}
             </td>
+            <td class="px-4 py-3 text-xs whitespace-nowrap text-slate-500">{{ formatDateTime(account.created_at) }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <RouterLink

@@ -31,6 +31,7 @@ class TrainingCertificateController extends Controller
         'course' => 'course',
         'hours' => 'hours',
         'end_date' => 'end_date',
+        'created_at' => 'created_at',
     ];
 
     public function index(Request $request): AnonymousResourceCollection

@@ -31,6 +31,7 @@ class FoodHandlerRecordController extends Controller
         'document_number' => 'document_number',
         'age' => 'age',
         'issue_date' => 'issue_date',
+        'created_at' => 'created_at',
     ];
 
     public function index(Request $request): AnonymousResourceCollection

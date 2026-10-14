@@ -7,6 +7,7 @@ import PerPageSelect from '@/components/PerPageSelect.vue'
 import SortableHeader from '@/components/SortableHeader.vue'
 import { useTableQuery } from '@/composables/useTableQuery'
 import api, { parseApiError } from '@/services/api'
+import { formatDateTime } from '@/services/dates'
 import { downloadCertificatePdf } from '@/services/pdf'
 
 const route = useRoute()
@@ -204,6 +205,7 @@ function formatDate(value) {
             <SortableHeader field="course" label="Curso" first="asc" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="hours" label="Horas" :sort="sort" :direction="direction" @sort="toggleSort" />
             <SortableHeader field="end_date" label="Finalización" :sort="sort" :direction="direction" @sort="toggleSort" />
+            <SortableHeader field="created_at" label="Registrado" :sort="sort" :direction="direction" @sort="toggleSort" />
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
@@ -222,6 +224,7 @@ function formatDate(value) {
             <td class="px-4 py-3 text-slate-600">{{ certificate.course }}</td>
             <td class="px-4 py-3 text-slate-600">{{ certificate.hours }}</td>
             <td class="px-4 py-3 text-slate-600">{{ formatDate(certificate.end_date) }}</td>
+            <td class="px-4 py-3 text-xs whitespace-nowrap text-slate-500">{{ formatDateTime(certificate.created_at) }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <RouterLink

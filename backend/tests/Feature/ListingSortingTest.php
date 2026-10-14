@@ -204,6 +204,51 @@ class ListingSortingTest extends TestCase
         $this->assertSame(['Ana Beltrán', 'Ana Torres'], $names);
     }
 
+    public function test_it_sorts_by_the_real_registration_date(): void
+    {
+        /*
+         * La fecha del documento la escribe quien lo diligencia y puede ser
+         * futura o estar corregida, asi que no sirve para saber que se
+         * registro de ultimo. Para eso esta created_at.
+         */
+        $old = $this->certificate(['end_date' => '2026-12-31']);
+        $old->forceFill(['created_at' => '2026-01-05 08:00:00'])->saveQuietly();
+
+        $recent = $this->certificate(['end_date' => '2026-01-01']);
+        $recent->forceFill(['created_at' => '2026-10-14 17:30:00'])->saveQuietly();
+
+        $codes = $this->codes('?sort=created_at&direction=desc');
+
+        $this->assertSame([$recent->order_code, $old->order_code], $codes);
+        $this->assertSame([$old->order_code, $recent->order_code], $this->codes('?sort=created_at&direction=asc'));
+    }
+
+    public function test_every_listing_exposes_the_registration_date(): void
+    {
+        $this->certificate();
+
+        $endpoints = [
+            '/api/exams' => null,
+            '/api/food-handler' => null,
+            '/api/certificates' => 'created_at',
+            '/api/billing' => null,
+        ];
+
+        foreach (array_keys($endpoints) as $endpoint) {
+            // Ordenar por created_at no debe fallar en ningun listado.
+            $this->actingAs($this->admin(), 'sanctum')
+                ->getJson("{$endpoint}?sort=created_at&direction=desc")
+                ->assertOk();
+        }
+
+        $row = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/certificates')
+            ->json('data.0');
+
+        $this->assertArrayHasKey('created_at', $row);
+        $this->assertNotNull($row['created_at']);
+    }
+
     public function test_every_listing_accepts_sorting_and_page_size(): void
     {
         $admin = $this->admin();

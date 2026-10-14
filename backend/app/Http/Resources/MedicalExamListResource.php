@@ -25,6 +25,8 @@ class MedicalExamListResource extends JsonResource
             'result_label' => $this->result->shortLabel(),
             'annulled' => $this->annulled_at !== null,
             'issued_at' => $this->issued_at?->toIso8601String(),
+            // Fecha real de registro: la del documento la escribe el usuario.
+            'created_at' => $this->created_at?->toIso8601String(),
             'pdf_url' => route('api.exams.pdf', $this->id),
         ];
     }
