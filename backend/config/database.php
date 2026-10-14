@@ -97,6 +97,20 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'options' => [
+                /*
+                 * Neon (y cualquier PgBouncer en modo transaccion) reparte una
+                 * misma conexion del servidor entre peticiones distintas. Con
+                 * sentencias preparadas del lado del servidor, PostgreSQL
+                 * guarda el plan de cada consulta; al agregar una columna, el
+                 * plan de un "select *" anterior deja de corresponder y la
+                 * conexion responde "cached plan must not change result type"
+                 * hasta que el pooler la recicla.
+                 *
+                 * Emularlas en el cliente evita que existan esos planes.
+                 */
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ],
         ],
 
         'sqlsrv' => [
