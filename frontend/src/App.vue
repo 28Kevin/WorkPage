@@ -25,6 +25,7 @@ const isExamsArea = computed(
     && !route.path.startsWith('/admin/alimentos')
     && !route.path.startsWith('/admin/certificados')
     && !route.path.startsWith('/admin/cuentas-de-cobro')
+    && route.name !== 'admin.usage'
     && !['login', 'admin.branding', 'admin.messages'].includes(route.name),
 )
 
@@ -113,6 +114,16 @@ async function handleLogout() {
               :class="$route.path.startsWith('/admin/cuentas-de-cobro') ? 'bg-white/15 text-white' : ''"
             >
               Cuentas de cobro
+            </RouterLink>
+
+            <RouterLink
+              v-if="auth.isDeveloper"
+              :to="{ name: 'admin.usage' }"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10"
+              :class="$route.name === 'admin.usage' ? 'bg-white/15 text-white' : ''"
+              title="Uso de la plataforma"
+            >
+              Uso
             </RouterLink>
 
             <RouterLink

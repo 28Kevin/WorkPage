@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Render sirve la app detras de un proxy TLS: sin esto Laravel genera
         // las URLs absolutas (pdf_url) con http:// y el navegador las bloquea.
         $middleware->trustProxies(at: '*');
+
+        $middleware->alias([
+            'developer' => App\Http\Middleware\EnsureUserIsDeveloper::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

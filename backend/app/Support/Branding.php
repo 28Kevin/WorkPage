@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Une los ajustes guardados en base de datos con los valores por defecto del
@@ -63,12 +64,12 @@ class Branding
                 'schedule' => "Lunes a viernes: 6:30 a. m. – 3:00 p. m.\nSábados: 8:00 a. m. – 3:00 p. m.",
             ],
             'biller' => [
-                'name' => '',
-                'nit' => '',
-                'document' => '',
-                'mobile' => '',
-                'email' => '',
-                'signature' => null,
+                'name' => 'MARIA EDER MONTERO CORREA',
+                'nit' => '51852142 - 9',
+                'document' => '51852142',
+                'mobile' => '3138425731',
+                'email' => 'mariaederm@gmail.com',
+                'signature' => self::file('firma-emisor.png'),
             ],
             'food_handler' => [
                 'course_name' => 'Curso de manipulación higiénica de alimentos',
@@ -81,6 +82,24 @@ class Branding
                 'food_engineer_name' => '',
             ],
         ];
+    }
+
+    /**
+     * Imagen de public/images como data URI, para poder usarla de valor por
+     * defecto. Se cachea porque defaults() se consulta en cada peticion.
+     */
+    private static function file(string $name): ?string
+    {
+        $path = public_path('images/'.$name);
+
+        if (! is_readable($path)) {
+            return null;
+        }
+
+        return Cache::rememberForever(
+            'branding.file.'.$name.'.'.filemtime($path),
+            fn () => 'data:image/png;base64,'.base64_encode((string) file_get_contents($path)),
+        );
     }
 
     /** Ajustes efectivos, ya mezclados con los defaults. */

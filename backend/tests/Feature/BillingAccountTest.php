@@ -81,8 +81,8 @@ class BillingAccountTest extends TestCase
             $response->json('concepts.6.name'),
         );
 
-        // El consecutivo es de cinco digitos.
-        $this->assertSame('00001', $response->json('next_number_code'));
+        // Cinco digitos, continuando donde iba la numeracion a mano.
+        $this->assertSame('06013', $response->json('next_number_code'));
     }
 
     public function test_the_number_is_a_five_digit_consecutive_that_never_repeats(): void
@@ -90,8 +90,8 @@ class BillingAccountTest extends TestCase
         $first = $this->create();
         $second = $this->create(['company_nit' => '800123456-7']);
 
-        $this->assertSame('00001', $first['number_code']);
-        $this->assertSame('00002', $second['number_code']);
+        $this->assertSame('06013', $first['number_code']);
+        $this->assertSame('06014', $second['number_code']);
         $this->assertNotSame($first['number_code'], $second['number_code']);
     }
 
@@ -238,10 +238,10 @@ class BillingAccountTest extends TestCase
             ->assertJsonPath('data.0.company.name', 'CONSTRUCTORA ANDINA S.A.S.');
 
         $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/billing?search=00001')
+            ->getJson('/api/billing?search=06013')
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.number_code', '00001');
+            ->assertJsonPath('data.0.number_code', '06013');
     }
 
     public function test_an_account_can_be_corrected_keeping_its_number(): void
@@ -275,7 +275,7 @@ class BillingAccountTest extends TestCase
 
         // El consecutivo no se reutiliza.
         $next = $this->create(['company_nit' => '800123456-7']);
-        $this->assertSame('00002', $next['number_code']);
+        $this->assertSame('06014', $next['number_code']);
     }
 
     public function test_the_pdf_follows_the_guide_document(): void
@@ -304,7 +304,7 @@ class BillingAccountTest extends TestCase
         // Nombre en ASCII: la cabecera trae una sola variante.
         $this->assertStringContainsString('attachment', $disposition);
         $this->assertStringContainsString(
-            'filename="Cuenta de cobro 00001 - FUMIGACIONES OCAMPO S A S.pdf"',
+            'filename="Cuenta de cobro 06013 - FUMIGACIONES OCAMPO S A S.pdf"',
             $disposition,
         );
     }
@@ -319,7 +319,7 @@ class BillingAccountTest extends TestCase
 
         // Con tildes aparece tambien la variante UTF-8, que es la que conserva
         // los acentos; la ASCII queda de respaldo.
-        $expected = rawurlencode('Cuenta de cobro 00001 - Construcciones Pérez & Muñoz S.A.S..pdf');
+        $expected = rawurlencode('Cuenta de cobro 06013 - Construcciones Pérez & Muñoz S.A.S..pdf');
 
         $this->assertStringContainsString("filename*=utf-8''{$expected}", $disposition);
     }
@@ -331,6 +331,36 @@ class BillingAccountTest extends TestCase
             ->assertOk()
             ->assertJsonPath('total_label', '$3’160.000')
             ->assertJsonPath('total_in_words', 'Tres millones ciento sesenta mil pesos M/CTE');
+    }
+
+    public function test_the_issuer_data_is_ready_without_configuring_anything(): void
+    {
+        $biller = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson('/api/branding')
+            ->assertOk()
+            ->json('branding.biller');
+
+        $this->assertSame('MARIA EDER MONTERO CORREA', $biller['name']);
+        $this->assertSame('51852142 - 9', $biller['nit']);
+        $this->assertSame('51852142', $biller['document']);
+        $this->assertSame('3138425731', $biller['mobile']);
+        $this->assertSame('mariaederm@gmail.com', $biller['email']);
+
+        // La firma viaja como data URI: la usan el PDF y la vista previa.
+        $this->assertStringStartsWith('data:image/png;base64,', $biller['signature']);
+    }
+
+    public function test_the_signature_block_of_the_pdf_carries_the_issuer_and_the_signature(): void
+    {
+        $account = $this->create();
+
+        $pdf = $this->actingAs($this->admin(), 'sanctum')
+            ->get("/api/billing/{$account['id']}/pdf")
+            ->getContent();
+
+        // La firma es la unica imagen del documento: sin ella no se incrusta
+        // ninguna, que es como salia antes de cargar los datos del emisor.
+        $this->assertSame(1, preg_match_all('~/Subtype\s*/Image~', $pdf));
     }
 
     public function test_money_is_written_the_colombian_way(): void

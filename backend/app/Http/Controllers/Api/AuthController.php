@@ -39,17 +39,30 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+            'user' => $this->profile($user),
         ]);
     }
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
+        return response()->json(['user' => $this->profile($request->user())]);
+    }
 
-        return response()->json([
-            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
-        ]);
+    /**
+     * Datos de sesion. Incluyen el rol porque el panel decide con el que
+     * secciones mostrar; el acceso real lo sigue validando el servidor.
+     *
+     * @return array<string, mixed>
+     */
+    private function profile(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'is_developer' => $user->isDeveloper(),
+        ];
     }
 
     public function logout(Request $request): JsonResponse

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\GalleryImageController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
 use App\Http\Controllers\Api\TrainingCertificateController;
+use App\Http\Controllers\Api\UsageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -152,4 +153,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/billing/{account}', [BillingAccountController::class, 'update'])->name('api.billing.update');
     Route::delete('/billing/{account}', [BillingAccountController::class, 'destroy'])->name('api.billing.destroy');
     Route::get('/billing/{account}/pdf', [BillingAccountController::class, 'pdf'])->name('api.billing.pdf');
+
+    /*
+    |----------------------------------------------------------------------
+    | Tablero de uso (solo cuentas de desarrollo)
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('developer')->group(function () {
+        Route::get('/dev/usage', [UsageController::class, 'index'])->name('api.dev.usage');
+    });
 });

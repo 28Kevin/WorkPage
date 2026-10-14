@@ -10,6 +10,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => Boolean(token.value && user.value))
 
+  /** Solo las cuentas de desarrollo ven el tablero de uso. */
+  const isDeveloper = computed(() => Boolean(user.value?.is_developer))
+
   async function login(credentials) {
     loading.value = true
 
@@ -62,5 +65,5 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, token, loading, initialized, isAuthenticated, login, logout, restore, clear }
+  return { user, token, loading, initialized, isAuthenticated, isDeveloper, login, logout, restore, clear }
 })

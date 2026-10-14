@@ -103,6 +103,7 @@
     @endif
 </div>
 
+<p>{{ $biller['name'] }}</p>
 <p>CC. {{ $biller['document'] }}</p>
 <p class="head">Teléfono Celular: {{ $biller['mobile'] }}</p>
 <p class="head">E-mail: {{ $biller['email'] }}</p>

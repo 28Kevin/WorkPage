@@ -11,12 +11,23 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    /** Opera la plataforma: examenes, certificados y cuentas de cobro. */
+    public const ROLE_ADMIN = 'admin';
+
+    /** Ademas ve el tablero de uso. */
+    public const ROLE_DEVELOPER = 'developer';
+
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    public function isDeveloper(): bool
+    {
+        return $this->role === self::ROLE_DEVELOPER;
+    }
 
     /**
      * Get the attributes that should be cast.

@@ -132,6 +132,12 @@ const routes = [
     meta: { requiresAuth: true, title: 'Corregir cuenta de cobro' },
   },
   {
+    path: '/admin/uso',
+    name: 'admin.usage',
+    component: () => import('@/views/UsageDashboardView.vue'),
+    meta: { requiresAuth: true, requiresDeveloper: true, title: 'Uso de la plataforma' },
+  },
+  {
     path: '/admin/configuracion',
     name: 'admin.branding',
     component: () => import('@/views/BrandingView.vue'),
@@ -168,6 +174,12 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.guestOnly && auth.isAuthenticated) {
+    return { name: 'admin.exams' }
+  }
+
+  // El servidor vuelve a comprobarlo: esto solo evita entrar a una pantalla
+  // que de todos modos respondería 403.
+  if (to.meta.requiresDeveloper && !auth.isDeveloper) {
     return { name: 'admin.exams' }
   }
 
