@@ -54,7 +54,6 @@ const form = reactive({
   food_handler: {
     course_name: '', course_hours: '', training_resolution: '',
     card_authorization: '', bacteriologist_name: '', food_engineer_name: '',
-    advisor_name: '', advisor_phone: '',
   },
 })
 
@@ -629,17 +628,6 @@ function discard() {
           </template>
         </FormField>
 
-        <FormField label="Asesora" :error="errors['food_handler.advisor_name']">
-          <template #default="{ id }">
-            <input :id="id" v-model="form.food_handler.advisor_name" type="text" class="field-input" @input="dirty = true">
-          </template>
-        </FormField>
-
-        <FormField label="Teléfono de la asesora" :error="errors['food_handler.advisor_phone']">
-          <template #default="{ id }">
-            <input :id="id" v-model="form.food_handler.advisor_phone" type="text" class="field-input" @input="dirty = true">
-          </template>
-        </FormField>
       </div>
     </section>
 

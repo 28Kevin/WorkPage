@@ -18,7 +18,7 @@
         * { box-sizing: border-box; }
         @page { margin: 104px 42px 86px; }
 
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10.4px; color: #111827; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 13px; color: #111827; }
 
         table { width: 100%; border-collapse: collapse; }
 
@@ -41,79 +41,85 @@
         .page { page-break-after: always; }
         .page.last { page-break-after: auto; }
 
-        h1.doc { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: .6px;
-                 text-align: center; color: {{ $palette[800] }}; margin: 0 0 9px; }
+        h1.doc { font-size: 21px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+                 text-align: center; color: {{ $palette[800] }}; margin: 0 0 10px;
+                 padding-bottom: 5px; border-bottom: 2px solid {{ $palette[200] }}; }
 
         /* Datos del paciente, repetidos en cada pagina del paquete. */
         .patient { border: 1px solid #d1d5db; margin-bottom: 9px; }
-        .patient td { padding: 4px 7px; border-right: 1px solid #e5e7eb;
-                      border-bottom: 1px solid #e5e7eb; font-size: 9.6px; }
+        .patient td { padding: 5px 9px; border-right: 1px solid #e5e7eb;
+                      border-bottom: 1px solid #e5e7eb; font-size: 12px; }
         .patient td:last-child { border-right: none; }
         .patient tr:last-child td { border-bottom: none; }
-        .patient .k { color: #6b7280; text-transform: uppercase; font-size: 7.8px;
-                      letter-spacing: .3px; display: block; }
+        .patient .k { color: #6b7280; text-transform: uppercase; font-size: 9.6px;
+                      letter-spacing: .3px; display: block; margin-bottom: 1px; }
         .patient .v { font-weight: bold; }
 
         /* Paneles de laboratorio. */
-        .panel { margin-bottom: 9px; border: 1px solid #d1d5db; }
+        .panel { margin-bottom: 8px; border: 1px solid #d1d5db; }
         .panel .title { background: {{ $palette[50] }}; color: {{ $palette[900] }};
-                        font-size: 9.2px; font-weight: bold; text-transform: uppercase;
-                        letter-spacing: .4px; padding: 4px 7px; border-bottom: 1px solid #d1d5db; }
-        .panel .group { background: #f9fafb; font-size: 8.6px; font-weight: bold; color: #374151;
-                        padding: 3px 7px; border-bottom: 1px solid #e5e7eb; }
-        .panel td { padding: 3px 7px; border-bottom: 1px solid #f3f4f6; font-size: 9.6px; }
-        .panel td.f { width: 42%; color: #4b5563; }
-        .panel td.v { font-weight: bold; }
-        .panel tr:last-child td { border-bottom: none; }
+                        font-size: 12px; font-weight: bold; text-transform: uppercase;
+                        letter-spacing: .5px; padding: 4px 9px; border-bottom: 1px solid #d1d5db; }
+        .panel .group { background: #f9fafb; font-size: 10.5px; font-weight: bold; color: #374151;
+                        padding: 2px 9px; border-bottom: 1px solid #e5e7eb; }
+        /* Celda contenedora de las dos columnas: sin relleno ni separadores. */
+        .panel td.cols { padding: 0; border-bottom: none; }
+        .panel table.grid { width: 100%; }
+        .panel table.grid > tr > td.col { width: 50%; padding: 0; border-bottom: none;
+                                          vertical-align: top; }
+        .panel table.grid > tr > td.col:first-child { border-right: 1px solid #e5e7eb; }
 
-        .prose { font-size: 10.4px; line-height: 1.75; text-align: justify; }
+        .panel td { padding: 1.5px 9px; border-bottom: 1px solid #f3f4f6; font-size: 11.5px; }
+        .panel td.f { width: 46%; color: #4b5563; }
+        .panel td.v { font-weight: bold; }
+
+        .prose { font-size: 14px; line-height: 2.05; text-align: justify; margin-bottom: 26px; }
         .prose strong { color: {{ $palette[900] }}; }
 
         /* Firma al pie de cada pagina. */
-        .sign { margin-top: 20px; }
-        .sign img { max-height: 54px; max-width: 200px; display: block; margin-bottom: 2px; }
-        .sign .rule { border-bottom: 1px solid #6b7280; width: 220px; }
-        .sign .who { font-size: 9.2px; font-weight: bold; margin-top: 2px; }
-        .sign .role { font-size: 8.6px; color: #6b7280; }
+        /*
+         * Los sellos son escaneos pequenios (180-234 px de ancho): al
+         * agrandarlos pierden definicion, pero asi se leen el nombre y el
+         * registro, que es lo que hace util el sello.
+         */
+        .sign { margin-top: 12px; }
+        .sign img { width: 236px; height: auto; display: block; margin-bottom: 3px; }
+        .sign .rule { border-bottom: 1px solid #6b7280; width: 300px; }
+        .sign .who { font-size: 12.5px; font-weight: bold; margin-top: 3px; }
+        .sign .role { font-size: 11px; color: #6b7280; }
 
         /* ------------------------------------------------------- carnet ---- */
-        .card { width: 340px; border: 3px solid {{ $palette[700] }}; border-radius: 12px;
-                padding: 9px 11px; }
-        .card .brand { font-size: 9.6px; font-weight: bold; color: {{ $palette[800] }};
-                       text-transform: uppercase; letter-spacing: .4px; text-align: center;
-                       border-bottom: 1px solid {{ $palette[200] }}; padding-bottom: 4px; }
-        .card .body td { vertical-align: top; padding-top: 5px; font-size: 8.8px; }
-        .card .photo { width: 74px; }
-        .card .photo .frame { width: 68px; height: 86px; border: 1px solid {{ $palette[300] }};
-                              border-radius: 5px; text-align: center; }
-        .card .photo .frame img { width: 68px; height: 86px; }
-        .card .photo .empty { font-size: 7px; color: #9ca3af; padding-top: 36px; }
-        .card .k { color: #6b7280; text-transform: uppercase; font-size: 6.8px;
+        /* 'margin: auto' centra el carne en la ultima pagina. */
+        .card { width: 430px; margin: 0 auto; border: 3px solid {{ $palette[700] }};
+                border-radius: 14px; padding: 13px 16px; }
+        .card .brand { font-size: 12.5px; font-weight: bold; color: {{ $palette[800] }};
+                       text-transform: uppercase; letter-spacing: .5px; text-align: center;
+                       border-bottom: 1px solid {{ $palette[200] }}; padding-bottom: 6px; }
+        .card .body td { vertical-align: top; padding-top: 7px; font-size: 11.5px; }
+        .card .photo { width: 92px; }
+        .card .photo .frame { width: 84px; height: 106px; border: 1px solid {{ $palette[300] }};
+                              border-radius: 6px; text-align: center; }
+        .card .photo .frame img { width: 84px; height: 106px; }
+        .card .k { color: #6b7280; text-transform: uppercase; font-size: 9px;
                    letter-spacing: .3px; display: block; }
-        .card .v { font-weight: bold; font-size: 9.2px; }
+        .card .v { font-weight: bold; font-size: 12px; }
         .card .serial { font-family: DejaVu Sans Mono, monospace; font-weight: bold;
-                        color: {{ $palette[800] }}; font-size: 10px; }
-        .card .qr { width: 66px; text-align: right; }
-        .card .qr img { width: 62px; height: 62px; }
-        .card .cardsign { height: 30px; }
-        .card .cardsign img { max-height: 28px; max-width: 120px; }
-        .card .foot { border-top: 1px solid {{ $palette[200] }}; margin-top: 6px; padding-top: 4px;
-                      font-size: 7px; color: #4b5563; line-height: 1.5; }
+                        color: {{ $palette[800] }}; font-size: 13px; }
+        .card .qr { width: 86px; text-align: right; }
+        .card .qr img { width: 82px; height: 82px; }
+        .card .cardsign { text-align: center; padding: 4px 0 2px; }
+        .card .cardsign img { width: 170px; height: auto; }
+        .card .foot { border-top: 1px solid {{ $palette[200] }}; margin-top: 9px; padding-top: 6px;
+                      font-size: 9.5px; color: #4b5563; line-height: 1.6; text-align: center; }
         .card .foot strong { color: {{ $palette[800] }}; }
 
-        .advisor { width: 340px; border: 1px solid #d1d5db; border-radius: 10px; padding: 9px 11px;
-                   margin-top: 16px; }
-        .advisor img { max-height: 76px; max-width: 100%; }
-        .advisor .k { color: #6b7280; text-transform: uppercase; font-size: 6.8px; display: block; }
-        .advisor .v { font-weight: bold; font-size: 9.6px; }
-
         /* Verificacion publica. */
-        .verify { margin-top: 14px; }
+        .verify { margin-top: 26px; }
         .verify td { vertical-align: middle; }
-        .verify .qr { width: 86px; text-align: center; }
-        .verify .qr img { width: 78px; height: 78px; border: 1px solid #d1d5db; padding: 3px; }
-        .verify .legend { font-size: 8.4px; color: #4b5563; line-height: 1.5; padding-left: 10px; }
-        .verify .code { font-family: DejaVu Sans Mono, monospace; font-size: 8.8px;
+        .verify .qr { width: 96px; text-align: center; }
+        .verify .qr img { width: 88px; height: 88px; border: 1px solid #d1d5db; padding: 3px; }
+        .verify .legend { font-size: 10.5px; color: #4b5563; line-height: 1.65; padding-left: 12px; }
+        .verify .code { font-family: DejaVu Sans Mono, monospace; font-size: 10.5px;
                         color: {{ $palette[800] }}; word-break: break-all; }
 
         .annulled-stamp { position: fixed; top: 300px; left: 0; right: 0; text-align: center;
@@ -244,15 +250,12 @@
 
         <table class="body">
             <tr>
-                <td class="photo">
-                    <div class="frame">
-                        @if ($record->photo)
-                            <img src="{{ $record->photo }}" alt="">
-                        @else
-                            <div class="empty">Sin foto</div>
-                        @endif
-                    </div>
-                </td>
+                {{-- Sin fotografia no se dibuja el recuadro: queda el espacio libre. --}}
+                @if ($record->photo)
+                    <td class="photo">
+                        <div class="frame"><img src="{{ $record->photo }}" alt=""></div>
+                    </td>
+                @endif
                 <td>
                     <span class="k">Señor(a)</span>
                     <span class="v">{{ $record->full_name }}</span>
@@ -281,18 +284,6 @@
             <strong>{{ $texts['card_authorization'] }}</strong><br>
             NIT {{ $center['nit'] }}
         </div>
-    </div>
-
-    {{-- Tarjeta de la asesora: imagen de la plantilla o sus datos en texto. --}}
-    <div class="advisor">
-        @if ($images['advisor_card'])
-            <img src="{{ $images['advisor_card'] }}" alt="">
-        @else
-            <span class="k">Asesora</span>
-            <span class="v">{{ $texts['advisor_name'] ?: $blank }}</span>
-            <span class="k" style="margin-top:4px;">Contacto</span>
-            <span class="v">{{ $texts['advisor_phone'] ?: $center['phone'] }}</span>
-        @endif
     </div>
 
     @include('pdf.food-handler.signature', ['role' => 'food_engineer'])

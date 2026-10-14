@@ -57,6 +57,19 @@ class PdfAssets
     }
 
     /**
+     * Sello o firma escaneada: llega como JPEG con fondo blanco, asi que se
+     * vuelve transparente igual que el sello del medico ocupacional. Sin eso
+     * el recuadro blanco taparia el texto que tiene debajo.
+     *
+     * Devuelve null si el archivo no esta, y entonces la plantilla deja la
+     * linea en blanco para firmar a mano.
+     */
+    public static function stamp(string $file): ?string
+    {
+        return self::dataUri($file);
+    }
+
+    /**
      * Imagen de plantilla tal cual, sin volver transparente el fondo: las del
      * paquete de alimentos llegan ya recortadas. Devuelve null si el archivo
      * todavia no se ha subido, y entonces la plantilla deja la linea en blanco.

@@ -20,14 +20,20 @@ use Illuminate\Support\Str;
  */
 class FoodHandlerPdfGenerator
 {
-    /** Nombre de archivo de cada imagen fija, en public/images. */
+    /** Encabezado y pie de la plantilla, en public/images. */
     private const TEMPLATE_IMAGES = [
         'header' => 'alimentos-encabezado.png',
         'footer' => 'alimentos-pie.png',
-        'bacteriologist' => 'firma-bacteriologa.png',
-        'physician' => 'firma-medico.png',
-        'food_engineer' => 'firma-ingeniera-alimentos.png',
-        'advisor_card' => 'tarjeta-asesora.png',
+    ];
+
+    /**
+     * Sellos de quien firma cada pagina. Son escaneos sobre fondo blanco, asi
+     * que pasan por la conversion a transparente antes de incrustarlos.
+     */
+    private const SIGNATURE_STAMPS = [
+        'bacteriologist' => 'bacteriologa.jpeg',
+        'physician' => 'sellomedgen.jpeg',
+        'food_engineer' => 'ingalimentos.jpeg',
     ];
 
     public function __construct(private readonly QrCodeGenerator $qr) {}
@@ -62,16 +68,17 @@ class FoodHandlerPdfGenerator
     }
 
     /**
-     * Imagenes de la plantilla ya como data URI. Las ausentes quedan en null.
+     * Imagenes de la plantilla ya como data URI. Las ausentes quedan en null y
+     * entonces esa firma sale como linea en blanco.
      *
      * @return array<string, string|null>
      */
     private function templateImages(): array
     {
-        return array_map(
-            fn (string $file) => PdfAssets::raw($file),
-            self::TEMPLATE_IMAGES,
-        );
+        return [
+            ...array_map(fn (string $file) => PdfAssets::raw($file), self::TEMPLATE_IMAGES),
+            ...array_map(fn (string $file) => PdfAssets::stamp($file), self::SIGNATURE_STAMPS),
+        ];
     }
 
     /**

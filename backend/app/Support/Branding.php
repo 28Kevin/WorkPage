@@ -34,7 +34,6 @@ class Branding
         'food_handler' => [
             'course_name', 'course_hours', 'training_resolution',
             'card_authorization', 'bacteriologist_name', 'food_engineer_name',
-            'advisor_name', 'advisor_phone',
         ],
     ];
 
@@ -80,8 +79,6 @@ class Branding
                 // con la linea en blanco para firmar a mano.
                 'bacteriologist_name' => '',
                 'food_engineer_name' => '',
-                'advisor_name' => '',
-                'advisor_phone' => '',
             ],
         ];
     }

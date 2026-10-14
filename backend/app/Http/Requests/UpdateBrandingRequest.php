@@ -59,8 +59,6 @@ class UpdateBrandingRequest extends FormRequest
             'food_handler.card_authorization' => ['nullable', 'string', 'max:200'],
             'food_handler.bacteriologist_name' => ['nullable', 'string', 'max:120'],
             'food_handler.food_engineer_name' => ['nullable', 'string', 'max:120'],
-            'food_handler.advisor_name' => ['nullable', 'string', 'max:120'],
-            'food_handler.advisor_phone' => ['nullable', 'string', 'max:40'],
         ];
     }
 
@@ -94,8 +92,6 @@ class UpdateBrandingRequest extends FormRequest
             'food_handler.card_authorization' => 'autorización del carné',
             'food_handler.bacteriologist_name' => 'bacterióloga',
             'food_handler.food_engineer_name' => 'ingeniera de alimentos',
-            'food_handler.advisor_name' => 'asesora',
-            'food_handler.advisor_phone' => 'teléfono de la asesora',
         ];
     }
 
