@@ -61,8 +61,7 @@
 {{-- Empresa a la que se le cobra. --}}
 <p class="center b">{{ $account->company_name }}</p>
 <p class="center b">
-    NIT: {{ $account->company_nit }}&nbsp;&nbsp;DIRECCIÓN: {{ $account->company_address }}
-    {{ $account->company_city }}
+    NIT: {{ $account->company_nit }}&nbsp;&nbsp;DIRECCIÓN: {{ $account->company_address }}@if ($account->company_city) {{ $account->company_city }}@endif
 </p>
 
 <p class="center b">DEBE A:</p>

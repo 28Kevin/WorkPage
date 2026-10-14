@@ -100,7 +100,7 @@ class BillingAccountGenerator
             [
                 'name' => $data['company_name'],
                 'address' => $data['company_address'],
-                'city' => $data['company_city'],
+                'city' => $data['company_city'] ?? null,
             ],
         );
     }
@@ -122,7 +122,7 @@ class BillingAccountGenerator
             'company_name' => $data['company_name'],
             'company_nit' => $data['company_nit'],
             'company_address' => $data['company_address'],
-            'company_city' => $data['company_city'],
+            'company_city' => $data['company_city'] ?? null,
 
             'items' => $priced['items'],
             'total' => $priced['total'],

@@ -88,7 +88,7 @@ async function loadAccount() {
     company_name: account.company.name,
     company_nit: account.company.nit,
     company_address: account.company.address,
-    company_city: account.company.city,
+    company_city: account.company.city || '',
     items: account.items.map((item) => ({
       concept: item.concept,
       quantity: item.quantity,
@@ -109,7 +109,7 @@ function pickCompany(event) {
     company_name: company.name,
     company_nit: company.nit,
     company_address: company.address,
-    company_city: company.city,
+    company_city: company.city || '',
   })
 }
 
@@ -148,6 +148,7 @@ watch(total, (value) => {
 function payload() {
   return {
     ...form,
+    company_city: form.company_city || null,
     items: form.items.map((item) => ({
       concept: item.concept,
       quantity: Number(item.quantity) || 0,
@@ -290,9 +291,9 @@ function itemError(index, field) {
                    :class="{ 'field-input-error': hasError }" required>
           </FormField>
 
-          <FormField v-slot="{ id, hasError }" label="Ciudad" :error="errors.company_city" required>
+          <FormField v-slot="{ id, hasError }" label="Ciudad" :error="errors.company_city">
             <input :id="id" v-model="form.company_city" type="text" class="field-input"
-                   :class="{ 'field-input-error': hasError }" required>
+                   :class="{ 'field-input-error': hasError }">
           </FormField>
         </div>
       </section>

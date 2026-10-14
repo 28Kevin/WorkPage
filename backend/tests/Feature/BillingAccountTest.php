@@ -126,7 +126,7 @@ class BillingAccountTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'issue_place', 'issue_date', 'company_name', 'company_nit',
-                'company_address', 'company_city', 'items',
+                'company_address', 'items',
             ]);
 
         $this->actingAs($this->admin(), 'sanctum')
@@ -140,6 +140,27 @@ class BillingAccountTest extends TestCase
             ]))
             ->assertUnprocessable()
             ->assertJsonValidationErrors('items.0.quantity');
+    }
+
+    public function test_the_city_of_the_company_can_be_left_blank(): void
+    {
+        $account = $this->create(['company_city' => null]);
+
+        $this->assertNull($account['company']['city']);
+
+        // El documento se emite igual, sin dejar un espacio suelto al final
+        // de la línea de la dirección.
+        $pdf = $this->actingAs($this->admin(), 'sanctum')
+            ->get("/api/billing/{$account['id']}/pdf");
+
+        $pdf->assertOk();
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+
+        // Y la empresa queda guardada para reutilizarla, también sin ciudad.
+        $this->assertDatabaseHas('billing_companies', [
+            'nit' => '900867292-1',
+            'city' => null,
+        ]);
     }
 
     public function test_the_company_is_saved_to_choose_it_next_time(): void

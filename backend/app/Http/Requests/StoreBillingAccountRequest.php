@@ -21,7 +21,7 @@ class StoreBillingAccountRequest extends FormRequest
             'company_name' => ['required', 'string', 'max:150'],
             'company_nit' => ['required', 'string', 'max:40'],
             'company_address' => ['required', 'string', 'max:180'],
-            'company_city' => ['required', 'string', 'max:80'],
+            'company_city' => ['nullable', 'string', 'max:80'],
 
             // Al menos un item: una cuenta sin conceptos no cobra nada.
             'items' => ['required', 'array', 'min:1'],
