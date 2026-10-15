@@ -15,8 +15,13 @@ class BackupRun extends Model
 
     public const FAILED = 'failed';
 
+    /** Vias por las que se obtiene el respaldo. */
+    public const DOWNLOAD = 'download';
+
+    public const MAIL = 'mail';
+
     protected $fillable = [
-        'status', 'delivered', 'mailer', 'recipient',
+        'status', 'channel', 'delivered', 'mailer', 'recipient',
         'filename', 'bytes', 'error', 'created_by',
     ];
 

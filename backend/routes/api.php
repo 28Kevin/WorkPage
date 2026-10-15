@@ -170,6 +170,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Respaldo de la base: genera el volcado y lo manda por correo.
         Route::get('/backups', [BackupController::class, 'index'])->name('api.backups.index');
+        Route::get('/backups/download', [BackupController::class, 'download'])
+            ->middleware('throttle:3,10')
+            ->name('api.backups.download');
         Route::post('/backups', [BackupController::class, 'store'])
             ->middleware('throttle:3,10')
             ->name('api.backups.store');

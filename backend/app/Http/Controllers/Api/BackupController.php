@@ -9,6 +9,7 @@ use App\Support\MailDelivery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -34,6 +35,7 @@ class BackupController extends Controller
             'runs' => $runs->map(fn (BackupRun $run) => [
                 'id' => $run->id,
                 'status' => $run->status,
+                'channel' => $run->channel,
                 'delivered' => $run->delivered,
                 'mailer' => $run->mailer,
                 'recipient' => $run->recipient,
@@ -47,8 +49,39 @@ class BackupController extends Controller
     }
 
     /**
-     * Genera el respaldo y lo envia al correo indicado. Es sincrono: el volcado
-     * de una base pequena tarda unos segundos y evita montar una cola.
+     * Genera el respaldo y lo entrega como descarga.
+     *
+     * Es la via principal: no depende del servidor de correo ni del limite de
+     * tamanio de un adjunto.
+     */
+    public function download(Request $request, DatabaseBackup $backup): BinaryFileResponse|JsonResponse
+    {
+        try {
+            $file = $backup->generate();
+        } catch (Throwable $exception) {
+            $this->record(BackupRun::FAILED, $request, null, channel: BackupRun::DOWNLOAD, error: $exception->getMessage());
+
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_CONFLICT);
+        }
+
+        $this->record(
+            BackupRun::OK,
+            $request,
+            null,
+            // Una descarga llega a su destino por definicion: la recibe quien
+            // la pidio, sin intermediarios que puedan fallar en silencio.
+            delivered: true,
+            channel: BackupRun::DOWNLOAD,
+            filename: $file['filename'],
+            bytes: $file['bytes'],
+        );
+
+        return response()->download($file['path'], $file['filename']);
+    }
+
+    /**
+     * Genera el respaldo y lo envia al correo indicado. Deja una copia fuera
+     * del servidor, que es lo que la descarga no cubre.
      */
     public function store(Request $request, DatabaseBackup $backup): JsonResponse
     {
@@ -67,12 +100,12 @@ class BackupController extends Controller
         try {
             $result = $backup->sendTo($recipient);
         } catch (RuntimeException $exception) {
-            $this->record(BackupRun::FAILED, $request, $recipient, error: $exception->getMessage());
+            $this->record(BackupRun::FAILED, $request, $recipient, channel: BackupRun::MAIL, error: $exception->getMessage());
 
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_CONFLICT);
         } catch (Throwable $exception) {
             // Un fallo del servidor de correo tambien tiene que quedar anotado.
-            $this->record(BackupRun::FAILED, $request, $recipient, error: $exception->getMessage());
+            $this->record(BackupRun::FAILED, $request, $recipient, channel: BackupRun::MAIL, error: $exception->getMessage());
 
             return response()->json([
                 'message' => 'El respaldo no pudo enviarse: '.$exception->getMessage(),
@@ -84,6 +117,7 @@ class BackupController extends Controller
             $request,
             $recipient,
             delivered: $result['delivered'],
+            channel: BackupRun::MAIL,
             mailer: $result['mailer'],
             filename: $result['filename'],
             bytes: $result['bytes'],
@@ -110,6 +144,7 @@ class BackupController extends Controller
         Request $request,
         ?string $recipient,
         bool $delivered = false,
+        string $channel = BackupRun::MAIL,
         ?string $mailer = null,
         ?string $filename = null,
         ?int $bytes = null,
@@ -117,6 +152,7 @@ class BackupController extends Controller
     ): void {
         BackupRun::create([
             'status' => $status,
+            'channel' => $channel,
             'delivered' => $delivered,
             'mailer' => $mailer ?? config('mail.default'),
             'recipient' => $recipient,

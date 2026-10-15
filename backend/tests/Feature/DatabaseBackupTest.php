@@ -47,6 +47,61 @@ class DatabaseBackupTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_the_download_needs_a_developer_account(): void
+    {
+        $this->getJson('/api/backups/download')->assertUnauthorized();
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN]), 'sanctum')
+            ->getJson('/api/backups/download')
+            ->assertForbidden();
+    }
+
+    public function test_a_failed_download_is_recorded_as_such(): void
+    {
+        /*
+         * En las pruebas la base es SQLite en memoria: no hay nada que volcar,
+         * asi que el comando falla. Lo que importa es que el fallo quede
+         * anotado en el historial y marcado como descarga, no como correo.
+         */
+        $this->actingAs($this->developer(), 'sanctum')
+            ->getJson('/api/backups/download')
+            ->assertStatus(409);
+
+        $run = BackupRun::latest('id')->first();
+
+        $this->assertSame(BackupRun::FAILED, $run->status);
+        $this->assertSame(BackupRun::DOWNLOAD, $run->channel);
+        $this->assertNotEmpty($run->error);
+    }
+
+    public function test_the_download_does_not_depend_on_the_mail_being_configured(): void
+    {
+        // Sin correo configurado, enviar falla; descargar no tiene por que.
+        config()->set('mail.default', 'log');
+
+        $this->actingAs($this->developer(), 'sanctum')
+            ->getJson('/api/backups/download')
+            // Falla por el volcado, no por el correo: el mensaje no lo menciona.
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn (string $m) => ! str_contains($m, 'correo'));
+    }
+
+    public function test_the_history_separates_downloads_from_mails(): void
+    {
+        $developer = $this->developer();
+
+        $this->actingAs($developer, 'sanctum')->getJson('/api/backups/download')->assertStatus(409);
+        $this->actingAs($developer, 'sanctum')
+            ->postJson('/api/backups', ['email' => 'kevin@ejemplo.test'])
+            ->assertStatus(409);
+
+        $channels = collect(
+            $this->actingAs($developer, 'sanctum')->getJson('/api/backups')->json('runs'),
+        )->pluck('channel')->all();
+
+        $this->assertSame([BackupRun::MAIL, BackupRun::DOWNLOAD], $channels);
+    }
+
     public function test_the_recipient_must_be_a_valid_address(): void
     {
         $this->actingAs($this->developer(), 'sanctum')

@@ -21,19 +21,15 @@ class DatabaseBackup
     private const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
     /**
-     * @return array{filename: string, bytes: int, delivered: bool, mailer: string, warning: string|null}
+     * Genera el volcado y devuelve donde quedo. No lo entrega: de eso se
+     * encargan la descarga o el envio por correo.
      *
-     * @throws RuntimeException si el volcado falla o pesa demasiado
+     * @return array{path: string, filename: string, bytes: int}
+     *
+     * @throws RuntimeException si el volcado falla
      */
-    public function sendTo(string $recipient): array
+    public function generate(): array
     {
-        /*
-         * Se mira antes de generar nada: si el correo no puede salir, decirlo
-         * de entrada evita un volcado inutil y, sobre todo, evita informar un
-         * envio que nunca ocurrio.
-         */
-        $delivery = MailDelivery::check();
-
         $exitCode = Artisan::call('backup:run', ['--only-db' => true, '--disable-notifications' => true]);
 
         if ($exitCode !== 0) {
@@ -50,21 +46,38 @@ class DatabaseBackup
 
         [$path, $bytes] = $backup;
 
+        return [
+            'path' => Storage::disk('local')->path($path),
+            'filename' => basename($path),
+            'bytes' => $bytes,
+        ];
+    }
+
+    /**
+     * @return array{filename: string, bytes: int, delivered: bool, mailer: string, warning: string|null}
+     *
+     * @throws RuntimeException si el volcado falla o pesa demasiado
+     */
+    public function sendTo(string $recipient): array
+    {
+        /*
+         * Se mira antes de generar nada: si el correo no puede salir, decirlo
+         * de entrada evita un volcado inutil y, sobre todo, evita informar un
+         * envio que nunca ocurrio.
+         */
+        $delivery = MailDelivery::check();
+
+        ['path' => $path, 'filename' => $filename, 'bytes' => $bytes] = $this->generate();
+
         if ($bytes > self::MAX_ATTACHMENT_BYTES) {
             throw new RuntimeException(sprintf(
-                'El respaldo pesa %s y supera el límite de %s por correo. Descárguelo desde el servidor.',
+                'El respaldo pesa %s y supera el límite de %s por correo. Use la descarga directa.',
                 $this->readable($bytes),
                 $this->readable(self::MAX_ATTACHMENT_BYTES),
             ));
         }
 
-        $filename = basename($path);
-
-        Mail::to($recipient)->send(new DatabaseBackupMail(
-            Storage::disk('local')->path($path),
-            $filename,
-            $bytes,
-        ));
+        Mail::to($recipient)->send(new DatabaseBackupMail($path, $filename, $bytes));
 
         return [
             'filename' => $filename,

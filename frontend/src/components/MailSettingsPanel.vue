@@ -219,8 +219,25 @@ async function sendTest() {
 
         </template>
 
-        <FormField v-slot="{ id }" label="Correo remitente" :error="errors.from_address">
-          <input :id="id" v-model="form.from_address" type="email" class="field-input">
+        <!--
+          Resend exige que el dominio del remitente esté verificado: una
+          dirección de Gmail o similar la rechaza.
+        -->
+        <FormField
+          v-slot="{ id }"
+          label="Correo remitente"
+          :error="errors.from_address"
+          :hint="form.transport === 'resend'
+            ? 'Debe ser de un dominio verificado en Resend. Sin dominio propio, use onboarding@resend.dev.'
+            : 'En Gmail y Outlook debe coincidir con el usuario.'"
+        >
+          <input
+            :id="id"
+            v-model="form.from_address"
+            type="email"
+            class="field-input"
+            :placeholder="form.transport === 'resend' ? 'onboarding@resend.dev' : ''"
+          >
         </FormField>
 
         <FormField v-slot="{ id }" label="Nombre del remitente" :error="errors.from_name">

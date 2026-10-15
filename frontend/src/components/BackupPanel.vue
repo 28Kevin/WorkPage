@@ -7,6 +7,7 @@ import { formatDateTime } from '@/services/dates'
 
 const email = ref('')
 const sending = ref(false)
+const downloading = ref(false)
 const result = ref(null)
 const warning = ref(null)
 const error = ref(null)
@@ -28,6 +29,60 @@ async function loadState() {
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * Descarga directa: no pasa por el servidor de correo ni tiene el límite de
+ * tamaño de un adjunto. El endpoint exige el token, así que se pide como blob.
+ */
+async function download() {
+  downloading.value = true
+  result.value = null
+  warning.value = null
+  error.value = null
+
+  try {
+    const { data, headers } = await api.get('/backups/download', { responseType: 'blob' })
+
+    const name = filenameFrom(headers) || 'respaldo.zip'
+    const url = URL.createObjectURL(new Blob([data], { type: 'application/zip' }))
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = name
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    result.value = `Respaldo descargado: ${name}`
+  } catch (err) {
+    // El error llega como blob: hay que leerlo para ver el mensaje.
+    error.value = await blobMessage(err)
+  } finally {
+    downloading.value = false
+    await loadState()
+  }
+}
+
+function filenameFrom(headers) {
+  const match = /filename="?([^";]+)"?/i.exec(headers?.['content-disposition'] ?? '')
+
+  return match ? match[1].trim() : null
+}
+
+async function blobMessage(err) {
+  const data = err.response?.data
+
+  if (data instanceof Blob) {
+    try {
+      return JSON.parse(await data.text()).message
+    } catch {
+      // Respuesta que no es JSON: se usa el mensaje genérico.
+    }
+  }
+
+  return parseApiError(err).message
 }
 
 async function send() {
@@ -69,21 +124,33 @@ function size(bytes) {
 
     <div class="space-y-4 p-5">
       <p class="text-sm leading-relaxed text-slate-600">
-        Genera una copia completa de la base —exámenes, configuración y galería— y la envía como archivo
-        adjunto. Guárdela fuera del servidor: sirve para restaurar aunque se pierda el acceso al proveedor.
+        Genera una copia completa de la base: exámenes, certificados, cuentas de cobro, configuración y
+        galería. Guárdela fuera del servidor: sirve para restaurar aunque se pierda el acceso al proveedor.
       </p>
 
-      <!-- Si el correo no puede salir, se dice antes de pulsar el botón. -->
-      <AlertMessage v-if="state && !state.mail.deliverable" variant="error">
-        <strong>El correo saliente no está configurado.</strong>
-        {{ state.mail.reason }}
-      </AlertMessage>
+      <div>
+        <button type="button" class="btn-primary" :disabled="downloading" @click="download">
+          {{ downloading ? 'Generando…' : 'Descargar respaldo' }}
+        </button>
+        <p class="field-hint">El archivo se descarga a su equipo. No pasa por el servidor de correo.</p>
+      </div>
 
       <AlertMessage v-if="result" variant="success">{{ result }}</AlertMessage>
       <AlertMessage v-if="warning" variant="error">{{ warning }}</AlertMessage>
       <AlertMessage v-if="error" variant="error">{{ error }}</AlertMessage>
 
-      <div class="flex flex-wrap items-end gap-3">
+      <!-- Envío por correo: secundario, para dejar la copia fuera del servidor. -->
+      <details class="border-t border-slate-200 pt-4">
+        <summary class="cursor-pointer text-sm font-medium text-slate-700">
+          Enviar también por correo
+        </summary>
+
+        <AlertMessage v-if="state && !state.mail.deliverable" variant="error" class="mt-3">
+          <strong>El correo saliente no está configurado.</strong>
+          {{ state.mail.reason }}
+        </AlertMessage>
+
+        <div class="mt-3 flex flex-wrap items-end gap-3">
         <FormField
           v-slot="{ id }"
           label="Enviar a"
@@ -95,10 +162,11 @@ function size(bytes) {
           <input :id="id" v-model="email" type="email" class="field-input" placeholder="correo@ejemplo.com">
         </FormField>
 
-        <button type="button" class="btn-primary" :disabled="sending" @click="send">
-          {{ sending ? 'Generando y enviando…' : 'Generar respaldo y enviarlo' }}
+        <button type="button" class="btn-secondary" :disabled="sending" @click="send">
+          {{ sending ? 'Generando y enviando…' : 'Enviar por correo' }}
         </button>
-      </div>
+        </div>
+      </details>
 
       <!-- Historial: hace visible un respaldo que lleva tiempo fallando. -->
       <div class="border-t border-slate-200 pt-4">
@@ -107,9 +175,9 @@ function size(bytes) {
 
           <p class="text-xs" :class="state?.last_successful_at ? 'text-slate-500' : 'text-red-700'">
             <template v-if="state?.last_successful_at">
-              Último respaldo entregado: {{ formatDateTime(state.last_successful_at) }}
+              Último respaldo obtenido: {{ formatDateTime(state.last_successful_at) }}
             </template>
-            <template v-else>Todavía no hay ningún respaldo entregado.</template>
+            <template v-else>Todavía no se ha obtenido ningún respaldo.</template>
           </p>
         </div>
 
@@ -127,11 +195,13 @@ function size(bytes) {
                 ? 'bg-emerald-100 text-emerald-800'
                 : 'bg-red-100 text-red-800'"
             >
-              {{ run.status === 'ok' && run.delivered ? 'ENTREGADO' : 'NO ENTREGADO' }}
+              {{ run.status === 'ok' && run.delivered ? 'OK' : 'FALLÓ' }}
             </span>
 
             <span class="text-slate-600">{{ formatDateTime(run.created_at) }}</span>
-            <span class="text-slate-500">{{ run.recipient }}</span>
+            <span class="text-slate-500">
+              {{ run.channel === 'download' ? 'Descarga' : run.recipient }}
+            </span>
             <span class="text-slate-500">{{ size(run.bytes) }}</span>
 
             <span v-if="run.error" class="w-full text-xs text-red-700">{{ run.error }}</span>
