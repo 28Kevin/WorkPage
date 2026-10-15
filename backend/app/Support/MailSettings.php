@@ -19,10 +19,16 @@ class MailSettings
 {
     private const PREFIX = 'mail.';
 
-    /** Campos visibles del formulario. La contrasenia va aparte. */
-    public const FIELDS = ['host', 'port', 'username', 'encryption', 'from_address', 'from_name'];
+    /** Campos visibles del formulario. Los secretos van aparte. */
+    public const FIELDS = ['transport', 'host', 'port', 'username', 'encryption', 'from_address', 'from_name'];
 
+    /** Vias de salida que ofrece el panel. */
+    public const TRANSPORTS = ['smtp', 'resend'];
+
+    /** Valores que no se devuelven nunca al navegador. */
     private const PASSWORD = 'password';
+
+    private const API_KEY = 'api_key';
 
     /**
      * Ajustes guardados, sin la contrasenia.
@@ -44,10 +50,25 @@ class MailSettings
         return filled(self::stored()[self::PREFIX.self::PASSWORD] ?? null);
     }
 
-    /** ¿Hay un servidor configurado desde el panel? */
+    public static function hasApiKey(): bool
+    {
+        return filled(self::stored()[self::PREFIX.self::API_KEY] ?? null);
+    }
+
+    /** Via elegida en el panel. */
+    public static function transport(): string
+    {
+        $transport = self::all()['transport'];
+
+        return in_array($transport, self::TRANSPORTS, true) ? $transport : 'smtp';
+    }
+
+    /** ¿Hay algo configurado desde el panel que debamos aplicar? */
     public static function configured(): bool
     {
-        return filled(self::all()['host']);
+        return self::transport() === 'resend'
+            ? self::hasApiKey()
+            : filled(self::all()['host']);
     }
 
     /**
@@ -66,17 +87,22 @@ class MailSettings
             }
         }
 
-        if (filled($values[self::PASSWORD] ?? null)) {
-            $flat[self::PREFIX.self::PASSWORD] = Crypt::encryptString((string) $values[self::PASSWORD]);
+        foreach ([self::PASSWORD, self::API_KEY] as $secret) {
+            if (filled($values[$secret] ?? null)) {
+                $flat[self::PREFIX.$secret] = Crypt::encryptString((string) $values[$secret]);
+            }
         }
 
         Setting::putMany($flat);
     }
 
-    /** Borra la contrasenia guardada. */
+    /** Borra los secretos guardados. */
     public static function forgetPassword(): void
     {
-        Setting::putMany([self::PREFIX.self::PASSWORD => '']);
+        Setting::putMany([
+            self::PREFIX.self::PASSWORD => '',
+            self::PREFIX.self::API_KEY => '',
+        ]);
     }
 
     /**
@@ -100,6 +126,22 @@ class MailSettings
 
         $settings = self::all();
 
+        /*
+         * Resend viaja por HTTPS en vez de SMTP. Hace falta donde el proveedor
+         * de hosting bloquea los puertos de correo saliente, que es lo normal
+         * en los planes gratuitos.
+         */
+        if (self::transport() === 'resend') {
+            config([
+                'mail.default' => 'resend',
+                'services.resend.key' => self::secret(self::API_KEY),
+            ]);
+
+            self::applyFrom($settings);
+
+            return;
+        }
+
         config([
             'mail.default' => 'smtp',
             'mail.mailers.smtp.host' => $settings['host'],
@@ -115,6 +157,12 @@ class MailSettings
             'mail.mailers.smtp.scheme' => $settings['encryption'] === 'ssl' ? 'smtps' : 'smtp',
         ]);
 
+        self::applyFrom($settings);
+    }
+
+    /** @param array<string, string|null> $settings */
+    private static function applyFrom(array $settings): void
+    {
         if (filled($settings['from_address'])) {
             config(['mail.from.address' => $settings['from_address']]);
         }
@@ -124,10 +172,15 @@ class MailSettings
         }
     }
 
-    /** Contrasenia descifrada, o null si no hay o si no se puede descifrar. */
     private static function password(): ?string
     {
-        $stored = self::stored()[self::PREFIX.self::PASSWORD] ?? null;
+        return self::secret(self::PASSWORD);
+    }
+
+    /** Secreto descifrado, o null si no hay o si no se puede descifrar. */
+    private static function secret(string $name): ?string
+    {
+        $stored = self::stored()[self::PREFIX.$name] ?? null;
 
         if (blank($stored)) {
             return null;

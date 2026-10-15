@@ -17,15 +17,29 @@ class MailSettingsController extends Controller
     public function show(): JsonResponse
     {
         return response()->json([
-            // La contrasenia nunca sale del servidor: solo si existe.
-            'settings' => [...MailSettings::all(), 'has_password' => MailSettings::hasPassword()],
+            // Los secretos nunca salen del servidor: solo si existen.
+            'settings' => $this->settings(),
             'status' => MailDelivery::check(),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function settings(): array
+    {
+        return [
+            ...MailSettings::all(),
+            'transport' => MailSettings::transport(),
+            'has_password' => MailSettings::hasPassword(),
+            'has_api_key' => MailSettings::hasApiKey(),
+        ];
     }
 
     public function update(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'transport' => ['nullable', Rule::in(MailSettings::TRANSPORTS)],
+            // Clave de API de Resend; vacia conserva la guardada.
+            'api_key' => ['nullable', 'string', 'max:255'],
             'host' => ['nullable', 'string', 'max:150'],
             'port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'username' => ['nullable', 'string', 'max:150'],
@@ -35,6 +49,8 @@ class MailSettingsController extends Controller
             'from_address' => ['nullable', 'email', 'max:150'],
             'from_name' => ['nullable', 'string', 'max:120'],
         ], [], [
+            'transport' => 'vía de envío',
+            'api_key' => 'clave de API',
             'host' => 'servidor',
             'port' => 'puerto',
             'username' => 'usuario',
@@ -49,7 +65,7 @@ class MailSettingsController extends Controller
 
         return response()->json([
             'message' => 'Configuración de correo guardada.',
-            'settings' => [...MailSettings::all(), 'has_password' => MailSettings::hasPassword()],
+            'settings' => $this->settings(),
             'status' => MailDelivery::check(),
         ]);
     }
@@ -57,8 +73,9 @@ class MailSettingsController extends Controller
     public function forgetPassword(): JsonResponse
     {
         MailSettings::forgetPassword();
+        MailSettings::apply();
 
-        return response()->json(['message' => 'Contraseña eliminada.']);
+        return response()->json(['message' => 'Credenciales eliminadas.']);
     }
 
     /**

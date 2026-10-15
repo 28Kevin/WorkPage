@@ -32,6 +32,14 @@ class MailDelivery
             ];
         }
 
+        if ($mailer === 'resend' && blank(config('services.resend.key'))) {
+            return [
+                'deliverable' => false,
+                'mailer' => $mailer,
+                'reason' => 'Falta la clave de API de Resend. Sin ella el servicio rechaza el envío.',
+            ];
+        }
+
         if ($mailer === 'smtp' && blank(config('mail.mailers.smtp.host'))) {
             return [
                 'deliverable' => false,

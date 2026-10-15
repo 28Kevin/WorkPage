@@ -138,6 +138,65 @@ class MailSettingsTest extends TestCase
         $this->assertSame(465, config('mail.mailers.smtp.port'));
     }
 
+    public function test_resend_sends_over_https_instead_of_smtp(): void
+    {
+        /*
+         * Render bloquea los puertos de SMTP saliente en los planes gratuitos:
+         * la conexion a smtp.gmail.com:587 caduca sin llegar a autenticar.
+         * Resend viaja por HTTPS, que no esta bloqueado en ninguna parte.
+         */
+        $this->actingAs($this->developer(), 'sanctum')
+            ->putJson('/api/mail-settings', [
+                'transport' => 'resend',
+                'api_key' => 're_la-clave-de-api',
+                'from_address' => 'avisos@ejemplo.test',
+                'from_name' => 'Centro Médico',
+            ])
+            ->assertOk()
+            ->assertJsonPath('settings.transport', 'resend')
+            ->assertJsonPath('settings.has_api_key', true)
+            ->assertJsonPath('status.deliverable', true);
+
+        MailSettings::apply();
+
+        $this->assertSame('resend', config('mail.default'));
+        $this->assertSame('re_la-clave-de-api', config('services.resend.key'));
+        $this->assertSame('avisos@ejemplo.test', config('mail.from.address'));
+    }
+
+    public function test_the_api_key_is_stored_encrypted_and_never_returned(): void
+    {
+        $this->actingAs($this->developer(), 'sanctum')
+            ->putJson('/api/mail-settings', ['transport' => 'resend', 'api_key' => 're_la-clave-de-api'])
+            ->assertOk();
+
+        $stored = Setting::where('key', 'mail.api_key')->value('value');
+
+        $this->assertNotSame('re_la-clave-de-api', $stored);
+        $this->assertNotEmpty($stored);
+
+        $response = $this->actingAs($this->developer(), 'sanctum')->getJson('/api/mail-settings');
+
+        $this->assertStringNotContainsString('re_la-clave-de-api', $response->getContent());
+        $this->assertArrayNotHasKey('api_key', $response->json('settings'));
+    }
+
+    public function test_resend_without_a_key_is_not_a_delivery(): void
+    {
+        $this->actingAs($this->developer(), 'sanctum')
+            ->putJson('/api/mail-settings', ['transport' => 'resend'])
+            ->assertOk()
+            ->assertJsonPath('status.deliverable', false);
+    }
+
+    public function test_an_invented_transport_is_rejected(): void
+    {
+        $this->actingAs($this->developer(), 'sanctum')
+            ->putJson('/api/mail-settings', ['transport' => 'paloma-mensajera'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('transport');
+    }
+
     public function test_without_a_host_it_does_not_touch_the_environment(): void
     {
         config()->set('mail.default', 'log');

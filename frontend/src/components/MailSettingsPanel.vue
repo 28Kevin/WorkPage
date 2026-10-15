@@ -11,6 +11,8 @@ import api, { parseApiError } from '@/services/api'
  * guardada. Dejarla vacía al guardar conserva la que ya estaba.
  */
 const form = reactive({
+  transport: 'smtp',
+  api_key: '',
   host: '',
   port: 587,
   username: '',
@@ -21,6 +23,7 @@ const form = reactive({
 })
 
 const hasPassword = ref(false)
+const hasApiKey = ref(false)
 const status = ref(null)
 
 const ready = ref(false)
@@ -48,6 +51,8 @@ function fill(data) {
   const settings = data.settings
 
   Object.assign(form, {
+    transport: settings.transport ?? 'smtp',
+    api_key: '',
     host: settings.host ?? '',
     port: settings.port ?? 587,
     username: settings.username ?? '',
@@ -58,6 +63,7 @@ function fill(data) {
   })
 
   hasPassword.value = settings.has_password
+  hasApiKey.value = settings.has_api_key
   status.value = data.status
 }
 
@@ -71,8 +77,9 @@ async function save() {
     const { data } = await api.put('/mail-settings', {
       ...form,
       port: Number(form.port) || null,
-      // Vacía significa "deja la que hay", no "bórrala".
+      // Vacíos significan "deja los que hay", no "bórralos".
       password: form.password || null,
+      api_key: form.api_key || null,
     })
 
     fill(data)
@@ -90,7 +97,8 @@ async function forgetPassword() {
   try {
     await api.delete('/mail-settings/password')
     hasPassword.value = false
-    notice.value = 'Contraseña eliminada.'
+    hasApiKey.value = false
+    notice.value = 'Credenciales eliminadas.'
   } catch (err) {
     error.value = parseApiError(err).message
   }
@@ -139,6 +147,38 @@ async function sendTest() {
       <p v-if="!ready" class="text-sm text-slate-500">Cargando…</p>
 
       <form v-else class="grid gap-4 sm:grid-cols-2" @submit.prevent="save">
+        <FormField
+          v-slot="{ id }"
+          label="Vía de envío"
+          class="sm:col-span-2"
+          :error="errors.transport"
+          hint="Si el servidor de hosting bloquea los puertos de SMTP, use Resend: viaja por HTTPS."
+        >
+          <select :id="id" v-model="form.transport" class="field-input">
+            <option value="smtp">Servidor SMTP (Gmail, Outlook…)</option>
+            <option value="resend">Resend (API por HTTPS)</option>
+          </select>
+        </FormField>
+
+        <FormField
+          v-if="form.transport === 'resend'"
+          v-slot="{ id }"
+          label="Clave de API"
+          class="sm:col-span-2"
+          :error="errors.api_key"
+          :hint="hasApiKey ? 'Hay una clave guardada. Déjelo vacío para conservarla.' : 'Se obtiene en el panel de Resend.'"
+        >
+          <input
+            :id="id"
+            v-model="form.api_key"
+            type="password"
+            class="field-input"
+            autocomplete="off"
+            placeholder="re_…"
+          >
+        </FormField>
+
+        <template v-if="form.transport === 'smtp'">
         <FormField v-slot="{ id }" label="Servidor (host)" :error="errors.host">
           <input :id="id" v-model="form.host" type="text" class="field-input" placeholder="smtp.gmail.com">
         </FormField>
@@ -177,6 +217,8 @@ async function sendTest() {
           </select>
         </FormField>
 
+        </template>
+
         <FormField v-slot="{ id }" label="Correo remitente" :error="errors.from_address">
           <input :id="id" v-model="form.from_address" type="email" class="field-input">
         </FormField>
@@ -186,8 +228,13 @@ async function sendTest() {
         </FormField>
 
         <div class="flex flex-wrap items-center justify-end gap-2 sm:col-span-2">
-          <button v-if="hasPassword" type="button" class="btn-ghost text-xs text-red-700" @click="forgetPassword">
-            Borrar contraseña guardada
+          <button
+            v-if="hasPassword || hasApiKey"
+            type="button"
+            class="btn-ghost text-xs text-red-700"
+            @click="forgetPassword"
+          >
+            Borrar credenciales guardadas
           </button>
 
           <button type="submit" class="btn-primary" :disabled="saving">
