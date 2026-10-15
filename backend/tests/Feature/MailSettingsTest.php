@@ -114,11 +114,28 @@ class MailSettingsTest extends TestCase
         $this->assertSame('smtp', config('mail.default'));
         $this->assertSame('smtp.ejemplo.test', config('mail.mailers.smtp.host'));
         $this->assertSame(587, config('mail.mailers.smtp.port'));
-        $this->assertSame('tls', config('mail.mailers.smtp.encryption'));
+        // Laravel 13 lee 'scheme', no 'encryption'.
+        $this->assertSame('smtp', config('mail.mailers.smtp.scheme'));
         $this->assertSame('avisos@ejemplo.test', config('mail.from.address'));
 
         // Y la comprobacion previa ve lo mismo que usara el envio.
         $this->assertTrue(MailDelivery::check()['deliverable']);
+    }
+
+    public function test_ssl_uses_the_implicit_tls_scheme(): void
+    {
+        /*
+         * 'smtps' es lo que activa el cifrado implicito del puerto 465. Con la
+         * clave equivocada el puerto 465 se queda esperando sin cifrar.
+         */
+        $this->actingAs($this->developer(), 'sanctum')
+            ->putJson('/api/mail-settings', $this->payload(['encryption' => 'ssl', 'port' => 465]))
+            ->assertOk();
+
+        MailSettings::apply();
+
+        $this->assertSame('smtps', config('mail.mailers.smtp.scheme'));
+        $this->assertSame(465, config('mail.mailers.smtp.port'));
     }
 
     public function test_without_a_host_it_does_not_touch_the_environment(): void

@@ -106,8 +106,13 @@ class MailSettings
             'mail.mailers.smtp.port' => (int) ($settings['port'] ?: 587),
             'mail.mailers.smtp.username' => $settings['username'] ?: null,
             'mail.mailers.smtp.password' => self::password(),
-            // 'ninguno' se guarda como cadena vacia; Laravel espera null.
-            'mail.mailers.smtp.encryption' => $settings['encryption'] ?: null,
+            /*
+             * Laravel 13 configura el cifrado con 'scheme', no con
+             * 'encryption': 'smtps' es TLS implicito (puerto 465) y 'smtp'
+             * deja que se negocie STARTTLS (puerto 587). Escribir
+             * 'encryption' no haria nada: esa clave ya no existe.
+             */
+            'mail.mailers.smtp.scheme' => $settings['encryption'] === 'ssl' ? 'smtps' : 'smtp',
         ]);
 
         if (filled($settings['from_address'])) {

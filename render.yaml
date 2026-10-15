@@ -78,8 +78,9 @@ services:
         sync: false
       - key: MAIL_PASSWORD
         sync: false
+      # Laravel 13 espera 'smtp' (STARTTLS) o 'smtps' (TLS implicito, 465).
       - key: MAIL_SCHEME
-        value: tls
+        value: smtp
       - key: MAIL_FROM_ADDRESS
         sync: false
       - key: MAIL_FROM_NAME
