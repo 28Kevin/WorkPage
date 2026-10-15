@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\MailDelivery;
 use App\Support\MailSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /** Credenciales del servidor de correo configuradas desde el panel. */
@@ -179,6 +180,20 @@ class MailSettingsTest extends TestCase
 
         $this->assertStringNotContainsString('re_la-clave-de-api', $response->getContent());
         $this->assertArrayNotHasKey('api_key', $response->json('settings'));
+    }
+
+    public function test_the_resend_transport_can_actually_be_built(): void
+    {
+        /*
+         * Elegir la via no basta: hace falta el paquete resend/resend-php.
+         * Sin el, Laravel resuelve el transporte y revienta con
+         * «Class "Resend" not found», y solo se ve al pulsar enviar.
+         */
+        config(['services.resend.key' => 're_clave-de-prueba']);
+
+        $transport = Mail::mailer('resend')->getSymfonyTransport();
+
+        $this->assertNotNull($transport);
     }
 
     public function test_resend_without_a_key_is_not_a_delivery(): void
