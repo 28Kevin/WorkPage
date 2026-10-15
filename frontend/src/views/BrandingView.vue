@@ -5,13 +5,16 @@ import AlertMessage from '@/components/AlertMessage.vue'
 import FormField from '@/components/FormField.vue'
 import BackupPanel from '@/components/BackupPanel.vue'
 import BillingConceptsManager from '@/components/BillingConceptsManager.vue'
+import MailSettingsPanel from '@/components/MailSettingsPanel.vue'
 import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { parseApiError } from '@/services/api'
 import { prepareImage } from '@/services/images'
 import { applyBranding, buildPalette } from '@/services/theme'
+import { useAuthStore } from '@/stores/auth'
 import { useBrandingStore } from '@/stores/branding'
 
+const auth = useAuthStore()
 const branding = useBrandingStore()
 
 /** Familias de Google Fonts sugeridas; el campo acepta cualquier otra. */
@@ -639,9 +642,13 @@ function discard() {
       </div>
 
       <GalleryManager />
-
-      <BackupPanel />
     </section>
+
+    <!-- Correo y respaldo: solo para cuentas de desarrollo. -->
+    <template v-if="auth.isDeveloper">
+      <MailSettingsPanel />
+      <BackupPanel />
+    </template>
 
     <div class="flex justify-end gap-2">
       <button v-if="dirty" type="button" class="btn-secondary" @click="discard">Descartar</button>

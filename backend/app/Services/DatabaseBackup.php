@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Mail\DatabaseBackupMail;
+use App\Support\MailDelivery;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -20,12 +21,19 @@ class DatabaseBackup
     private const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
     /**
-     * @return array{filename: string, bytes: int}
+     * @return array{filename: string, bytes: int, delivered: bool, mailer: string, warning: string|null}
      *
      * @throws RuntimeException si el volcado falla o pesa demasiado
      */
     public function sendTo(string $recipient): array
     {
+        /*
+         * Se mira antes de generar nada: si el correo no puede salir, decirlo
+         * de entrada evita un volcado inutil y, sobre todo, evita informar un
+         * envio que nunca ocurrio.
+         */
+        $delivery = MailDelivery::check();
+
         $exitCode = Artisan::call('backup:run', ['--only-db' => true, '--disable-notifications' => true]);
 
         if ($exitCode !== 0) {
@@ -58,7 +66,13 @@ class DatabaseBackup
             $bytes,
         ));
 
-        return ['filename' => $filename, 'bytes' => $bytes];
+        return [
+            'filename' => $filename,
+            'bytes' => $bytes,
+            'delivered' => $delivery['deliverable'],
+            'mailer' => $delivery['mailer'],
+            'warning' => $delivery['reason'],
+        ];
     }
 
     /**

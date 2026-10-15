@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\FoodHandlerRecordController;
 use App\Http\Controllers\Api\GalleryImageController;
+use App\Http\Controllers\Api\MailSettingsController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
 use App\Http\Controllers\Api\TrainingCertificateController;
@@ -69,10 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogs', [CatalogController::class, 'index'])->name('api.catalogs');
 
     Route::put('/branding', [BrandingController::class, 'update'])->name('api.branding.update');
-
-    Route::post('/backups', [BackupController::class, 'store'])
-        ->middleware('throttle:3,10')
-        ->name('api.backups.store');
 
     Route::get('/gallery/all', [GalleryImageController::class, 'all'])->name('api.gallery.all');
     Route::post('/gallery', [GalleryImageController::class, 'store'])->name('api.gallery.store');
@@ -161,5 +158,20 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::middleware('developer')->group(function () {
         Route::get('/dev/usage', [UsageController::class, 'index'])->name('api.dev.usage');
+
+        // Credenciales del servidor de correo.
+        Route::get('/mail-settings', [MailSettingsController::class, 'show'])->name('api.mail.show');
+        Route::put('/mail-settings', [MailSettingsController::class, 'update'])->name('api.mail.update');
+        Route::delete('/mail-settings/password', [MailSettingsController::class, 'forgetPassword'])
+            ->name('api.mail.forget-password');
+        Route::post('/mail-settings/test', [MailSettingsController::class, 'test'])
+            ->middleware('throttle:5,10')
+            ->name('api.mail.test');
+
+        // Respaldo de la base: genera el volcado y lo manda por correo.
+        Route::get('/backups', [BackupController::class, 'index'])->name('api.backups.index');
+        Route::post('/backups', [BackupController::class, 'store'])
+            ->middleware('throttle:3,10')
+            ->name('api.backups.store');
     });
 });
