@@ -90,7 +90,7 @@ onMounted(async () => {
           </div>
           <div>
             <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha de expedición</dt>
-            <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ data.exam.issued_at_label }}</dd>
+            <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ data.exam.issue_date_label }}</dd>
           </div>
         </dl>
 

@@ -7,8 +7,10 @@ use App\Models\FoodHandlerRecord;
 use App\Models\MedicalExam;
 use App\Models\TrainingCertificate;
 use App\Support\Branding;
+use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -106,7 +108,7 @@ class PublicVerificationController extends Controller
                 $exam->order_code,
                 $center['name'],
                 $center['nit'],
-                $exam->issued_at->translatedFormat('d \d\e F \d\e Y'),
+                $this->longDate($exam->exam_date),
             ),
             'issuer' => [
                 'name' => $center['name'],
@@ -121,8 +123,7 @@ class PublicVerificationController extends Controller
                 'exam_type_label' => $exam->exam_type->label(),
                 'result_label' => $exam->result->label(),
                 'exam_date' => $exam->exam_date->toDateString(),
-                'issued_at' => $exam->issued_at->toIso8601String(),
-                'issued_at_label' => $exam->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
+                'issue_date_label' => $this->longDate($exam->exam_date),
                 'arl' => $exam->arl?->name,
             ],
         ]);
@@ -146,8 +147,9 @@ class PublicVerificationController extends Controller
             'exam_type_label' => $exam->exam_type->label(),
             'result_label' => $exam->result->label(),
             'exam_date' => $exam->exam_date->toDateString(),
+            'issue_date_label' => $this->longDate($exam->exam_date),
+            // Solo para ordenar la lista; no se muestra.
             'issued_at' => $exam->issued_at->toIso8601String(),
-            'issued_at_label' => $exam->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
             'verification_code' => $exam->verification_code,
         ];
     }
@@ -167,8 +169,9 @@ class PublicVerificationController extends Controller
             'full_name' => $this->maskName($record->full_name),
             'document_number' => $this->maskDocument($record->document_number),
             'exam_date' => $record->issue_date->toDateString(),
+            'issue_date_label' => $this->longDate($record->issue_date),
+            // Solo para ordenar la lista; no se muestra.
             'issued_at' => $record->issued_at->toIso8601String(),
-            'issued_at_label' => $record->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
             'verification_code' => $record->verification_code,
         ];
     }
@@ -203,7 +206,7 @@ class PublicVerificationController extends Controller
                 $record->order_code,
                 $center['name'],
                 $center['nit'],
-                $record->issued_at->translatedFormat('d \d\e F \d\e Y'),
+                $this->longDate($record->issue_date),
             ),
             'issuer' => [
                 'name' => $center['name'],
@@ -216,8 +219,7 @@ class PublicVerificationController extends Controller
                 'full_name' => $this->maskName($record->full_name),
                 'document_number' => $this->maskDocument($record->document_number),
                 'exam_date' => $record->issue_date->toDateString(),
-                'issued_at' => $record->issued_at->toIso8601String(),
-                'issued_at_label' => $record->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
+                'issue_date_label' => $this->longDate($record->issue_date),
             ],
         ]);
     }
@@ -276,8 +278,8 @@ class PublicVerificationController extends Controller
                 'hours' => $certificate->hours,
                 'start_date' => $certificate->start_date->toDateString(),
                 'end_date' => $certificate->end_date->toDateString(),
-                'issued_at' => $certificate->issued_at->toIso8601String(),
-                'issued_at_label' => $certificate->issued_at->translatedFormat('d \d\e F \d\e Y, h:i a'),
+                // La del documento es la fecha de firma, no la del registro.
+                'issue_date_label' => $this->longDate($certificate->signed_date),
             ],
             // Lo que el formulario carga para esta pagina.
             'company' => [
@@ -291,6 +293,19 @@ class PublicVerificationController extends Controller
                 'email' => $center['email'],
             ],
         ]);
+    }
+
+    /**
+     * Fecha del documento en letra, sin hora.
+     *
+     * La consulta publica muestra una sola fecha: la que lleva impresa el
+     * documento. El instante en que se registro en el sistema puede ser otro
+     * —se diligencia dias despues, o se corrige— y ensenar las dos solo
+     * confunde a quien verifica.
+     */
+    private function longDate(DateTimeInterface $date): string
+    {
+        return Carbon::instance($date)->translatedFormat('d \d\e F \d\e Y');
     }
 
     /** Datos del centro tal como quedaron en el modulo de configuracion. */

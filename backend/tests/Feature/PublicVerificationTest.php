@@ -50,8 +50,43 @@ class PublicVerificationTest extends TestCase
             ->assertJsonPath('total', 1)
             ->assertJsonPath('results.0.order_code', $exam->order_code)
             ->assertJsonPath('results.0.result_label', 'APTO')
-            ->assertJsonPath('results.0.issued_at', $exam->issued_at->toIso8601String())
-            ->assertJsonStructure(['message', 'issuer', 'results' => [['exam_date', 'issued_at', 'issued_at_label']]]);
+            ->assertJsonStructure(['message', 'issuer', 'results' => [['exam_date', 'issue_date_label']]]);
+    }
+
+    public function test_the_public_query_shows_only_the_date_of_the_document(): void
+    {
+        /*
+         * El examen se diligencia el dia 10 pero se registra hoy. Antes la
+         * consulta ensenaba las dos fechas y quien verificaba no sabia cual
+         * mirar; ahora manda la que lleva impresa el documento.
+         */
+        $exam = $this->createExam(['exam_date' => '2026-03-10']);
+
+        $this->assertNotSame(
+            $exam->exam_date->toDateString(),
+            $exam->issued_at->toDateString(),
+            'El examen debía quedar registrado en una fecha distinta a la del documento.',
+        );
+
+        $entry = $this->getJson('/api/public/exams/search?document_number=1020304050')
+            ->assertOk()
+            ->json('results.0');
+
+        $this->assertSame('2026-03-10', $entry['exam_date']);
+        $this->assertSame('10 de marzo de 2026', $entry['issue_date_label']);
+
+        // La etiqueta con la hora del registro ya no se publica.
+        $this->assertArrayNotHasKey('issued_at_label', $entry);
+    }
+
+    public function test_the_qr_page_and_the_legend_use_the_same_date(): void
+    {
+        $exam = $this->createExam(['exam_date' => '2026-03-10']);
+
+        $response = $this->getJson('/api/public/verify/'.$exam->verification_code)->assertOk();
+
+        $this->assertSame('10 de marzo de 2026', $response->json('exam.issue_date_label'));
+        $this->assertStringContainsString('10 de marzo de 2026', $response->json('legend'));
     }
 
     public function test_public_search_returns_not_found_for_unknown_document(): void
