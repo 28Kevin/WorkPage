@@ -122,7 +122,16 @@ function formatDate(value) {
               <dd class="mt-0.5 text-sm text-slate-900">{{ item.exam_type_label }}</dd>
             </div>
             <div>
-              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha de expedición</dt>
+              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha del documento</dt>
+              <dd class="mt-0.5 text-sm text-slate-900">{{ formatDate(item.exam_date) }}</dd>
+            </div>
+            <!--
+              Las dos filas muestran la misma fecha, la que lleva impreso el
+              documento: antes la de abajo traía el instante del registro y no
+              coincidía con la de arriba.
+            -->
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium tracking-wide text-slate-500 uppercase">Fecha exacta de expedición</dt>
               <dd class="mt-0.5 text-sm font-semibold text-slate-900">{{ item.issue_date_label }}</dd>
             </div>
           </dl>
