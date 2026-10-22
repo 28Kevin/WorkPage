@@ -89,29 +89,53 @@
         .sign .role { font-size: 11px; color: #6b7280; }
 
         /* ------------------------------------------------------- carnet ---- */
-        /* 'margin: auto' centra el carne en la ultima pagina. */
-        .card { width: 430px; margin: 0 auto; border: 3px solid {{ $palette[700] }};
-                border-radius: 14px; padding: 13px 16px; }
-        .card .brand { font-size: 12.5px; font-weight: bold; color: {{ $palette[800] }};
-                       text-transform: uppercase; letter-spacing: .5px; text-align: center;
-                       border-bottom: 1px solid {{ $palette[200] }}; padding-bottom: 6px; }
-        .card .body td { vertical-align: top; padding-top: 7px; font-size: 11.5px; }
-        .card .photo { width: 92px; }
-        .card .photo .frame { width: 84px; height: 106px; border: 1px solid {{ $palette[300] }};
-                              border-radius: 6px; text-align: center; }
-        .card .photo .frame img { width: 84px; height: 106px; }
-        .card .k { color: #6b7280; text-transform: uppercase; font-size: 9px;
-                   letter-spacing: .3px; display: block; }
-        .card .v { font-weight: bold; font-size: 12px; }
-        .card .serial { font-family: DejaVu Sans Mono, monospace; font-weight: bold;
-                        color: {{ $palette[800] }}; font-size: 13px; }
-        .card .qr { width: 86px; text-align: right; }
-        .card .qr img { width: 82px; height: 82px; }
-        .card .cardsign { text-align: center; padding: 4px 0 2px; }
-        .card .cardsign img { width: 170px; height: auto; }
-        .card .foot { border-top: 1px solid {{ $palette[200] }}; margin-top: 9px; padding-top: 6px;
-                      font-size: 9.5px; color: #4b5563; line-height: 1.6; text-align: center; }
-        .card .foot strong { color: {{ $palette[800] }}; }
+        /*
+         * Carne de manipulador: reproduce el formato impreso. Todo va en
+         * cursiva, con el titulo y el curso dentro de recuadros, y a la
+         * derecha la foto sobre el numero. 'margin: auto' lo centra.
+         */
+        .card { width: 470px; margin: 0 auto; border: 2px solid {{ $palette[800] }};
+                border-radius: 16px; padding: 4px; }
+        .card .inner { border: 1px solid {{ $palette[700] }}; border-radius: 12px;
+                       padding: 9px 12px; font-style: italic; color: #111827; }
+
+        .card .box { border: 1px solid #374151; padding: 3px 7px; text-align: center;
+                     font-weight: bold; }
+        .card .box.title { font-size: 11.5px; letter-spacing: .2px; display: inline-block; }
+        .card .box.course { font-size: 12.5px; margin: 3px 0 7px; }
+
+        .card .grid { width: 100%; }
+        .card .grid > tr > td { vertical-align: top; padding: 0; }
+        .card .side { width: 108px; text-align: center; }
+
+        /* Linea de puntos donde en el impreso se escribe a mano. */
+        .card .field { font-size: 11.5px; font-weight: bold; margin-top: 5px;
+                       border-bottom: 1px solid #6b7280; padding-bottom: 1px; }
+        .card .field .lbl { font-weight: bold; }
+
+        .card .attended { text-align: center; font-size: 10.5px; font-weight: bold;
+                          margin-top: 6px; }
+        .card .meta { font-size: 11px; font-weight: bold; margin-top: 4px; }
+
+        .card .photo { width: 96px; height: 120px; border: 2px solid {{ $palette[700] }};
+                       border-radius: 10px; margin: 0 auto; }
+        .card .photo img { width: 92px; height: 116px; }
+
+        .card .numberbox { border: 1px solid #374151; margin: 10px auto 0; padding: 4px 6px;
+                           font-size: 15px; font-weight: bold; letter-spacing: .5px; }
+
+        .card .cardqr { margin-top: 8px; }
+        .card .cardqr img { width: 62px; height: 62px; }
+
+        /* El sello ya trae el nombre, el cargo y el NIT de quien firma. */
+        .card .cardsign { height: 52px; margin-top: 2px; }
+        .card .cardsign img { width: 186px; height: auto; }
+
+        .card .auth { font-size: 9.5px; font-weight: bold; margin-top: 2px; }
+
+        /* Tarjeta de la asesora: el escaneo va tal cual, debajo del carne. */
+        .advisor { text-align: center; margin-top: 16px; }
+        .advisor img { width: 390px; height: auto; }
 
         /* Verificacion publica. */
         .verify { margin-top: 26px; }
@@ -246,48 +270,64 @@
     <h1 class="doc">Carné de manipulador de alimentos</h1>
 
     <div class="card">
-        <div class="brand">{{ $center['name'] }}</div>
+        <div class="inner">
+            <table class="grid">
+                <tr>
+                    <td>
+                        <div class="box title">CARNET MANIPULADOR DE ALIMENTOS</div>
 
-        <table class="body">
-            <tr>
-                {{-- Sin fotografia no se dibuja el recuadro: queda el espacio libre. --}}
-                @if ($record->photo)
-                    <td class="photo">
-                        <div class="frame"><img src="{{ $record->photo }}" alt=""></div>
+                        <div class="field">
+                            <span class="lbl">Señor(a)</span> {{ $record->full_name }}
+                        </div>
+                        <div class="field">
+                            <span class="lbl">Con c.c. No</span> {{ $record->document_number }}
+                        </div>
+
+                        <p class="attended">Asistió al curso de:</p>
+
+                        {{-- Fijo de la plantilla: en el carné impreso es una
+                             etiqueta, no el nombre largo del curso. --}}
+                        <div class="box course">MANIPULACIÓN DE ALIMENTOS</div>
+
+                        <p class="meta">Con una intensidad de {{ $texts['course_hours'] }}</p>
+                        <p class="meta">
+                            Fecha de expedición&nbsp;&nbsp;{{ $record->issue_date->format('d - m - Y') }}
+                        </p>
+
+                        <div class="cardsign">
+                            @if ($images['food_engineer'])
+                                <img src="{{ $images['food_engineer'] }}" alt="">
+                            @endif
+                        </div>
+
+                        <p class="auth">{{ $texts['card_authorization'] }}</p>
                     </td>
-                @endif
-                <td>
-                    <span class="k">Señor(a)</span>
-                    <span class="v">{{ $record->full_name }}</span>
 
-                    <span class="k" style="margin-top:4px;">C.C. No.</span>
-                    <span class="v">{{ $record->document_number }}</span>
+                    <td class="side">
+                        {{-- Sin fotografia el recuadro queda vacio, como en el impreso. --}}
+                        <div class="photo">
+                            @if ($record->photo)
+                                <img src="{{ $record->photo }}" alt="">
+                            @endif
+                        </div>
 
-                    <span class="k" style="margin-top:4px;">Fecha de expedición</span>
-                    <span class="v">{{ $record->issue_date->format('d/m/Y') }}</span>
+                        <div class="numberbox">{{ $record->order_code }}</div>
 
-                    <span class="k" style="margin-top:4px;">Número</span>
-                    <span class="serial">{{ $record->order_code }}</span>
-                </td>
-                <td class="qr"><img src="{{ $qr }}" alt="Código QR de verificación"></td>
-            </tr>
-        </table>
-
-        <div class="cardsign">
-            @if ($images['food_engineer'])
-                <img src="{{ $images['food_engineer'] }}" alt="">
-            @endif
-        </div>
-
-        <div class="foot">
-            {{ $texts['course_name'] }} · Intensidad: {{ $texts['course_hours'] }}<br>
-            <strong>{{ $texts['card_authorization'] }}</strong><br>
-            NIT {{ $center['nit'] }}
+                        <div class="cardqr"><img src="{{ $qr }}" alt="Código QR de verificación"></div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    @include('pdf.food-handler.signature', ['role' => 'food_engineer'])
+    @if ($images['advisor_card'])
+        <div class="advisor">
+            <img src="{{ $images['advisor_card'] }}" alt="Tarjeta de la asesora">
+        </div>
+    @endif
 
+    {{-- Sin bloque de firma suelto: la ingeniera ya firma en el sello del
+         carne y en su tarjeta, y repetirla una tercera vez no cabia. --}}
     <table class="verify">
         <tr>
             <td class="qr"><img src="{{ $qr }}" alt="Código QR de verificación"></td>

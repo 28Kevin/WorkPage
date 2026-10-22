@@ -20,10 +20,12 @@ use Illuminate\Support\Str;
  */
 class FoodHandlerPdfGenerator
 {
-    /** Encabezado y pie de la plantilla, en public/images. */
+    /** Imagenes fijas de la plantilla, en public/images. */
     private const TEMPLATE_IMAGES = [
         'header' => 'alimentos-encabezado.png',
         'footer' => 'alimentos-pie.png',
+        // Escaneo de la tarjeta de la asesora: va debajo del carne.
+        'advisor_card' => 'tarjeta-asesora.png',
     ];
 
     /**
