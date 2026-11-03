@@ -25,9 +25,14 @@ api.interceptors.request.use((config) => {
 
 // Se registra desde main.js para poder redirigir al login sin importar el router aquí.
 let onUnauthenticated = () => {}
+let onSystemDisabled = () => {}
 
 export function setUnauthenticatedHandler(handler) {
   onUnauthenticated = handler
+}
+
+export function setSystemDisabledHandler(handler) {
+  onSystemDisabled = handler
 }
 
 api.interceptors.response.use(
@@ -39,6 +44,11 @@ api.interceptors.response.use(
     if (status === 401 && tokenStorage.get()) {
       tokenStorage.clear()
       onUnauthenticated()
+    }
+
+    // La plataforma se apagó con la pestaña abierta.
+    if (status === 503 && error.response.data?.code === 'system_disabled') {
+      onSystemDisabled()
     }
 
     return Promise.reject(error)

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useBrandingStore } from '@/stores/branding'
+import { useSystemStore } from '@/stores/system'
 
 const routes = [
   {
@@ -151,6 +152,13 @@ const routes = [
   },
 
   {
+    path: '/no-disponible',
+    name: 'system.unavailable',
+    component: () => import('@/views/ServiceUnavailableView.vue'),
+    meta: { public: true, title: 'Servicio no disponible' },
+  },
+
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFoundView.vue'),
@@ -167,7 +175,19 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
-  await auth.restore()
+  const system = useSystemStore()
+
+  await Promise.all([auth.restore(), system.load()])
+
+  // Plataforma apagada: solo el login y las cuentas de desarrollo pasan,
+  // para que siempre haya forma de volver a encenderla.
+  if (!system.enabled && !auth.isDeveloper && !['login', 'system.unavailable'].includes(to.name)) {
+    return { name: 'system.unavailable' }
+  }
+
+  if (system.enabled && to.name === 'system.unavailable') {
+    return '/'
+  }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }

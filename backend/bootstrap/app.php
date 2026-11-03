@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'developer' => App\Http\Middleware\EnsureUserIsDeveloper::class,
         ]);
+
+        // Interruptor general: se evalua en toda la API, con o sin sesion.
+        $middleware->api(append: [
+            App\Http\Middleware\EnsureSystemIsEnabled::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\GalleryImageController;
 use App\Http\Controllers\Api\MailSettingsController;
 use App\Http\Controllers\Api\MedicalExamController;
 use App\Http\Controllers\Api\PublicVerificationController;
+use App\Http\Controllers\Api\SystemSwitchController;
 use App\Http\Controllers\Api\TrainingCertificateController;
 use App\Http\Controllers\Api\UsageController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,7 @@ Route::post('/public/contact', [ContactMessageController::class, 'store'])
 | Identidad visual: la SPA la pide antes de pintar, con o sin sesion abierta
 |--------------------------------------------------------------------------
 */
+Route::get('/system', [SystemSwitchController::class, 'show'])->name('api.system.show');
 Route::get('/branding', [BrandingController::class, 'show'])->name('api.branding.show');
 Route::get('/gallery', [GalleryImageController::class, 'index'])->name('api.gallery.index');
 Route::get('/gallery/{image}/file', [GalleryImageController::class, 'file'])->name('api.gallery.file');
@@ -158,6 +160,9 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::middleware('developer')->group(function () {
         Route::get('/dev/usage', [UsageController::class, 'index'])->name('api.dev.usage');
+
+        // Interruptor general de la plataforma.
+        Route::put('/system', [SystemSwitchController::class, 'update'])->name('api.system.update');
 
         // Credenciales del servidor de correo.
         Route::get('/mail-settings', [MailSettingsController::class, 'show'])->name('api.mail.show');

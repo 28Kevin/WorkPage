@@ -6,6 +6,7 @@ import FormField from '@/components/FormField.vue'
 import BackupPanel from '@/components/BackupPanel.vue'
 import BillingConceptsManager from '@/components/BillingConceptsManager.vue'
 import MailSettingsPanel from '@/components/MailSettingsPanel.vue'
+import SystemSwitchPanel from '@/components/SystemSwitchPanel.vue'
 import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import { parseApiError } from '@/services/api'
@@ -234,7 +235,12 @@ function discard() {
       </div>
 
       <div class="grid gap-5 p-5 md:grid-cols-2">
-        <FormField label="Nombre de la plataforma" :error="errors['identity.app_name']" required>
+        <FormField
+          label="Nombre de la plataforma"
+          hint="Solo se ve en la web y en el encabezado del panel. No sale en los documentos."
+          :error="errors['identity.app_name']"
+          required
+        >
           <template #default="{ id }">
             <input
               :id="id"
@@ -432,7 +438,12 @@ function discard() {
       </p>
 
       <div class="grid gap-5 p-5 md:grid-cols-2">
-        <FormField label="Razón social" :error="errors['center.name']" required>
+        <FormField
+          label="Razón social"
+          hint="Es el nombre que se imprime en todos los PDF y en la verificación pública."
+          :error="errors['center.name']"
+          required
+        >
           <template #default="{ id }">
             <input :id="id" v-model="form.center.name" type="text" class="field-input" @input="dirty = true">
           </template>
@@ -648,6 +659,7 @@ function discard() {
     <template v-if="auth.isDeveloper">
       <MailSettingsPanel />
       <BackupPanel />
+      <SystemSwitchPanel />
     </template>
 
     <div class="flex justify-end gap-2">
