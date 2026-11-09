@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BloodType;
 use App\Enums\DocumentType;
 use App\Enums\ExamResult;
 use App\Enums\ExamType;
@@ -32,6 +33,7 @@ class StoreMedicalExamRequest extends FormRequest
             'document_number' => ['required', 'string', 'max:20', 'regex:/^[0-9]+$/'],
             'birth_date' => ['required', 'date', 'before:today', 'after:1920-01-01'],
             'sex' => ['required', Rule::enum(Sex::class)],
+            'blood_type' => ['required', Rule::enum(BloodType::class)],
             // Fotografia opcional: ~400 KB de base64 tras reducirla en el navegador.
             'photo' => ['nullable', 'string', 'max:400000', 'regex:/^data:image\/(png|jpeg|webp);base64,/'],
             // Firma trazada en el canvas del formulario: PNG con fondo transparente.
@@ -107,6 +109,7 @@ class StoreMedicalExamRequest extends FormRequest
             'document_number' => 'número de documento',
             'birth_date' => 'fecha de nacimiento',
             'sex' => 'sexo',
+            'blood_type' => 'RH',
             'photo' => 'fotografía',
             'worker_signature' => 'firma del trabajador',
             'height_cm' => 'estatura',

@@ -244,6 +244,7 @@ function formatDate(value) {
               {{ exam.worker.document_type || 'CC' }} {{ exam.worker.document_number }} ·
               {{ exam.worker.age }} años
               <template v-if="exam.worker.sex_label"> · {{ exam.worker.sex_label }}</template>
+              <template v-if="exam.worker.blood_type"> · RH {{ exam.worker.blood_type }}</template>
             </p>
           </div>
           <div>

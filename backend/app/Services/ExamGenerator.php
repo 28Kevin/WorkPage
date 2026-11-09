@@ -97,6 +97,7 @@ class ExamGenerator
             'document_number' => $data['document_number'],
             'birth_date' => $data['birth_date'],
             'sex' => $data['sex'] ?? null,
+            'blood_type' => $data['blood_type'] ?? null,
             'photo' => $data['photo'] ?? null,
             'worker_signature' => $data['worker_signature'] ?? null,
             'email' => $data['email'] ?? null,

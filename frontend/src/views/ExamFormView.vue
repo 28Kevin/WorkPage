@@ -31,6 +31,7 @@ const form = reactive({
   document_number: '',
   birth_date: '',
   sex: '',
+  blood_type: '',
   photo: null,
   height_cm: '',
   weight_kg: '',
@@ -146,6 +147,7 @@ async function loadExam() {
       document_number: exam.worker.document_number,
       birth_date: exam.worker.birth_date,
       sex: exam.worker.sex || '',
+      blood_type: exam.worker.blood_type || '',
       photo: exam.worker.photo || null,
       height_cm: exam.worker.height_cm,
       weight_kg: exam.worker.weight_kg,
@@ -457,6 +459,14 @@ async function submit() {
                     :class="{ 'field-input-error': hasError }" required>
               <option value="" disabled>Seleccione…</option>
               <option v-for="item in catalogs.sexes" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </FormField>
+
+          <FormField v-slot="{ id, hasError }" label="RH" :error="errors.blood_type" required>
+            <select :id="id" v-model="form.blood_type" class="field-input"
+                    :class="{ 'field-input-error': hasError }" required>
+              <option value="" disabled>Seleccione…</option>
+              <option v-for="item in catalogs.bloodTypes" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
           </FormField>
 

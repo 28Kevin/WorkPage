@@ -236,7 +236,10 @@
             <span class="k">Fecha de nacimiento / edad</span>
             <span class="v">{{ $exam->birth_date->format('d/m/Y') }} ({{ $exam->age }} años)</span>
         </td>
-        <td><span class="k">Sexo</span><span class="v">{{ $exam->sex?->label() ?? '—' }}</span></td>
+        <td>
+            <span class="k">Sexo / RH</span>
+            <span class="v">{{ $exam->sex?->label() ?? '—' }} &middot; {{ $exam->blood_type?->label() ?? '—' }}</span>
+        </td>
     </tr>
     <tr>
         <td colspan="2"><span class="k">ARL</span><span class="v">{{ $exam->arl?->name ?? '—' }}</span></td>

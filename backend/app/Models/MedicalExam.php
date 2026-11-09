@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BloodType;
 use App\Enums\DocumentType;
 use App\Enums\ExamResult;
 use App\Enums\ExamType;
@@ -24,6 +25,7 @@ class MedicalExam extends Model
         'document_number',
         'birth_date',
         'sex',
+        'blood_type',
         'photo',
         'worker_signature',
         'email',
@@ -72,6 +74,7 @@ class MedicalExam extends Model
             'paraclinicals' => 'array',
             'document_type' => DocumentType::class,
             'sex' => Sex::class,
+            'blood_type' => BloodType::class,
             'exam_type' => ExamType::class,
             'result' => ExamResult::class,
             'aptitude_position' => ExamResult::class,

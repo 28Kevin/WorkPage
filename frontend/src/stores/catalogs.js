@@ -8,6 +8,7 @@ export const useCatalogStore = defineStore('catalogs', () => {
   const examTypes = ref([])
   const documentTypes = ref([])
   const sexes = ref([])
+  const bloodTypes = ref([])
   const aptitudeResults = ref([])
 
   // Definiciones de los bloques semiestructurados del formato ocupacional.
@@ -33,6 +34,7 @@ export const useCatalogStore = defineStore('catalogs', () => {
       examTypes.value = data.exam_types
       documentTypes.value = data.document_types ?? []
       sexes.value = data.sexes ?? []
+      bloodTypes.value = data.blood_types ?? []
       aptitudeResults.value = data.aptitude_results ?? []
 
       systems.value = data.form?.systems ?? []
@@ -56,6 +58,7 @@ export const useCatalogStore = defineStore('catalogs', () => {
     examTypes.value = []
     documentTypes.value = []
     sexes.value = []
+    bloodTypes.value = []
     aptitudeResults.value = []
     systems.value = []
     paraclinicals.value = []
@@ -66,7 +69,7 @@ export const useCatalogStore = defineStore('catalogs', () => {
 
   return {
     arls, risks,
-    examTypes, documentTypes, sexes, aptitudeResults,
+    examTypes, documentTypes, sexes, bloodTypes, aptitudeResults,
     systems, paraclinicals, assessments, aptitudes,
     loaded, loading, load, findArl, reset,
   }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\BloodType;
 use App\Enums\DocumentType;
 use App\Enums\ExamResult;
 use App\Enums\ExamType;
@@ -25,6 +26,7 @@ class CatalogController extends Controller
             'exam_types' => ExamType::options(),
             'document_types' => DocumentType::options(),
             'sexes' => Sex::options(),
+            'blood_types' => BloodType::options(),
             'aptitude_results' => ExamResult::options(),
 
             // Bloques semiestructurados del formato: el formulario los pinta
