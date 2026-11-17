@@ -53,6 +53,12 @@ return [
     'expiration' => null,
 
     /*
+    | Minutos sin actividad tras los cuales el token deja de valer. Cada
+    | peticion autenticada renueva la cuenta (ver AppServiceProvider).
+    */
+    'idle_minutes' => (int) env('SANCTUM_IDLE_MINUTES', 15),
+
+    /*
     |--------------------------------------------------------------------------
     | Token Prefix
     |--------------------------------------------------------------------------

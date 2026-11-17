@@ -18,6 +18,12 @@ return [
     'default' => env('CACHE_STORE', 'database'),
 
     /*
+    | Almacen del tablero de uso. Va aparte y en archivo para no escribir en la
+    | base de datos en cada evento contado (ver App\Support\UsageTracker).
+    */
+    'usage_store' => env('USAGE_CACHE_STORE', 'file'),
+
+    /*
     |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------

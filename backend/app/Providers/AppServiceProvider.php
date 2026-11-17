@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Support\MailSettings;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,5 +28,16 @@ class AppServiceProvider extends ServiceProvider
          * durante las migraciones iniciales.
          */
         MailSettings::apply();
+
+        /*
+         * La sesion se cierra tras unos minutos sin actividad: el token vale
+         * mientras su ultimo uso (o su creacion) sea reciente. Sanctum actualiza
+         * last_used_at en cada peticion, asi que usar la plataforma la mantiene viva.
+         */
+        Sanctum::authenticateAccessTokensUsing(function ($token, bool $isValid) {
+            $lastActivity = $token->last_used_at ?? $token->created_at;
+
+            return $isValid && $lastActivity->gt(now()->subMinutes(config('sanctum.idle_minutes')));
+        });
     }
 }

@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'developer' => App\Http\Middleware\EnsureUserIsDeveloper::class,
+            'track' => App\Http\Middleware\TrackUsage::class,
         ]);
 
         // Interruptor general: se evalua en toda la API, con o sin sesion.

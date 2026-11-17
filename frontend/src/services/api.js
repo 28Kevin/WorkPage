@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { pendingRequests, tracksLoading } from '@/services/loading'
 
 const TOKEN_KEY = 'emo.token'
 
@@ -20,8 +21,20 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`
   }
 
+  if (tracksLoading(config)) {
+    config.tracked = true
+    pendingRequests.value++
+  }
+
   return config
 })
+
+function untrack(config) {
+  if (config?.tracked) {
+    config.tracked = false
+    pendingRequests.value = Math.max(0, pendingRequests.value - 1)
+  }
+}
 
 // Se registra desde main.js para poder redirigir al login sin importar el router aquí.
 let onUnauthenticated = () => {}
@@ -36,8 +49,14 @@ export function setSystemDisabledHandler(handler) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    untrack(response.config)
+
+    return response
+  },
   (error) => {
+    untrack(error.config)
+
     const status = error.response?.status
 
     // Las rutas públicas devuelven 404 legítimos; solo el 401 cierra la sesión.

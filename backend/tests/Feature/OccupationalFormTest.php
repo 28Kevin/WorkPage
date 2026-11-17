@@ -33,6 +33,7 @@ class OccupationalFormTest extends TestCase
             'document_number' => '1020304050',
             'birth_date' => '1992-03-11',
             'sex' => 'F',
+            'blood_type' => 'O+',
             'email' => 'ana.torres@example.com',
             'phone' => '3109998877',
             'height_cm' => 165,

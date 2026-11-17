@@ -18,7 +18,7 @@ setUnauthenticatedHandler(() => {
   useAuthStore().clear()
 
   if (router.currentRoute.value.meta.requiresAuth) {
-    router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+    router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath, expired: '1' } })
   }
 })
 

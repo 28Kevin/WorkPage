@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Support\UsageTracker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($request->input('password'), $user->password)) {
             RateLimiter::hit($key, 60);
+            UsageTracker::record(UsageTracker::LOGIN_FAILED);
 
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales no coinciden con nuestros registros.'],
@@ -34,6 +36,7 @@ class AuthController extends Controller
         }
 
         RateLimiter::clear($key);
+        UsageTracker::record(UsageTracker::LOGIN, (string) $user->id);
 
         $token = $user->createToken($request->input('device_name', 'web'))->plainTextToken;
 

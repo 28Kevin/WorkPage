@@ -1,108 +1,126 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useDragScroll } from '@/composables/useDragScroll'
 
 defineProps({
   services: { type: Array, required: true },
 })
 
-const track = ref(null)
-const atStart = ref(true)
-const atEnd = ref(false)
+// Rueda del mouse y arrastre para recorrer las tarjetas.
+const { track, dragging, handlers } = useDragScroll()
 
-/** Habilita o deshabilita las flechas según dónde esté el desplazamiento. */
-function sync() {
-  const element = track.value
+const reducedMotion =
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
 
-  if (!element) return
+/** Inclina la tarjeta hacia el cursor; solo con mouse, en pantallas táctiles no aplica. */
+function tilt(event) {
+  if (reducedMotion || event.pointerType !== 'mouse') return
 
-  const max = element.scrollWidth - element.clientWidth
+  const stage = event.currentTarget
+  const box = stage.getBoundingClientRect()
+  const x = (event.clientX - box.left) / box.width
+  const y = (event.clientY - box.top) / box.height
 
-  atStart.value = element.scrollLeft <= 4
-  atEnd.value = element.scrollLeft >= max - 4
+  stage.style.setProperty('--rx', `${(0.5 - y) * 16}deg`)
+  stage.style.setProperty('--ry', `${(x - 0.5) * 16}deg`)
+  stage.style.setProperty('--gx', `${x * 100}%`)
+  stage.style.setProperty('--gy', `${y * 100}%`)
+  stage.classList.add('is-tilting')
 }
 
-/** Avanza o retrocede el ancho de una tarjeta. */
-function scrollBy(direction) {
-  const element = track.value
+function untilt(event) {
+  const stage = event.currentTarget
 
-  if (!element) return
-
-  const card = element.firstElementChild
-
-  element.scrollBy({
-    left: direction * ((card?.clientWidth ?? 300) + 16),
-    behavior: 'smooth',
-  })
+  stage.style.setProperty('--rx', '0deg')
+  stage.style.setProperty('--ry', '0deg')
+  stage.classList.remove('is-tilting')
 }
-
-onMounted(() => {
-  sync()
-  window.addEventListener('resize', sync)
-})
-
-onBeforeUnmount(() => window.removeEventListener('resize', sync))
 </script>
 
 <template>
   <div class="relative">
     <div
       ref="track"
-      class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2"
+      class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:snap-none"
+      :class="dragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
       tabindex="0"
       aria-label="Servicios que ofrecemos"
-      @scroll="sync"
+      v-on="handlers"
     >
-      <article
+      <!-- El contenedor da la perspectiva; la tarjeta se inclina siguiendo el mouse. -->
+      <div
         v-for="(service, position) in services"
         :key="service.title"
-        class="card flex w-[280px] shrink-0 snap-start flex-col bg-white p-6 sm:w-[300px] lg:w-[264px] xl:w-[280px]"
+        class="tilt-stage w-[85%] shrink-0 snap-start py-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)] xl:w-[calc((100%-4rem)/5)]"
+        @pointermove="tilt"
+        @pointerleave="untilt"
       >
-        <span
-          class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-800"
-          aria-hidden="true"
-        >
-          {{ String(position + 1).padStart(2, '0') }}
-        </span>
+        <article class="tilt-card card relative flex h-full flex-col bg-white p-6">
+          <!-- Brillo que sigue al cursor, como luz sobre una superficie. -->
+          <span class="tilt-glare" aria-hidden="true"></span>
 
-        <h3 class="mt-4 text-base leading-snug font-bold text-balance text-slate-900">
-          {{ service.title }}
-        </h3>
+          <span
+            class="layer-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-sm font-bold text-white shadow-lg shadow-brand-500/30"
+            aria-hidden="true"
+          >
+            {{ String(position + 1).padStart(2, '0') }}
+          </span>
 
-        <p class="mt-2 text-sm font-medium text-brand-800">{{ service.summary }}</p>
-        <p class="mt-3 line-clamp-5 text-sm leading-relaxed text-slate-600">{{ service.detail }}</p>
+          <h3 class="layer-2 mt-4 text-base leading-snug font-bold text-balance text-slate-900">
+            {{ service.title }}
+          </h3>
 
-        <ul class="mt-auto flex flex-wrap gap-1.5 pt-4">
-          <li v-for="item in service.includes" :key="item" class="chip">{{ item }}</li>
-        </ul>
-      </article>
+          <p class="layer-1 mt-2 text-sm font-medium text-brand-800">{{ service.summary }}</p>
+          <p class="layer-1 mt-3 line-clamp-5 text-sm leading-relaxed text-slate-600">{{ service.detail }}</p>
+
+          <ul class="layer-2 mt-auto flex flex-wrap gap-1.5 pt-4">
+            <li v-for="item in service.includes" :key="item" class="chip">{{ item }}</li>
+          </ul>
+        </article>
+      </div>
     </div>
 
-    <div class="mt-6 flex justify-center gap-3">
-      <button
-        type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-brand-500"
-        aria-label="Ver servicios anteriores"
-        :disabled="atStart"
-        @click="scrollBy(-1)"
-      >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-      </button>
-
-      <button
-        type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-brand-500"
-        aria-label="Ver más servicios"
-        :disabled="atEnd"
-        @click="scrollBy(1)"
-      >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m9 18 6-6-6-6" />
-        </svg>
-      </button>
-    </div>
   </div>
 </template>
+
+<style scoped>
+.tilt-stage {
+  perspective: 1000px;
+}
+
+.tilt-card {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
+}
+
+/* Mientras sigue al cursor responde rápido; al salir vuelve suave a su sitio. */
+.is-tilting .tilt-card {
+  transition: transform 0.1s linear, box-shadow 0.3s;
+  box-shadow: 0 30px 60px -20px rgb(15 23 42 / 0.3);
+}
+
+/* Cada capa flota a una profundidad distinta. */
+.layer-1,
+.layer-2,
+.layer-3 {
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.is-tilting .layer-1 { transform: translateZ(20px); }
+.is-tilting .layer-2 { transform: translateZ(40px); }
+.is-tilting .layer-3 { transform: translateZ(60px); }
+
+.tilt-glare {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.6), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.is-tilting .tilt-glare { opacity: 1; }
+</style>

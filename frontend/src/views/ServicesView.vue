@@ -1,12 +1,18 @@
 <script setup>
-import { computed, onMounted } from 'vue'
-import HeroBanner from '@/components/HeroBanner.vue'
+import { onMounted } from 'vue'
+import HeroSection from '@/components/HeroSection.vue'
+import GalleryCard from '@/components/GalleryCard.vue'
+import ServiceCard from '@/components/ServiceCard.vue'
 import ServiceCarousel from '@/components/ServiceCarousel.vue'
+import { useDragScroll } from '@/composables/useDragScroll'
 import { useBrandingStore } from '@/stores/branding'
 import { useGalleryStore } from '@/stores/gallery'
 
 const branding = useBrandingStore()
 const gallery = useGalleryStore()
+
+// La galería se recorre con la rueda del mouse o arrastrando.
+const { track: galleryTrack, dragging: galleryDragging, handlers: galleryHandlers } = useDragScroll()
 
 const SERVICES = [
   {
@@ -55,13 +61,42 @@ const SERVICES = [
   },
 ]
 
+/** Convenios. 'icon' es el trazo de un ícono de Lucide, que la tarjeta dibuja en grande. */
 const SECTORS = [
-  { name: 'Trabajo seguro en alturas', note: 'Todas las categorías y niveles de entrenamiento.' },
-  { name: 'Construcción pública y privada', note: 'Obra civil, edificaciones e infraestructura.' },
-  { name: 'Administrativo y operativo', note: 'Personal de oficina, bodega y planta.' },
-  { name: 'Telecomunicaciones y tecnología', note: 'Montaje y mantenimiento de redes y torres.' },
-  { name: 'Industria de alimentos', note: 'Producción, distribución y servicio.' },
+  {
+    name: 'Trabajo seguro en alturas',
+    note: 'Todas las categorías y niveles de entrenamiento.',
+    icon: 'M2 20h20M5 20V8l7-5 7 5v12M9 20v-6h6v6',
+    tone: 'brand',
+  },
+  {
+    name: 'Construcción pública y privada',
+    note: 'Obra civil, edificaciones e infraestructura.',
+    icon: 'M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1zM10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5M4 15v-3a6 6 0 0 1 6-6M14 6a6 6 0 0 1 6 6v3',
+    tone: 'light',
+  },
+  {
+    name: 'Administrativo y operativo',
+    note: 'Personal de oficina, bodega y planta.',
+    icon: 'M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M4 6h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z',
+    tone: 'soft',
+  },
+  {
+    name: 'Telecomunicaciones y tecnología',
+    note: 'Montaje y mantenimiento de redes y torres.',
+    icon: 'M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19M12 12h.01',
+    tone: 'accent',
+  },
+  {
+    name: 'Industria de alimentos',
+    note: 'Producción, distribución y servicio.',
+    icon: 'M3 2v7a3 3 0 0 0 6 0V2M6 2v20M21 15V2a5 5 0 0 0-5 5v6h5zm0 0v7',
+    tone: 'dark',
+  },
 ]
+
+/** Video del banner principal; si no carga se ve la primera imagen. */
+const HERO_VIDEO = 'https://cdn.21st.dev/assets/mirror/4b/4bc542f7d287b18d595da8e796a834608a5cf10ef3618e191bdc524ce712ba67.mp4'
 
 /** Diapositivas del banner. Las imágenes se sirven desde public/images. */
 const SLIDES = [
@@ -100,34 +135,31 @@ const HIGHLIGHTS = [
     title: 'Certificado el mismo día',
     note: 'El documento queda en PDF apenas termina la valoración.',
     icon: 'M13 2 3 14h7l-1 8 10-12h-7l1-8z',
-    tone: 'bg-amber-100 text-amber-700 ring-amber-200',
+    tone: 'brand',
+    to: { name: 'public.contact' },
+    cta: 'Agendar una cita',
   },
   {
     title: 'Verificable con código QR',
     note: 'Cualquiera puede comprobar la autenticidad del certificado en línea.',
     icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z',
-    tone: 'bg-brand-100 text-brand-700 ring-brand-200',
+    tone: 'soft',
+    to: { name: 'public.search' },
+    cta: 'Verificar un certificado',
   },
   {
     title: 'Atención a empresas',
     note: 'Programación por grupos y cotización para toda su nómina.',
     icon: 'M17 20h5v-2a3 3 0 0 0-5.4-1.8M17 20H7m10 0v-2c0-.7-.1-1.3-.4-1.8M7 20H2v-2a3 3 0 0 1 5.4-1.8M7 20v-2c0-.7.1-1.3.4-1.8m0 0a5 5 0 0 1 9.2 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
-    tone: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
+    tone: 'accent',
+    to: { name: 'public.contact' },
+    cta: 'Solicitar cotización',
   },
 ]
 
-/** Un acento distinto por convenio, para que la retícula no quede plana. */
-const SECTOR_TONES = [
-  'from-brand-600 to-accent-500',
-  'from-accent-500 to-teal-500',
-  'from-indigo-500 to-brand-600',
-  'from-teal-500 to-emerald-500',
-  'from-amber-500 to-orange-500',
-]
+/** Cinco convenios en dos filas: dos tarjetas anchas arriba y tres abajo. */
+const SECTOR_SPANS = ['lg:col-span-3', 'lg:col-span-3', 'lg:col-span-2', 'lg:col-span-2', 'lg:col-span-2']
 
-const schedule = computed(() =>
-  (branding.center.schedule || '').split('\n').map((line) => line.trim()).filter(Boolean),
-)
 
 onMounted(() => {
   branding.load()
@@ -138,33 +170,37 @@ onMounted(() => {
 <template>
   <div class="space-y-16">
     <!-- ============================================================= encabezado -->
-    <HeroBanner :slides="SLIDES" />
+    <HeroSection
+      :eyebrow="SLIDES[0].eyebrow"
+      :title="SLIDES[0].title"
+      :text="SLIDES[0].text"
+      :poster="SLIDES[0].image"
+      :video="HERO_VIDEO"
+      :marquee="SECTORS.map((sector) => sector.name)"
+      marquee-label="Atendemos a empresas de"
+    />
+
+    <!-- Lo que sigue al banner usa todo el ancho, con margen a los lados. -->
+    <div class="space-y-16 px-4 sm:px-8 lg:px-12 2xl:px-20">
 
     <!-- ------------------------------------------------------------ argumentos -->
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Por qué elegirnos">
-      <div v-for="item in HIGHLIGHTS" :key="item.title" class="card flex gap-4 bg-white p-6">
-        <span
-          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset"
-          :class="item.tone"
-          aria-hidden="true"
-        >
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path :d="item.icon" />
-          </svg>
-        </span>
-
-        <div>
-          <h2 class="text-base font-bold text-slate-900">{{ item.title }}</h2>
-          <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ item.note }}</p>
-        </div>
-      </div>
+      <ServiceCard
+        v-for="item in HIGHLIGHTS"
+        :key="item.title"
+        :title="item.title"
+        :description="item.note"
+        :icon="item.icon"
+        :tone="item.tone"
+        :to="item.to"
+        :cta="item.cta"
+      />
     </section>
 
     <!-- --------------------------------------------------------- los servicios -->
     <section
       id="servicios"
-      class="scroll-mt-24 rounded-2xl bg-gradient-to-b from-brand-50 via-accent-50/60 to-white px-5 py-14 sm:px-10 sm:py-20"
+      class="scroll-mt-24 py-6 sm:py-10"
     >
       <header class="mx-auto max-w-2xl text-center">
         <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Nuestros servicios</p>
@@ -190,22 +226,24 @@ onMounted(() => {
         </h2>
       </header>
 
-      <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <figure v-for="image in gallery.images" :key="image.id" class="card group overflow-hidden">
-          <div class="overflow-hidden">
-            <img
-              :src="image.url"
-              :alt="image.title"
-              loading="lazy"
-              class="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
-            >
-          </div>
-
-          <figcaption class="px-3 py-2.5">
-            <p class="text-xs font-bold text-slate-900">{{ image.title }}</p>
-            <p v-if="image.caption" class="mt-0.5 text-xs text-slate-500">{{ image.caption }}</p>
-          </figcaption>
-        </figure>
+      <!-- Una sola fila que se recorre de lado: admite cualquier cantidad de fotos. -->
+      <div
+        ref="galleryTrack"
+        class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto py-2 md:snap-none"
+        :class="galleryDragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
+        tabindex="0"
+        aria-label="Fotografías de las instalaciones"
+        v-on="galleryHandlers"
+      >
+        <GalleryCard
+          v-for="(image, position) in gallery.images"
+          :key="image.id"
+          class="w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] 2xl:w-[calc((100%-3.75rem)/4)]"
+          :image="image.url"
+          :title="image.title"
+          :caption="image.caption"
+          :index="position"
+        />
       </div>
     </section>
 
@@ -221,64 +259,21 @@ onMounted(() => {
         </p>
       </header>
 
-      <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
+      <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <ServiceCard
           v-for="(sector, position) in SECTORS"
           :key="sector.name"
-          class="card overflow-hidden bg-white transition hover:-translate-y-0.5 hover:shadow-md"
-        >
-          <div class="h-1.5 bg-gradient-to-r" :class="SECTOR_TONES[position % SECTOR_TONES.length]"></div>
-
-          <div class="p-6">
-            <h3 class="text-lg font-bold text-slate-900">{{ sector.name }}</h3>
-            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ sector.note }}</p>
-          </div>
-        </div>
+          :class="SECTOR_SPANS[position]"
+          :title="sector.name"
+          :description="sector.note"
+          :icon="sector.icon"
+          :tone="sector.tone"
+          :to="{ name: 'public.contact' }"
+          cta="Solicitar cotización"
+        />
       </div>
     </section>
 
-    <!-- ---------------------------------------------------- horarios y llamada -->
-    <section class="relative isolate overflow-hidden rounded-2xl bg-slate-900" aria-labelledby="cta-title">
-      <img
-        src="/images/fondo.jpg"
-        alt=""
-        class="absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-40"
-      >
-      <div class="absolute inset-0 -z-10 bg-slate-950/75" aria-hidden="true"></div>
-
-      <div class="grid grid-cols-1 gap-10 px-6 py-16 sm:px-12 lg:grid-cols-3 lg:py-20">
-        <div>
-          <h2 class="text-lg font-bold text-white">Horario de atención</h2>
-          <ul v-if="schedule.length" class="mt-3 space-y-1 text-sm text-slate-200">
-            <li v-for="line in schedule" :key="line">{{ line }}</li>
-          </ul>
-          <p v-else class="mt-3 text-sm text-slate-300">Consúltenos el horario de atención.</p>
-        </div>
-
-        <div>
-          <h2 class="text-lg font-bold text-white">Dónde estamos</h2>
-          <p class="mt-3 text-sm leading-relaxed text-slate-200">{{ branding.center.address || '—' }}</p>
-          <p v-if="branding.center.phone" class="mt-1 text-sm text-slate-200">{{ branding.center.phone }}</p>
-        </div>
-
-        <div class="lg:text-right">
-          <h2 id="cta-title" class="text-lg font-bold text-white">¿Listo para programar?</h2>
-          <p class="mt-3 text-sm leading-relaxed text-slate-200">
-            Escríbanos y le confirmamos disponibilidad, para su empresa o de forma individual.
-          </p>
-
-          <RouterLink
-            :to="{ name: 'public.contact' }"
-            class="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-slate-100"
-          >
-            Contáctenos
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </RouterLink>
-        </div>
-      </div>
-    </section>
+    </div>
   </div>
 </template>

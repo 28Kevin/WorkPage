@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      const { data } = await api.post('/auth/login', { ...credentials, device_name: 'web' })
+      const { data } = await api.post('/auth/login', { ...credentials, device_name: 'web' }, { silent: true })
 
       tokenStorage.set(data.token)
       token.value = data.token
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      await api.post('/auth/logout')
+      await api.post('/auth/logout', null, { silent: true })
     } catch {
       // La sesión se limpia localmente aunque el servidor no responda.
     } finally {

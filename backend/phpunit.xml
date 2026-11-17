@@ -35,6 +35,7 @@
         <server name="BCRYPT_ROUNDS" value="4" force="true"/>
         <server name="BROADCAST_CONNECTION" value="null" force="true"/>
         <server name="CACHE_STORE" value="array" force="true"/>
+        <server name="USAGE_CACHE_STORE" value="array" force="true"/>
         <server name="DB_CONNECTION" value="sqlite" force="true"/>
         <server name="DB_DATABASE" value=":memory:" force="true"/>
         <server name="DB_URL" value="" force="true"/>
@@ -54,6 +55,7 @@
         <env name="BCRYPT_ROUNDS" value="4" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null" force="true"/>
         <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="USAGE_CACHE_STORE" value="array" force="true"/>
         <env name="DB_CONNECTION" value="sqlite" force="true"/>
         <env name="DB_DATABASE" value=":memory:" force="true"/>
         <env name="DB_URL" value="" force="true"/>

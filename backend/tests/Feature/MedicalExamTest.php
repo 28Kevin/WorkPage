@@ -38,6 +38,7 @@ class MedicalExamTest extends TestCase
             'document_number' => '1020304050',
             'birth_date' => '1990-05-14',
             'sex' => 'M',
+            'blood_type' => 'O+',
             'email' => 'carlos.rodriguez@example.com',
             'phone' => '3101234567',
             'height_cm' => 175,

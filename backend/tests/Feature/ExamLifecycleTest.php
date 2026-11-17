@@ -36,6 +36,7 @@ class ExamLifecycleTest extends TestCase
             'document_number' => '7654321',
             'birth_date' => '1988-09-02',
             'sex' => 'M',
+            'blood_type' => 'O+',
             'height_cm' => 178,
             'arl_id' => Arl::first()->id,
             'is_independent' => false,

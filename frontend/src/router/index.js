@@ -32,7 +32,7 @@ const routes = [
     path: '/servicios',
     name: 'public.services',
     component: () => import('@/views/ServicesView.vue'),
-    meta: { public: true, title: 'Servicios' },
+    meta: { public: true, fullBleed: true, title: 'Servicios' },
   },
   {
     path: '/contacto',
@@ -46,7 +46,7 @@ const routes = [
     path: '/admin/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
-    meta: { public: true, guestOnly: true, title: 'Ingreso administrativo' },
+    meta: { public: true, guestOnly: true, wide: true, title: 'Ingreso administrativo' },
   },
   {
     path: '/admin',
@@ -136,7 +136,7 @@ const routes = [
     path: '/admin/uso',
     name: 'admin.usage',
     component: () => import('@/views/UsageDashboardView.vue'),
-    meta: { requiresAuth: true, requiresDeveloper: true, title: 'Uso de la plataforma' },
+    meta: { requiresAuth: true, requiresDeveloper: true, wide: true, title: 'Uso de la plataforma' },
   },
   {
     path: '/admin/configuracion',

@@ -23,9 +23,15 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::prefix('public')->name('api.public.')->middleware('throttle:30,1')->group(function () {
-    Route::get('/exams/search', [PublicVerificationController::class, 'search'])->name('search');
-    Route::get('/verify/{code}', [PublicVerificationController::class, 'verify'])->name('verify');
-    Route::get('/certificates/{code}', [PublicVerificationController::class, 'certificate'])->name('certificate');
+    Route::get('/exams/search', [PublicVerificationController::class, 'search'])
+        ->middleware('track:public.search')
+        ->name('search');
+    Route::get('/verify/{code}', [PublicVerificationController::class, 'verify'])
+        ->middleware('track:public.verify,code')
+        ->name('verify');
+    Route::get('/certificates/{code}', [PublicVerificationController::class, 'certificate'])
+        ->middleware('track:public.verify,code')
+        ->name('certificate');
 });
 
 /*
@@ -91,7 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/exams/{exam}', [MedicalExamController::class, 'show'])->name('api.exams.show');
     Route::put('/exams/{exam}', [MedicalExamController::class, 'update'])->name('api.exams.update');
     Route::delete('/exams/{exam}', [MedicalExamController::class, 'destroy'])->name('api.exams.destroy');
-    Route::get('/exams/{exam}/pdf', [MedicalExamController::class, 'pdf'])->name('api.exams.pdf');
+    Route::get('/exams/{exam}/pdf', [MedicalExamController::class, 'pdf'])->middleware('track:pdf.download,exam')->name('api.exams.pdf');
 
     /*
     |----------------------------------------------------------------------
@@ -112,7 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/food-handler/{record}', [FoodHandlerRecordController::class, 'show'])->name('api.food-handler.show');
     Route::put('/food-handler/{record}', [FoodHandlerRecordController::class, 'update'])->name('api.food-handler.update');
     Route::delete('/food-handler/{record}', [FoodHandlerRecordController::class, 'destroy'])->name('api.food-handler.destroy');
-    Route::get('/food-handler/{record}/pdf', [FoodHandlerRecordController::class, 'pdf'])->name('api.food-handler.pdf');
+    Route::get('/food-handler/{record}/pdf', [FoodHandlerRecordController::class, 'pdf'])->middleware('track:pdf.download,record')->name('api.food-handler.pdf');
 
     /*
     |----------------------------------------------------------------------
@@ -127,7 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/certificates/{certificate}', [TrainingCertificateController::class, 'show'])->name('api.certificates.show');
     Route::put('/certificates/{certificate}', [TrainingCertificateController::class, 'update'])->name('api.certificates.update');
     Route::delete('/certificates/{certificate}', [TrainingCertificateController::class, 'destroy'])->name('api.certificates.destroy');
-    Route::get('/certificates/{certificate}/pdf', [TrainingCertificateController::class, 'pdf'])->name('api.certificates.pdf');
+    Route::get('/certificates/{certificate}/pdf', [TrainingCertificateController::class, 'pdf'])->middleware('track:pdf.download,certificate')->name('api.certificates.pdf');
 
     /*
     |----------------------------------------------------------------------
@@ -151,7 +157,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/billing/{account}', [BillingAccountController::class, 'show'])->name('api.billing.show');
     Route::put('/billing/{account}', [BillingAccountController::class, 'update'])->name('api.billing.update');
     Route::delete('/billing/{account}', [BillingAccountController::class, 'destroy'])->name('api.billing.destroy');
-    Route::get('/billing/{account}/pdf', [BillingAccountController::class, 'pdf'])->name('api.billing.pdf');
+    Route::get('/billing/{account}/pdf', [BillingAccountController::class, 'pdf'])->middleware('track:pdf.download,account')->name('api.billing.pdf');
 
     /*
     |----------------------------------------------------------------------

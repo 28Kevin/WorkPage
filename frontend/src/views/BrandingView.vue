@@ -9,6 +9,7 @@ import MailSettingsPanel from '@/components/MailSettingsPanel.vue'
 import SystemSwitchPanel from '@/components/SystemSwitchPanel.vue'
 import GalleryManager from '@/components/GalleryManager.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import SectionCards from '@/components/SectionCards.vue'
 import { parseApiError } from '@/services/api'
 import { prepareImage } from '@/services/images'
 import { applyBranding, buildPalette } from '@/services/theme'
@@ -17,6 +18,70 @@ import { useBrandingStore } from '@/stores/branding'
 
 const auth = useAuthStore()
 const branding = useBrandingStore()
+
+/** Accesos a cada sección de la página, en el orden en que aparecen. Íconos de Lucide. */
+const SECTIONS = [
+  {
+    target: 'cfg-identidad',
+    title: 'Identidad',
+    description: 'Nombre de la plataforma, eslogan y logo.',
+    icon: 'M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z',
+  },
+  {
+    target: 'cfg-tema',
+    title: 'Tema visual',
+    description: 'Colores, tipografía y bordes de toda la plataforma.',
+    icon: 'M12 22a10 10 0 1 1 10-10c0 2-1.5 3-3 3h-2a2 2 0 0 0-1 3.7A1.5 1.5 0 0 1 12 22zM7.5 10.5h.01M10.5 7h.01M15 7.5h.01',
+  },
+  {
+    target: 'cfg-centro',
+    title: 'Datos del centro médico',
+    description: 'Razón social, NIT, contacto y horario de atención.',
+    icon: 'M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2',
+  },
+  {
+    target: 'cfg-cobro',
+    title: 'Cuentas de cobro',
+    description: 'Datos bancarios y conceptos que se facturan.',
+    icon: 'M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .7V2l-3 2-3-2-3 2-3-2-3 2zM8 8h8M8 12h8M8 16h5',
+  },
+  {
+    target: 'cfg-alimentos',
+    title: 'Manipulación de alimentos',
+    description: 'Ajustes del paquete de manipulación de alimentos.',
+    icon: 'M3 2v7a3 3 0 0 0 6 0V2M6 2v20M21 15V2a5 5 0 0 0-5 5v6h5zm0 0v7',
+  },
+  {
+    target: 'cfg-galeria',
+    title: 'Galería de fotografías',
+    description: 'Imágenes que se muestran en la página pública.',
+    icon: 'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6M15 9h.01',
+  },
+  {
+    target: 'cfg-correo',
+    title: 'Correo saliente',
+    description: 'Servidor de correo para notificaciones y respaldos.',
+    icon: 'M3 5h18v14H3zM3 7l9 6 9-6',
+    developer: true,
+  },
+  {
+    target: 'cfg-respaldo',
+    title: 'Respaldo',
+    description: 'Descarga o envío de la copia de la base de datos.',
+    icon: 'M4 5c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+    developer: true,
+  },
+  {
+    target: 'cfg-estado',
+    title: 'Estado de la plataforma',
+    description: 'Encender o apagar el sistema para todos los usuarios.',
+    icon: 'M12 2v10M18.4 6.6a9 9 0 1 1-12.8 0',
+    developer: true,
+  },
+]
+
+// Las tres últimas solo existen en la página para cuentas de desarrollo.
+const sections = computed(() => SECTIONS.filter((item) => !item.developer || auth.isDeveloper))
 
 /** Familias de Google Fonts sugeridas; el campo acepta cualquier otra. */
 const FONTS = [
@@ -221,6 +286,8 @@ function discard() {
       </div>
     </header>
 
+    <SectionCards :items="sections" />
+
     <AlertMessage v-if="alert" :variant="alert.variant">{{ alert.text }}</AlertMessage>
 
     <AlertMessage v-if="dirty" variant="info">
@@ -228,7 +295,7 @@ function discard() {
     </AlertMessage>
 
     <!-- ------------------------------------------------------------ identidad -->
-    <section class="card">
+    <section id="cfg-identidad" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">1</span>
         <h2 class="text-sm font-semibold text-slate-900">Identidad</h2>
@@ -311,7 +378,7 @@ function discard() {
     </section>
 
     <!-- ---------------------------------------------------------------- tema -->
-    <section class="card">
+    <section id="cfg-tema" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">2</span>
         <h2 class="text-sm font-semibold text-slate-900">Tema visual</h2>
@@ -427,7 +494,7 @@ function discard() {
     </section>
 
     <!-- ------------------------------------------------------- centro medico -->
-    <section class="card">
+    <section id="cfg-centro" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">3</span>
         <h2 class="text-sm font-semibold text-slate-900">Datos del centro médico</h2>
@@ -504,7 +571,7 @@ function discard() {
     </section>
 
     <!-- ----------------------------------------- emisor de cuentas de cobro -->
-    <section class="card">
+    <section id="cfg-cobro" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">4</span>
         <h2 class="text-sm font-semibold text-slate-900">Cuentas de cobro</h2>
@@ -582,7 +649,7 @@ function discard() {
     </section>
 
     <!-- -------------------------------------- textos del paquete de alimentos -->
-    <section class="card">
+    <section id="cfg-alimentos" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">5</span>
         <h2 class="text-sm font-semibold text-slate-900">Manipulación de alimentos</h2>
@@ -646,7 +713,7 @@ function discard() {
     </section>
 
     <!-- ------------------------------------------------------------- galería -->
-    <section class="card">
+    <section id="cfg-galeria" class="card scroll-mt-28">
       <div class="section-heading">
         <span class="section-badge">6</span>
         <h2 class="text-sm font-semibold text-slate-900">Galería de fotografías</h2>
@@ -657,9 +724,9 @@ function discard() {
 
     <!-- Correo y respaldo: solo para cuentas de desarrollo. -->
     <template v-if="auth.isDeveloper">
-      <MailSettingsPanel />
-      <BackupPanel />
-      <SystemSwitchPanel />
+      <MailSettingsPanel id="cfg-correo" class="scroll-mt-28" />
+      <BackupPanel id="cfg-respaldo" class="scroll-mt-28" />
+      <SystemSwitchPanel id="cfg-estado" class="scroll-mt-28" />
     </template>
 
     <div class="flex justify-end gap-2">
